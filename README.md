@@ -1,16 +1,3 @@
-# idle_space_farm
+This project is a personal experimental endeavor aimed at evaluating the capabilities of the Flutter framework as a game development platform. The objective is to determine whether Flutter can provide the necessary tools, libraries, and performance optimization features required for developers to build the foundational elements of an idle game. The focus is on assessing how well Flutter can replicate the core mechanics, such as automated resource generation, progression systems, and interactive UI elements, which are commonly found in idle games available on the Google Play Store. 
 
-A new Flutter project.
-
-## Getting Started
-
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
-
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+Since most idle games are traditionally developed using game engines like Unity due to their powerful rendering capabilities and built-in physics systems, this project seeks to explore whether Flutter can serve as a viable alternative. The experiment will involve developing a prototype that mimics key gameplay elements, testing performance across different devices, and evaluating how well Flutter handles animations, state management, and background processes in comparison to Unity-based implementations. Ultimately, the findings will provide insights into the feasibility of using Flutter for idle game development and its potential advantages or limitations as a cross-platform game development framework.
