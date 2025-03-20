@@ -2,42 +2,130 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import '../models/girl_farmer_model.dart';
+import '../models/equipment_model.dart';
 
-class GachaMainPage extends StatelessWidget {
+class GachaMainPage extends StatefulWidget {
+  @override
+  _GachaMainPageState createState() => _GachaMainPageState();
+}
+
+class _GachaMainPageState extends State<GachaMainPage> {
+  int _currentPageIndex = 0;
+  final PageController _pageController = PageController();
+
   @override
   Widget build(BuildContext context) {
-    return DefaultTabController(
-      length: 2,
-      child: Scaffold(
-        appBar: AppBar(
-          title: Text(
-            'Gacha System',
-            style: TextStyle(
-              fontFamily: 'GameFont', // Use a custom font
-              fontSize: 24,
-              fontWeight: FontWeight.bold,
+    return Scaffold(
+      appBar: CustomAppBar(
+        title: 'Summoning',
+        height: 40, // Height of the AppBar only
+        padding: EdgeInsets.zero,
+        margin: EdgeInsets.zero,
+      ),
+      body: Column(
+        children: [
+          // Custom Navigation Widget (Separate from AppBar)
+          _buildCustomNavigationBar(),
+          // PageView for Swiping Between Pages
+          Expanded(
+            child: PageView(
+              controller: _pageController,
+              onPageChanged: (index) {
+                setState(() {
+                  _currentPageIndex = index;
+                });
+              },
+              children: [
+                GachaGirlPage(),
+                GachaItemPage(),
+              ],
             ),
           ),
-          bottom: TabBar(
-            tabs: [
-              Tab(icon: Icon(Icons.face)), // Icon for Girls
-              Tab(icon: Icon(Icons.shopping_bag)), // Icon for Items
-            ],
-          ),
+        ],
+      ),
+    );
+  }
+
+  // Custom Navigation Widget
+  Widget _buildCustomNavigationBar() {
+    return Container(
+      height: 48, // Height of the navigation bar
+      color: Colors.brown, // Custom background color
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          _buildNavButton('Girls', 0),
+          SizedBox(width: 20),
+          _buildNavButton('Items', 1),
+        ],
+      ),
+    );
+  }
+
+  // Navigation Button
+  Widget _buildNavButton(String label, int index) {
+    return TextButton(
+      onPressed: () {
+        setState(() {
+          _currentPageIndex = index;
+          _pageController.animateToPage(
+            index,
+            duration: Duration(milliseconds: 300),
+            curve: Curves.easeInOut,
+          );
+        });
+      },
+      style: TextButton.styleFrom(
+        foregroundColor:
+            _currentPageIndex == index ? Colors.amber : Colors.white,
+        textStyle: TextStyle(
+          fontFamily: 'GameFont',
+          fontSize: 18,
+          fontWeight: FontWeight.bold,
         ),
-        body: Container(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topCenter,
-              end: Alignment.bottomCenter,
-              colors: [Colors.deepPurple, Colors.purpleAccent],
-            ),
-          ),
-          child: TabBarView(
-            children: [
-              GachaGirlPage(),
-              GachaItemPage(),
-            ],
+      ),
+      child: Text(label),
+    );
+  }
+}
+
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final double height;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    this.height = 56.0, // Default height similar to AppBar
+    this.padding = EdgeInsets.zero, // Custom padding
+    this.margin = EdgeInsets.zero, // Custom margin
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: preferredSize.height,
+      padding: padding, // Apply custom padding
+      margin: margin, // Apply custom margin
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/ui/wood-ui.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'GameFont',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),
@@ -45,140 +133,20 @@ class GachaMainPage extends StatelessWidget {
   }
 }
 
+// Rest of the code remains the same...
 class GachaGirlPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Card(
-            elevation: 5,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(
-                    'Gacha Cost',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  Divider(),
-                  Text(
-                    '💰 10 Credits (1x)\n💰 90 Credits (10x)',
-                    style: TextStyle(fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          _buildGachaButton(
-              context, gameProvider, '1x Pull', 1, Icons.casino, Colors.blue),
-          SizedBox(height: 10),
-          _buildGachaButton(context, gameProvider, '10x Pull', 10,
-              Icons.auto_awesome, Colors.purple),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildGachaButton(BuildContext context, GameProvider gameProvider,
-      String label, int pulls, IconData icon, Color color) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          backgroundColor: color,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-      onPressed: () {
-        final girls = gameProvider.performGachaGirl(pulls: pulls);
-        if (girls.isNotEmpty) {
-          for (var girl in girls) {
-            gameProvider.addGirl(girl);
-          }
-          // Show a popup dialog with the results
-          _showGachaResultsDialog(context, girls);
-        } else {
-          // Show an error dialog if not enough credits
-          _showErrorDialog(context, 'Not enough Credits!');
-        }
-      },
-      icon: Icon(icon, size: 24),
-      label: Text(label, style: TextStyle(fontSize: 18)),
-    );
-  }
-
-  // Function to show the gacha results in a popup dialog
-  void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
-    showDialog(
+    return _buildGachaSection(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('✨ Gacha Results ✨'),
-          content: SingleChildScrollView(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('You got ${girls.length} girl(s):'),
-                SizedBox(height: 10),
-                ...girls.map((girl) {
-                  return ListTile(
-                    leading: ClipRRect(
-                      borderRadius: BorderRadius.circular(8),
-                      child: Image.asset(
-                        girl.image,
-                        width: 40,
-                        height: 40,
-                        fit: BoxFit.cover,
-                        errorBuilder: (context, error, stackTrace) =>
-                            Icon(Icons.person, size: 40),
-                      ),
-                    ),
-                    title: Text(girl.name),
-                    subtitle: Text('${girl.rarity} - ⭐${girl.stars}'),
-                  );
-                }).toList(),
-              ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  // Function to show an error dialog
-  void _showErrorDialog(BuildContext context, String message) {
-    showDialog(
-      context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: Text('❌ Error'),
-          content: Text(message),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: Text('OK'),
-            ),
-          ],
-        );
-      },
+      title: '👧 Character Gacha',
+      subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
+      button1: _buildGachaButton(
+          context, gameProvider, '1x Pull', 1, Icons.casino, Colors.blue, true),
+      button2: _buildGachaButton(context, gameProvider, '10x Pull', 10,
+          Icons.auto_awesome, Colors.purple, true),
     );
   }
 }
@@ -188,77 +156,221 @@ class GachaItemPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
 
-    return Padding(
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Card(
-            elevation: 5,
-            shape:
-                RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-            child: Padding(
-              padding: const EdgeInsets.all(16.0),
-              child: Column(
-                children: [
-                  Text(
-                    'Gacha Cost',
-                    style: TextStyle(fontSize: 22, fontWeight: FontWeight.bold),
-                  ),
-                  Divider(),
-                  Text(
-                    '💰 10 Credits (1x)\n💰 90 Credits (10x)',
-                    style: TextStyle(fontSize: 18),
-                    textAlign: TextAlign.center,
-                  ),
-                ],
-              ),
-            ),
-          ),
-          SizedBox(height: 20),
-          _buildGachaButton(
-              context, gameProvider, '1x Pull', 1, Icons.casino, Colors.green),
-          SizedBox(height: 10),
-          _buildGachaButton(context, gameProvider, '10x Pull', 10,
-              Icons.auto_awesome, Colors.orange),
-        ],
-      ),
+    return _buildGachaSection(
+      context: context,
+      title: '🛠️ Equipment Gacha',
+      subtitle: '🎒 Get new weapons & armor!',
+      button1: _buildGachaButton(context, gameProvider, '1x Equipment', 1,
+          Icons.shield, Colors.orange, false),
+      button2: _buildGachaButton(context, gameProvider, '10x Equipment', 10,
+          Icons.backpack, Colors.red, false),
     );
   }
+}
 
-  Widget _buildGachaButton(BuildContext context, GameProvider gameProvider,
-      String label, int pulls, IconData icon, Color color) {
-    return ElevatedButton.icon(
-      style: ElevatedButton.styleFrom(
-          padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-          backgroundColor: color,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(10))),
-      onPressed: () {
+// ✅ **UI now follows your image layout**
+Widget _buildGachaSection({
+  required BuildContext context,
+  required String title,
+  required String subtitle,
+  required Widget button1,
+  required Widget button2,
+}) {
+  return Center(
+    child: _buildGlassCard(
+      title: title,
+      content: subtitle,
+      button1: button1,
+      button2: button2,
+    ),
+  );
+}
+
+// 🔹 **Improved Glass UI with Margin**
+Widget _buildGlassCard({
+  required String title,
+  required String content,
+  required Widget button1,
+  required Widget button2,
+}) {
+  return Container(
+    margin: EdgeInsets.all(20), // Add margin around the card
+    child: Card(
+      elevation: 10,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      color: Colors.white.withOpacity(0.15),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'GameFont',
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.amber,
+              ),
+            ),
+            Divider(color: Colors.white54),
+            Text(
+              content,
+              style: TextStyle(
+                fontFamily: 'GameFont',
+                fontSize: 18,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            SizedBox(height: 20),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Expanded(child: button1),
+                SizedBox(width: 10),
+                Expanded(child: button2),
+              ],
+            ),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+// ✅ **Fixed: Gacha Button Click Works**
+Widget _buildGachaButton(
+    BuildContext context,
+    GameProvider gameProvider,
+    String label,
+    int pulls,
+    IconData icon,
+    Color color,
+    bool isCharacterGacha) {
+  return ElevatedButton.icon(
+    style: ElevatedButton.styleFrom(
+      padding: EdgeInsets.symmetric(vertical: 15),
+      backgroundColor: color,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(15),
+      ),
+      shadowColor: Colors.black.withOpacity(0.3),
+      elevation: 8,
+    ),
+    onPressed: () {
+      if (isCharacterGacha) {
+        final girls = gameProvider.performGachaGirl(pulls: pulls);
+        if (girls.isNotEmpty) {
+          for (var girl in girls) {
+            gameProvider.addGirl(girl);
+          }
+          _showGachaResultsDialog(context, girls);
+        } else {
+          _showErrorSnackbar(context, '❌ Not enough Credits!');
+        }
+      } else {
         final items = gameProvider.performEquipmentGacha(pulls: pulls);
         if (items.isNotEmpty) {
           for (var item in items) {
             gameProvider.addEquipment(item);
           }
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('✨ You got ${items.length} item(s)!'),
-              behavior: SnackBarBehavior.floating,
-              duration: Duration(seconds: 2),
-            ),
-          );
+          _showSuccessSnackbar(context, '✨ You got ${items.length} item(s)!');
         } else {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content: Text('❌ Not enough Credits!'),
-              behavior: SnackBarBehavior.floating,
-              backgroundColor: Colors.red,
-            ),
-          );
+          _showErrorSnackbar(context, '❌ Not enough Credits!');
         }
-      },
-      icon: Icon(icon, size: 24),
-      label: Text(label, style: TextStyle(fontSize: 18)),
-    );
-  }
+      }
+    },
+    icon: Icon(icon, size: 28, color: Colors.white),
+    label: Text(
+      label,
+      style: TextStyle(
+        fontFamily: 'GameFont',
+        fontSize: 18,
+        color: Colors.white,
+      ),
+    ),
+  );
+}
+
+// 🎰 **Show Gacha Results in Dialog**
+void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
+  showDialog(
+    context: context,
+    builder: (context) {
+      return AlertDialog(
+        backgroundColor: Colors.deepPurple.shade800,
+        title: Text(
+          '✨ Gacha Results ✨',
+          style: TextStyle(
+            fontFamily: 'GameFont',
+            color: Colors.amber,
+          ),
+        ),
+        content: SingleChildScrollView(
+          child: Column(
+            children: girls.map((girl) {
+              return ListTile(
+                leading: ClipRRect(
+                  borderRadius: BorderRadius.circular(8),
+                  child: Image.asset(
+                    girl.image,
+                    width: 40,
+                    height: 40,
+                    fit: BoxFit.cover,
+                    errorBuilder: (_, __, ___) => Icon(
+                      Icons.person,
+                      size: 40,
+                      color: Colors.white,
+                    ),
+                  ),
+                ),
+                title: Text(
+                  girl.name,
+                  style: TextStyle(fontFamily: 'GameFont', color: Colors.white),
+                ),
+                subtitle: Text(
+                  '${girl.rarity} - ⭐${girl.stars}',
+                  style:
+                      TextStyle(fontFamily: 'GameFont', color: Colors.white70),
+                ),
+              );
+            }).toList(),
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: Text(
+              'OK',
+              style: TextStyle(fontFamily: 'GameFont', color: Colors.white),
+            ),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+// ✅ **Fixed Snackbar for Success/Error Messages**
+void _showSuccessSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.green,
+    ),
+  );
+}
+
+void _showErrorSnackbar(BuildContext context, String message) {
+  ScaffoldMessenger.of(context).showSnackBar(
+    SnackBar(
+      content: Text(message),
+      behavior: SnackBarBehavior.floating,
+      backgroundColor: Colors.red,
+    ),
+  );
 }

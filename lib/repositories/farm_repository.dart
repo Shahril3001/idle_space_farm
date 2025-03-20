@@ -16,7 +16,6 @@ class FarmRepository {
   /// Get all farms from the box
   List<Farm> getAllFarms() {
     final farms = _box.values.whereType<Farm>().toList();
-    print("DEBUG: Retrieved farms count: ${farms.length}"); // Add this line
     return farms;
   }
 

@@ -11,68 +11,143 @@ class MapPage extends StatelessWidget {
     final farms = gameProvider.farms;
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Map',
-          style: TextStyle(
-            fontFamily: 'GameFont', // Use a custom font
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.deepPurple, // Match the game theme
-        elevation: 10,
+      appBar: CustomAppBar(
+        title: 'Eldoria Map',
+        height: 40, // Adjust the height of the custom app bar
+        padding: EdgeInsets.zero, // Custom padding
+        margin: EdgeInsets.zero, // Custom margin
       ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-          ),
-        ),
+      body: Center(
         child: InteractiveViewer(
-          boundaryMargin: EdgeInsets.all(20),
           minScale: 0.5,
           maxScale: 4.0,
-          child: Center(
-            child: Stack(
-              children: farms.map((farm) {
+          panEnabled: true, // Allow panning
+          constrained: false, // Let the content be larger than the screen
+          child: Stack(
+            children: [
+              // Map Image as the Background
+              Image.asset(
+                "assets/images/map/eldoria_map.png",
+                width: 1500, // Large width for scrolling
+                height: 1500, // Large height for scrolling
+                fit: BoxFit.cover,
+              ),
+
+              // Overlay the farm locations
+              ...farms.map((farm) {
                 return Positioned(
                   left: farm.position.dx,
                   top: farm.position.dy,
-                  child: Container(
-                    color: Colors
-                        .transparent, // Ensure the container is transparent
-                    child: GestureDetector(
-                      behavior: HitTestBehavior.opaque, // Add this line
-                      onTap: () {
-                        print("DEBUG: Tapped farm - ${farm.name}");
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => FarmPage(farm: farm),
+                  child: GestureDetector(
+                    behavior: HitTestBehavior.opaque,
+                    onTap: () => _showFarmDetails(context, farm),
+                    child: Column(
+                      children: [
+                        Icon(Icons.location_on,
+                            size: 60, color: Colors.red), // Bigger Icon
+                        Container(
+                          padding:
+                              EdgeInsets.symmetric(vertical: 8, horizontal: 14),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.7),
+                            borderRadius: BorderRadius.circular(8),
                           ),
-                        );
-                      },
-                      child: Column(
-                        children: [
-                          Icon(Icons.location_on, size: 40, color: Colors.red),
-                          Text(
+                          child: Text(
                             farm.name,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 16,
+                              fontSize: 18, // Bigger Text
                               fontWeight: FontWeight.bold,
                             ),
                           ),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ),
                 );
               }).toList(),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showFarmDetails(BuildContext context, Farm farm) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text(farm.name),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text("Resource: ${farm.resourceType}"),
+              Text("Production: ${farm.resourcePerSecond} per sec"),
+              Text("Level: ${farm.level}"),
+              Text("Upgrade Cost: ${farm.upgradeCost}"),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: Text("Close"),
             ),
+            ElevatedButton(
+              onPressed: () {
+                Navigator.pop(context);
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => FarmPage(farm: farm)),
+                );
+              },
+              child: Text("Go to Farm"),
+            ),
+          ],
+        );
+      },
+    );
+  }
+}
+
+// Custom App Bar Implementation
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final double height;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    this.height = 56.0, // Default height similar to AppBar
+    this.padding = EdgeInsets.zero, // Custom padding
+    this.margin = EdgeInsets.zero, // Custom margin
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: preferredSize.height,
+      padding: padding, // Apply custom padding
+      margin: margin, // Apply custom margin
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/ui/wood-ui.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'GameFont',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
           ),
         ),
       ),

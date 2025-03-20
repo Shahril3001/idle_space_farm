@@ -12,7 +12,7 @@ import 'repositories/farm_repository.dart';
 import 'repositories/resource_repository.dart';
 import 'repositories/item_repository.dart';
 import 'repositories/girl_repository.dart';
-import 'pages/home_page.dart';
+import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
 

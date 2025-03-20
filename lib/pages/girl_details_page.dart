@@ -10,170 +10,220 @@ class GirlDetailsPage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final gameProvider =
-        Provider.of<GameProvider>(context); // Moved inside build
+    final gameProvider = Provider.of<GameProvider>(context);
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          girl.name,
-          style: TextStyle(
-            fontFamily: 'GameFont', // Use a custom font
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
+    return SafeArea(
+      child: Scaffold(
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage("assets/background_status.jpg"),
+              fit: BoxFit.cover,
+            ),
           ),
-        ),
-        backgroundColor: Colors.deepPurple, // Match the game theme
-        elevation: 10,
-        centerTitle: true,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-          ),
-        ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              Hero(
-                tag: 'girl-image-${girl.id}', // Unique tag for Hero animation
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(20),
-                  child: Image.asset(
-                    girl.image,
-                    width: 150,
-                    height: 150,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) =>
-                        Icon(Icons.person, size: 150, color: Colors.white),
-                  ),
-                ),
-              ),
-              SizedBox(height: 20),
-              Card(
-                elevation: 5,
-                shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(15),
-                ),
-                color: Colors.purple[100],
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
+          child: Padding(
+            padding: const EdgeInsets.all(16.0),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.center,
+              children: [
+                // Character Portrait with Glow Effect
+                Hero(
+                  tag: 'girl-image-${girl.id}',
+                  child: Stack(
+                    alignment: Alignment.center,
                     children: [
-                      _buildDetailRow('Name', Text(girl.name)),
-                      _buildDetailRow('Level', Text(girl.level.toString())),
-                      _buildDetailRow('Rarity', Text(girl.rarity)),
-                      _buildDetailRow('Mining Efficiency',
-                          Text(girl.miningEfficiency.toString())),
-                      _buildDetailRow('Stars', _buildStarRating(girl.stars)),
+                      Image.asset(
+                        'assets/glow_effect.png',
+                        width: 180,
+                        height: 180,
+                      ),
+                      CircleAvatar(
+                        radius: 100,
+                        backgroundImage: AssetImage(girl.image),
+                      ),
                     ],
                   ),
                 ),
-              ),
-              SizedBox(height: 20),
-              ElevatedButton(
-                onPressed: () {
-                  bool success = gameProvider.upgradeGirl(girl.id);
-                  if (success) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${girl.name} upgraded! 🎉'),
-                        backgroundColor: Colors.green,
-                        duration: Duration(seconds: 1),
-                      ),
-                    );
-                  } else {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('❌ Not enough minerals!'),
-                        backgroundColor: Colors.red,
-                        duration: Duration(seconds: 2),
-                      ),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.deepPurple,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                ),
-                child: Text(
-                  'Upgrade',
+                SizedBox(height: 10),
+                Text(
+                  girl.name,
                   style: TextStyle(
-                    color: Colors.white,
-                  ),
+                      fontFamily: 'GameFont',
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white),
                 ),
-              ),
-              SizedBox(height: 10),
-              ElevatedButton(
-                onPressed: () {
-                  // Add sell logic here
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('${girl.name} sold! 💰'),
-                      backgroundColor: Colors.orange,
-                      duration: Duration(seconds: 1),
-                    ),
-                  );
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.red,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 30, vertical: 15),
+                SizedBox(height: 20),
+
+                // Stats with Bars
+                _buildStatBar("HP", girl.hp, Colors.red, Icons.favorite),
+                _buildStatBar("MP", girl.mp, Colors.blue, Icons.bolt),
+                _buildStatBar("SP", girl.sp, Colors.green, Icons.flash_on),
+                SizedBox(height: 20),
+
+                // Attributes Section
+                _buildAttributes(),
+                SizedBox(height: 20),
+
+                // Interactive Buttons
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    _buildButton("Upgrade", Icons.arrow_upward, Colors.purple,
+                        () {
+                      bool success = gameProvider.upgradeGirl(girl.id);
+                      _showFeedback(context, success, girl.name);
+                    }),
+                    SizedBox(width: 20),
+                    _buildButton("Sell", Icons.sell, Colors.red, () {
+                      _confirmSell(context, gameProvider, girl);
+                    }),
+                  ],
                 ),
-                child: Text(
-                  'Sell',
-                  style: TextStyle(
-                    fontSize: 18,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-            ],
+              ],
+            ),
+          ),
+        ),
+        bottomNavigationBar: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: ElevatedButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text("Back"),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.grey[800],
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(10)),
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildDetailRow(String label, Widget value) {
+  Widget _buildStatBar(String label, int value, Color color, IconData icon) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      padding: const EdgeInsets.symmetric(vertical: 6.0),
       child: Row(
         children: [
-          Text(
-            '$label: ',
-            style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.bold,
-              color: Colors.deepPurple,
+          Icon(icon, color: color),
+          SizedBox(width: 10),
+          Text('$label:',
+              style: TextStyle(
+                  fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+          SizedBox(width: 10),
+          Expanded(
+            child: LinearProgressIndicator(
+              value: 1.0, // Always full
+              backgroundColor: Colors.grey[800],
+              color: color,
+              minHeight: 12,
             ),
           ),
-          value, // Use the provided widget
+          SizedBox(width: 10),
+          Text(value.toString(), style: TextStyle(fontSize: 16)),
         ],
       ),
     );
   }
 
-  Widget _buildStarRating(int stars) {
-    return Row(
-      children: List.generate(
-        5,
-        (index) => Icon(
-          index < stars ? Icons.star : Icons.star_border,
-          color: Colors.amber,
-          size: 20,
+  Widget _buildAttributes() {
+    return Card(
+      elevation: 5,
+      color: Colors.black54,
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          children: [
+            _buildAttributeRow(Icons.star, 'Level', "${girl.level}"),
+            _buildAttributeRow(
+                Icons.shield, 'Defense', "${girl.defensePoints}"),
+            _buildAttributeRow(
+                Icons.directions_run, 'Agility', "${girl.agilityPoints}"),
+            _buildAttributeRow(Icons.gavel, 'Attack', "${girl.attackPoints}"),
+            _buildStarRating(girl.stars),
+          ],
         ),
       ),
+    );
+  }
+
+  Widget _buildButton(
+      String text, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white),
+      label: Text(text, style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+      ),
+    );
+  }
+
+  Widget _buildAttributeRow(IconData icon, String label, String value) {
+    return Row(
+      children: [
+        Icon(icon, color: Colors.white),
+        SizedBox(width: 10),
+        Text("$label: ",
+            style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white)),
+        Spacer(),
+        Text(value, style: TextStyle(fontSize: 16, color: Colors.amberAccent)),
+      ],
+    );
+  }
+
+  Widget _buildStarRating(int stars) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: List.generate(5, (index) {
+        return Icon(
+          index < stars ? Icons.star : Icons.star_border,
+          color: Colors.amber,
+          size: 22,
+        );
+      }),
+    );
+  }
+
+  void _showFeedback(BuildContext context, bool success, String name) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content:
+            Text(success ? '$name upgraded! 🎉' : '❌ Not enough resources!'),
+        backgroundColor: success ? Colors.green : Colors.red,
+        duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _confirmSell(
+      BuildContext context, GameProvider gameProvider, GirlFarmer girl) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: Text('Sell ${girl.name}?'),
+          content: Text('Are you sure you want to sell ${girl.name}?'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+            ElevatedButton(
+              onPressed: () {
+                gameProvider.sellGirl(girl.id);
+                Navigator.pop(context);
+                _showFeedback(context, true, '${girl.name} sold! 💰');
+              },
+              style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
+              child: Text('Sell', style: TextStyle(color: Colors.white)),
+            ),
+          ],
+        );
+      },
     );
   }
 }

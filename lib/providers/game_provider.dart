@@ -100,29 +100,29 @@ class GameProvider with ChangeNotifier {
   void _initializeFarms() {
     print("DEBUG: Initializing farms..."); // Add this line
     final solarFarm = Farm(
-      name: 'Solar Farm',
+      name: 'Aetheris',
       resourcePerSecond: 1.0,
       unlockCost: 50.0,
       resourceType: 'Energy',
       upgradeCost: 50.0,
-      position: Offset(150, 250), // Example position
+      position: Offset(110, 830), // Example position
     );
 
     final mineralExtractor = Farm(
-      name: 'Mineral Extractor',
+      name: 'Eldoria',
       resourcePerSecond: 2.0,
       unlockCost: 100.0,
       resourceType: 'Minerals',
       upgradeCost: 100.0,
-      position: Offset(300, 400), // Example position
+      position: Offset(370, 800), // Example position
     );
 
     // Add floors to farms
     for (int i = 1; i <= 25; i++) {
       solarFarm.floors
-          .add(Floor(id: 'floor_$i', level: 1)); // ✅ Add default level
+          .add(Floor(id: 'Floor $i', level: 1)); // ✅ Add default level
       mineralExtractor.floors
-          .add(Floor(id: 'floor_$i', level: 1)); // ✅ Add default level
+          .add(Floor(id: 'Floor $i', level: 1)); // ✅ Add default level
     }
 
     _farmRepository.addFarm(solarFarm);
@@ -251,6 +251,17 @@ class GameProvider with ChangeNotifier {
             rarity: selectedGirl.rarity,
             stars: selectedGirl.stars,
             image: selectedGirl.image,
+            attackPoints: selectedGirl.attackPoints,
+            defensePoints: selectedGirl.defensePoints,
+            agilityPoints: selectedGirl.agilityPoints,
+            hp: selectedGirl.hp,
+            mp: selectedGirl.mp,
+            sp: selectedGirl.sp,
+            abilities: selectedGirl.abilities,
+            race: selectedGirl.race,
+            type: selectedGirl.type,
+            region: selectedGirl.region,
+            description: selectedGirl.description,
           ));
         }
       }
@@ -294,6 +305,14 @@ class GameProvider with ChangeNotifier {
             girl.miningEfficiency += 1; // Default fallback
         }
 
+        // Increase other stats
+        girl.attackPoints += 2;
+        girl.defensePoints += 2;
+        girl.agilityPoints += 1;
+        girl.hp += 20;
+        girl.mp += 10;
+        girl.sp += 5;
+
         _girlRepository.updateGirl(girl);
 
         print("Minerals After Upgrade: ${minerals.amount}");
@@ -329,6 +348,8 @@ class GameProvider with ChangeNotifier {
             sellPrice = 20;
             break;
         }
+        // Consider other stats like attackPoints, defensePoints, etc.
+        sellPrice *= (1 + girl.attackPoints * 0.01);
         credits.amount += sellPrice;
         _resourceRepository.updateResource(credits);
         _girlRepository.deleteGirl(girlId);
@@ -381,19 +402,19 @@ class GameProvider with ChangeNotifier {
   void assignGirlToFloor(String farmName, String floorId, String girlId) {
     print("Assigning girl $girlId to floor $floorId in farm $farmName");
 
-    // Ensure the girl is not already assigned to another farm
+    // Step 1: Unassign the girl from all farms and floors
     for (var farm in _farmRepository.getAllFarms()) {
       for (var floor in farm.floors) {
         if (floor.assignedGirlId == girlId) {
           print(
               "Girl $girlId is already assigned to ${farm.name}, floor ${floor.id}. Unassigning...");
           floor.assignedGirlId = null; // Unassign from previous farm
-          _farmRepository.updateFarm(farm);
+          _farmRepository.updateFarm(farm); // Update the farm state
         }
       }
     }
 
-    // Find the target farm
+    // Step 2: Find the target farm
     final farm = _farmRepository.getFarmByName(farmName);
     if (farm != null) {
       final floor = farm.floors.firstWhere(
@@ -402,9 +423,16 @@ class GameProvider with ChangeNotifier {
             throw Exception("Floor $floorId not found in farm $farmName"),
       );
 
-      // Assign girl to the new floor
+      // Step 3: Check if the floor is unlocked
+      if (!floor.isUnlocked) {
+        print(
+            "Cannot assign girl $girlId to floor $floorId because it is locked.");
+        return; // Block assignment if the floor is locked
+      }
+
+      // Step 4: Assign girl to the new floor
       floor.assignedGirlId = girlId;
-      _farmRepository.updateFarm(farm);
+      _farmRepository.updateFarm(farm); // Update the farm state
       print("Assigned girl $girlId to floor $floorId in farm $farmName");
       notifyListeners(); // Notify listeners to update the UI
     } else {
@@ -413,22 +441,20 @@ class GameProvider with ChangeNotifier {
   }
 
   List<GirlFarmer> getUnassignedGirls(String farmName) {
-    final farm = _farmRepository.getFarmByName(farmName);
-    if (farm != null) {
-      // Get all assigned girl IDs in the farm
-      final assignedGirlIds = farm.floors
-          .where((floor) => floor.assignedGirlId != null)
-          .map((floor) => floor.assignedGirlId)
-          .toSet();
-
-      // Filter out the girls who are already assigned
-      return girlFarmers
-          .where((girl) => !assignedGirlIds.contains(girl.id))
-          .toList();
-    } else {
-      print("Farm $farmName not found.");
-      return [];
+    // Get all assigned girl IDs across all farms
+    final assignedGirlIds = <String>{};
+    for (var farm in _farmRepository.getAllFarms()) {
+      for (var floor in farm.floors) {
+        if (floor.assignedGirlId != null) {
+          assignedGirlIds.add(floor.assignedGirlId!);
+        }
+      }
     }
+
+    // Filter out the girls who are already assigned to any floor in any farm
+    return girlFarmers
+        .where((girl) => !assignedGirlIds.contains(girl.id))
+        .toList();
   }
 
   // Clear Girl Assignment
@@ -443,7 +469,6 @@ class GameProvider with ChangeNotifier {
     print("Starting resource generation timer...");
     _resourceTimer?.cancel();
     _resourceTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      print("Timer tick - Generating resources...");
       generateResources();
     });
   }
@@ -452,7 +477,6 @@ class GameProvider with ChangeNotifier {
   void generateResources() {
     print("Generating resources...");
     for (var farm in _farmRepository.getAllFarms()) {
-      print("Processing farm: ${farm.name}");
       double totalMining = 0;
 
       for (var floor in farm.floors) {
@@ -462,19 +486,17 @@ class GameProvider with ChangeNotifier {
           if (girl != null) {
             print(
                 "Girl ${girl.name} has mining efficiency: ${girl.miningEfficiency}");
-            totalMining += girl.miningEfficiency;
+            // Consider other stats like attackPoints, defensePoints, etc.
+            totalMining +=
+                girl.miningEfficiency * (1 + girl.attackPoints * 0.01);
           } else {
             print("No girl found with ID: ${floor.assignedGirlId}");
           }
-        } else {
-          print("Floor ${floor.id} is either locked or has no assigned girl.");
         }
       }
 
       final resource = _resourceRepository.getResourceByName(farm.resourceType);
       if (resource != null) {
-        print(
-            "Updating resource ${farm.resourceType} from ${resource.amount} to ${resource.amount + (farm.resourcePerSecond * totalMining)}");
         resource.amount += farm.resourcePerSecond * totalMining;
         _resourceRepository.updateResource(resource);
       } else {
@@ -499,7 +521,9 @@ class GameProvider with ChangeNotifier {
           if (floor.isUnlocked && floor.assignedGirlId != null) {
             final girl = _girlRepository.getGirlById(floor.assignedGirlId!);
             if (girl != null) {
-              totalMining += girl.miningEfficiency;
+              // Consider other stats like attackPoints, defensePoints, etc.
+              totalMining +=
+                  girl.miningEfficiency * (1 + girl.attackPoints * 0.01);
             }
           }
         }

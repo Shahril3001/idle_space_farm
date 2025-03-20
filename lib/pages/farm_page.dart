@@ -140,7 +140,7 @@ class FarmPage extends StatelessWidget {
             child: Column(
               children: [
                 CircleAvatar(
-                  backgroundImage: NetworkImage(girlFarmer.image),
+                  backgroundImage: AssetImage(girlFarmer.image),
                   radius: 30,
                 ),
                 SizedBox(height: 8),
@@ -196,7 +196,7 @@ class FarmPage extends StatelessWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text('Floor ${floor.id}',
+                Text('${floor.id}',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 SizedBox(height: 8),

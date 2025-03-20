@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/girl_farmer_model.dart';
 import '../providers/game_provider.dart';
-import 'girl_details_page.dart'; // Import the new details page
+import 'girl_details_page.dart';
 
 class ManageGirlListPage extends StatefulWidget {
   @override
@@ -10,15 +10,14 @@ class ManageGirlListPage extends StatefulWidget {
 }
 
 class _ManageGirlListPageState extends State<ManageGirlListPage> {
-  String _sortBy = 'Level'; // Default sorting option
-  String _filterQuery = ''; // Filter query
+  String _sortBy = 'Level';
+  String _filterQuery = '';
 
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
     List<GirlFarmer> girlFarmers = gameProvider.girlFarmers;
 
-    // Apply filtering
     if (_filterQuery.isNotEmpty) {
       girlFarmers = girlFarmers
           .where((girl) =>
@@ -26,7 +25,6 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
           .toList();
     }
 
-    // Apply sorting
     switch (_sortBy) {
       case 'Level':
         girlFarmers.sort((a, b) => b.level.compareTo(a.level));
@@ -40,202 +38,91 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
     }
 
     return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          'Girl List',
-          style: TextStyle(
-            fontFamily: 'GameFont', // Use a custom font
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-        backgroundColor: Colors.deepPurple, // Match the game theme
-        elevation: 10,
+      appBar: CustomAppBar(
+        title: 'Knight',
+        height: 40, // Adjust the height of the custom app bar
+        padding: EdgeInsets.zero, // Custom padding
+        margin: EdgeInsets.zero, // Custom margin
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
+          image: DecorationImage(
+            image: AssetImage('assets/images/ui/app-bg.png'),
+            fit: BoxFit.cover,
           ),
         ),
         child: SafeArea(
           child: Padding(
-            padding: const EdgeInsets.all(8.0),
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
             child: Column(
               children: [
-                // Sorting and Filtering UI
                 _buildSortAndFilterUI(),
-
-                // Girl List
                 Expanded(
                   child: girlFarmers.isEmpty
                       ? Center(
                           child: Text(
                             'No girls available.',
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                            ),
+                            style: TextStyle(color: Colors.white, fontSize: 18),
                           ),
                         )
-                      : ListView.separated(
-                          shrinkWrap: true, // Important for performance
-                          // Remove or replace the NeverScrollableScrollPhysics() with a scrollable physics
-                          physics: BouncingScrollPhysics(), // Enable scrolling
+                      : ListView.builder(
+                          physics: BouncingScrollPhysics(),
                           itemCount: girlFarmers.length,
-                          separatorBuilder: (context, index) =>
-                              SizedBox(height: 8),
                           itemBuilder: (context, index) {
                             final girl = girlFarmers[index];
-
                             return GestureDetector(
-                              onTap: () {
-                                // Navigate to the GirlDetailsPage
-                                Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
                                     builder: (context) =>
-                                        GirlDetailsPage(girl: girl),
-                                  ),
-                                );
-                              },
+                                        GirlDetailsPage(girl: girl)),
+                              ),
                               child: Card(
-                                elevation: 5,
+                                elevation: 8,
+                                margin: EdgeInsets.symmetric(vertical: 6),
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(15),
-                                ),
-                                color: Colors.purple[100],
-                                child: Padding(
-                                  padding: const EdgeInsets.all(12),
-                                  child: Row(
-                                    children: [
-                                      ClipRRect(
-                                        borderRadius: BorderRadius.circular(10),
-                                        child: Image.asset(
-                                          girl.image,
-                                          width: 80,
-                                          height: 80,
-                                          fit: BoxFit.cover,
-                                          errorBuilder:
-                                              (context, error, stackTrace) =>
-                                                  Icon(Icons.person, size: 80),
-                                        ),
-                                      ),
-                                      SizedBox(width: 12),
-                                      Expanded(
-                                        child: Column(
-                                          crossAxisAlignment:
-                                              CrossAxisAlignment.start,
+                                    borderRadius: BorderRadius.circular(12)),
+                                child: Container(
+                                  decoration: BoxDecoration(
+                                    gradient: LinearGradient(
+                                      colors: [
+                                        Colors.grey.shade700,
+                                        Colors.grey.shade900,
+                                      ],
+                                      begin: Alignment.topLeft,
+                                      end: Alignment.bottomRight,
+                                    ),
+                                    borderRadius: BorderRadius.circular(12),
+                                  ),
+                                  child: ListTile(
+                                    leading: CircleAvatar(
+                                      backgroundImage: AssetImage(girl.image),
+                                      radius: 30,
+                                    ),
+                                    title: Text(
+                                      girl.name,
+                                      style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white),
+                                    ),
+                                    subtitle: Column(
+                                      crossAxisAlignment:
+                                          CrossAxisAlignment.start,
+                                      children: [
+                                        Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            Text(
-                                              girl.name,
-                                              style: TextStyle(
-                                                fontWeight: FontWeight.bold,
-                                                fontSize: 18,
-                                                color: Colors.deepPurple,
-                                              ),
-                                            ),
-                                            SizedBox(height: 4),
-                                            Text(
-                                              'Level: ${girl.level}, Rarity: ${girl.rarity}',
-                                              style: TextStyle(
-                                                color: Colors.deepPurple[700],
-                                              ),
-                                            ),
-                                            SizedBox(height: 8),
-                                            LinearProgressIndicator(
-                                              value: girl.level / 100,
-                                              backgroundColor:
-                                                  Colors.deepPurple[200],
-                                              valueColor:
-                                                  AlwaysStoppedAnimation<Color>(
-                                                      Colors.deepPurple),
-                                            ),
+                                            Text('Level: ${girl.level}',
+                                                style: TextStyle(
+                                                    fontSize: 14,
+                                                    color: Colors.white70)),
                                           ],
                                         ),
-                                      ),
-                                      SizedBox(width: 12),
-                                      Column(
-                                        children: [
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              bool success = gameProvider
-                                                  .upgradeGirl(girl.id);
-                                              if (success) {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                        '${girl.name} upgraded! 🎉'),
-                                                    backgroundColor:
-                                                        Colors.green,
-                                                    duration:
-                                                        Duration(seconds: 1),
-                                                  ),
-                                                );
-                                              } else {
-                                                ScaffoldMessenger.of(context)
-                                                    .showSnackBar(
-                                                  SnackBar(
-                                                    content: Text(
-                                                        '❌ Not enough minerals!'),
-                                                    backgroundColor: Colors.red,
-                                                    duration:
-                                                        Duration(seconds: 2),
-                                                  ),
-                                                );
-                                              }
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor:
-                                                  Colors.deepPurple,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              'Upgrade',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                          SizedBox(height: 8),
-                                          ElevatedButton(
-                                            onPressed: () {
-                                              gameProvider.sellGirl(girl.id);
-                                              ScaffoldMessenger.of(context)
-                                                  .showSnackBar(
-                                                SnackBar(
-                                                  content: Text(
-                                                      '${girl.name} sold! 💰'),
-                                                  backgroundColor:
-                                                      Colors.orange,
-                                                  duration:
-                                                      Duration(seconds: 1),
-                                                ),
-                                              );
-                                            },
-                                            style: ElevatedButton.styleFrom(
-                                              backgroundColor: Colors.red,
-                                              shape: RoundedRectangleBorder(
-                                                borderRadius:
-                                                    BorderRadius.circular(10),
-                                              ),
-                                            ),
-                                            child: Text(
-                                              'Sell',
-                                              style: TextStyle(
-                                                color: Colors.white,
-                                              ),
-                                            ),
-                                          ),
-                                        ],
-                                      ),
-                                    ],
+                                      ],
+                                    ),
+                                    trailing:
+                                        _buildActionButtons(girl, gameProvider),
                                   ),
                                 ),
                               ),
@@ -251,57 +138,139 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
     );
   }
 
-  /// Builds the sorting and filtering UI
   Widget _buildSortAndFilterUI() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 16.0),
-      child: Column(
+      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      child: Row(
         children: [
-          // Filter Text Field
-          TextField(
-            decoration: InputDecoration(
-              hintText: 'Search by name...',
-              prefixIcon: Icon(Icons.search, color: Colors.deepPurple),
-              filled: true,
-              fillColor: Colors.white,
-              border: OutlineInputBorder(
+          Expanded(
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.purple[800],
                 borderRadius: BorderRadius.circular(10),
-                borderSide: BorderSide.none,
+              ),
+              child: TextField(
+                decoration: InputDecoration(
+                  hintText: 'Search...',
+                  hintStyle: TextStyle(color: Colors.white70),
+                  prefixIcon: Icon(Icons.search, color: Colors.white),
+                  border: InputBorder.none,
+                  contentPadding:
+                      EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+                ),
+                style: TextStyle(color: Colors.white),
+                onChanged: (value) => setState(() => _filterQuery = value),
               ),
             ),
-            onChanged: (value) {
-              setState(() {
-                _filterQuery = value;
-              });
-            },
           ),
-          SizedBox(height: 8),
-
-          // Sorting Dropdown
-          DropdownButton<String>(
-            value: _sortBy,
-            onChanged: (String? newValue) {
-              setState(() {
-                _sortBy = newValue!;
-              });
-            },
-            items: <String>['Level', 'Rarity', 'Name']
-                .map<DropdownMenuItem<String>>((String value) {
-              return DropdownMenuItem<String>(
-                value: value,
-                child: Text(
-                  'Sort by: $value',
-                  style: TextStyle(color: Colors.deepPurple),
-                ),
-              );
-            }).toList(),
-            underline: Container(),
-            isExpanded: true,
-            icon: Icon(Icons.sort, color: Colors.deepPurple),
-            style: TextStyle(color: Colors.deepPurple),
-            dropdownColor: Colors.white,
+          SizedBox(width: 10),
+          Container(
+            decoration: BoxDecoration(
+              color: Colors.purple[900],
+              borderRadius: BorderRadius.circular(10),
+            ),
+            padding: EdgeInsets.symmetric(horizontal: 8),
+            child: DropdownButton<String>(
+              value: _sortBy,
+              onChanged: (String? newValue) =>
+                  setState(() => _sortBy = newValue!),
+              items: ['Level', 'Rarity', 'Name'].map((value) {
+                return DropdownMenuItem(
+                  value: value,
+                  child: Text(value, style: TextStyle(color: Colors.white)),
+                );
+              }).toList(),
+              dropdownColor: Colors.purple[900],
+              icon: Icon(Icons.sort, color: Colors.white),
+              underline: SizedBox(),
+            ),
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButtons(GirlFarmer girl, GameProvider gameProvider) {
+    return Row(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Tooltip(
+          message: 'Upgrade',
+          child: IconButton(
+            icon: Icon(Icons.upgrade, color: Colors.green),
+            onPressed: () {
+              if (gameProvider.upgradeGirl(girl.id)) {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('${girl.name} upgraded! 🎉'),
+                  backgroundColor: Colors.green,
+                ));
+              } else {
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('❌ Not enough resources!'),
+                  backgroundColor: Colors.red,
+                ));
+              }
+            },
+          ),
+        ),
+        Tooltip(
+          message: 'Sell',
+          child: IconButton(
+            icon: Icon(Icons.sell, color: Colors.orange),
+            onPressed: () {
+              gameProvider.sellGirl(girl.id);
+              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text('${girl.name} sold! 💰'),
+                backgroundColor: Colors.orange,
+              ));
+            },
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+// Custom App Bar Implementation
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final double height;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    this.height = 56.0, // Default height similar to AppBar
+    this.padding = EdgeInsets.zero, // Custom padding
+    this.margin = EdgeInsets.zero, // Custom margin
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: preferredSize.height,
+      padding: padding, // Apply custom padding
+      margin: margin, // Apply custom margin
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/ui/wood-ui.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'GameFont',
+            fontSize: 24,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
       ),
     );
   }
