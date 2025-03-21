@@ -22,95 +22,95 @@ class FarmPage extends StatelessWidget {
       return !farm.floors.any((floor) => floor.assignedGirlId == girl.id);
     }).toList();
 
-    return Scaffold(
-      appBar: AppBar(
-        title: Text(
-          '${farm.name}', // Show the farm name in the title
-          style: TextStyle(
-            fontFamily: 'GameFont',
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-          ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: '${farm.name}',
+          height: 40,
+          padding: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
         ),
-        backgroundColor: Colors.deepPurple,
-        elevation: 10,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: [Colors.deepPurple, Colors.purpleAccent],
-          ),
-        ),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Expanded(
-              child: Row(
-                children: [
-                  Expanded(
-                    flex: 3,
-                    child: Column(
-                      children: [
-                        _buildSectionTitle("Girls"),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount:
-                                unassignedGirls.length, // Use filtered list
-                            itemBuilder: (context, index) {
-                              final girlFarmer = unassignedGirls[index];
-                              return Draggable<GirlFarmer>(
-                                data: girlFarmer,
-                                feedback: _buildDraggableFeedback(girlFarmer),
-                                childWhenDragging: _buildGirlCard(
-                                    context, girlFarmer,
-                                    opacity: 0.5),
-                                child: _buildGirlCard(context, girlFarmer),
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  Expanded(
-                    flex: 7,
-                    child: Column(
-                      children: [
-                        _buildSectionTitle("Floors"),
-                        Expanded(
-                          child: ListView.builder(
-                            itemCount: farm.floors.length,
-                            itemBuilder: (context, index) {
-                              final floor = farm.floors[index];
-                              final assignedGirl = floor.assignedGirlId != null
-                                  ? girlFarmers.firstWhere(
-                                      (girl) => girl.id == floor.assignedGirlId)
-                                  : null;
-
-                              return DragTarget<GirlFarmer>(
-                                onAccept: (girlFarmer) {
-                                  gameProvider.assignGirlToFloor(
-                                      farm.name, floor.id, girlFarmer.id);
-                                },
-                                builder:
-                                    (context, candidateData, rejectedData) {
-                                  return _buildFloorCard(context, floor,
-                                      assignedGirl, gameProvider,
-                                      highlight: candidateData.isNotEmpty);
-                                },
-                              );
-                            },
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: AssetImage('assets/images/ui/mine.png'),
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Main Content (Girls and Floors in a Row)
+              Expanded(
+                child: Row(
+                  children: [
+                    // Girls List (Left Side)
+                    Expanded(
+                      flex: 3, // Takes 3 parts of the screen
+                      child: Column(
+                        children: [
+                          _buildSectionTitle("Girls"),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: unassignedGirls.length,
+                              itemBuilder: (context, index) {
+                                final girlFarmer = unassignedGirls[index];
+                                return Draggable<GirlFarmer>(
+                                  data: girlFarmer,
+                                  feedback: _buildDraggableFeedback(girlFarmer),
+                                  childWhenDragging: _buildGirlCard(
+                                      context, girlFarmer,
+                                      opacity: 0.5),
+                                  child: _buildGirlCard(context, girlFarmer),
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                    // Floors List (Right Side)
+                    Expanded(
+                      flex: 7, // Takes 7 parts of the screen
+                      child: Column(
+                        children: [
+                          _buildSectionTitle("Floors"),
+                          Expanded(
+                            child: ListView.builder(
+                              itemCount: farm.floors.length,
+                              itemBuilder: (context, index) {
+                                final floor = farm.floors[index];
+                                final assignedGirl =
+                                    floor.assignedGirlId != null
+                                        ? girlFarmers.firstWhere((girl) =>
+                                            girl.id == floor.assignedGirlId)
+                                        : null;
+
+                                return DragTarget<GirlFarmer>(
+                                  onAccept: (girlFarmer) {
+                                    gameProvider.assignGirlToFloor(
+                                        farm.name, floor.id, girlFarmer.id);
+                                  },
+                                  builder:
+                                      (context, candidateData, rejectedData) {
+                                    return _buildFloorCard(context, floor,
+                                        assignedGirl, gameProvider,
+                                        highlight: candidateData.isNotEmpty);
+                                  },
+                                );
+                              },
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              // Back Button (Bottom of the Screen)
+              _buildBackButton(context),
+            ],
+          ),
         ),
       ),
     );
@@ -119,8 +119,22 @@ class FarmPage extends StatelessWidget {
   Widget _buildSectionTitle(String title) {
     return Padding(
       padding: const EdgeInsets.all(8.0),
-      child: Text(title,
-          style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+      child: Container(
+        width: double.infinity, // Takes full width of parent
+        padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
+        decoration: BoxDecoration(
+          color: Color(0xFFCAA04D),
+          borderRadius: BorderRadius.circular(8),
+        ),
+        child: Text(
+          title,
+          style: TextStyle(
+            fontSize: 18,
+            color: Colors.white,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
     );
   }
 
@@ -132,21 +146,29 @@ class FarmPage extends StatelessWidget {
         onTap: () => _showGirlDetails(context, girlFarmer),
         child: Card(
           elevation: 4,
+          color: Colors.black.withOpacity(0.7), // Set background color
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           margin: const EdgeInsets.all(8),
           child: Padding(
-            padding: const EdgeInsets.all(12.0),
+            padding: const EdgeInsets.all(5.0),
             child: Column(
               children: [
                 CircleAvatar(
                   backgroundImage: AssetImage(girlFarmer.image),
-                  radius: 30,
+                  radius: 50,
                 ),
-                SizedBox(height: 8),
-                Text(girlFarmer.name,
-                    style:
-                        TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+                SizedBox(height: 2),
+                Text(
+                  girlFarmer.name,
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color:
+                        Colors.white, // Ensures text is visible on colored bg
+                  ),
+                ),
+                SizedBox(height: 5),
               ],
             ),
           ),
@@ -329,6 +351,69 @@ class FarmPage extends StatelessWidget {
           ],
         );
       },
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text("Back",
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          padding: EdgeInsets.symmetric(vertical: 10),
+        ),
+      ),
+    );
+  }
+}
+
+class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
+  final String title;
+  final double height;
+  final EdgeInsetsGeometry padding;
+  final EdgeInsetsGeometry margin;
+
+  const CustomAppBar({
+    Key? key,
+    required this.title,
+    this.height = 56.0, // Default height similar to AppBar
+    this.padding = EdgeInsets.zero, // Custom padding
+    this.margin = EdgeInsets.zero, // Custom margin
+  }) : super(key: key);
+
+  @override
+  Size get preferredSize => Size.fromHeight(height);
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      height: preferredSize.height,
+      padding: padding, // Apply custom padding
+      margin: margin, // Apply custom margin
+      decoration: BoxDecoration(
+        image: DecorationImage(
+          image: AssetImage("assets/images/ui/wood-ui.png"),
+          fit: BoxFit.cover,
+        ),
+      ),
+      child: Center(
+        child: Text(
+          title,
+          style: TextStyle(
+            fontFamily: 'GameFont',
+            fontSize: 20,
+            fontWeight: FontWeight.bold,
+            color: Colors.white,
+          ),
+        ),
+      ),
     );
   }
 }

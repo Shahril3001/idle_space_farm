@@ -181,7 +181,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 8, horizontal: 12),
                 ),
-                style: TextStyle(color: Colors.white),
+                style: TextStyle(color: Colors.black),
                 onChanged: (value) => setState(() => _filterQuery = value),
               ),
             ),
@@ -218,43 +218,96 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
-            message: 'Upgrade',
-            child: IconButton(
-              icon: Image.asset(
-                'assets/images/icons/upgrade.png', // Path to your upgrade icon
-                width: 30, // Adjust size as needed
-                height: 30,
-              ),
-              onPressed: () {
-                if (gameProvider.upgradeGirl(girl.id)) {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('${girl.name} upgraded! 🎉'),
-                    backgroundColor: Colors.green,
-                  ));
-                } else {
-                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                    content: Text('❌ Not enough resources!'),
-                    backgroundColor: Colors.red,
-                  ));
-                }
-              },
-            )),
+          message: 'Upgrade',
+          child: IconButton(
+            icon: Image.asset(
+              'assets/images/icons/upgrade.png', // Path to your upgrade icon
+              width: 30, // Adjust size as needed
+              height: 30,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Confirm Upgrade'),
+                    content: Text('Do you want to upgrade ${girl.name}?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(context), // Cancel action
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Close dialog
+                          if (gameProvider.upgradeGirl(girl.id)) {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('${girl.name} upgraded! 🎉'),
+                                backgroundColor: Color(0xFFCAA04D),
+                              ),
+                            );
+                          } else {
+                            ScaffoldMessenger.of(context).showSnackBar(
+                              SnackBar(
+                                content: Text('❌ Not enough resources!'),
+                                backgroundColor: Colors.red,
+                              ),
+                            );
+                          }
+                        },
+                        child: Text('Upgrade'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ),
         Tooltip(
-            message: 'Sell',
-            child: IconButton(
-              icon: Image.asset(
-                'assets/images/icons/sell.png', // Replace with your actual image path
-                width: 30, // Adjust size as needed
-                height: 30,
-              ),
-              onPressed: () {
-                gameProvider.sellGirl(girl.id);
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('${girl.name} sold! 💰'),
-                  backgroundColor: Colors.orange,
-                ));
-              },
-            )),
+          message: 'Sell',
+          child: IconButton(
+            icon: Image.asset(
+              'assets/images/icons/sell.png', // Replace with your actual image path
+              width: 30, // Adjust size as needed
+              height: 30,
+            ),
+            onPressed: () {
+              showDialog(
+                context: context,
+                builder: (BuildContext context) {
+                  return AlertDialog(
+                    title: Text('Confirm Sale'),
+                    content:
+                        Text('Are you sure you want to sell ${girl.name}?'),
+                    actions: [
+                      TextButton(
+                        onPressed: () =>
+                            Navigator.pop(context), // Cancel action
+                        child: Text('Cancel'),
+                      ),
+                      TextButton(
+                        onPressed: () {
+                          Navigator.pop(context); // Close dialog
+                          gameProvider.sellGirl(girl.id);
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(
+                              content: Text('${girl.name} sold! 💰'),
+                              backgroundColor: Color(0xFFCAA04D),
+                            ),
+                          );
+                        },
+                        child: Text('Sell'),
+                      ),
+                    ],
+                  );
+                },
+              );
+            },
+          ),
+        ),
       ],
     );
   }

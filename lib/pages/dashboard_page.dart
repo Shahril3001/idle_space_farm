@@ -10,8 +10,7 @@ class DashboardPage extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image:
-                AssetImage('assets/images/ui/app-bg.png'), // Background image
+            image: AssetImage('assets/images/ui/castle.png'),
             fit: BoxFit.cover,
           ),
         ),

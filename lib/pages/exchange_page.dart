@@ -189,7 +189,7 @@ class TransactionExchangePage extends StatelessWidget {
                   },
                   style: ElevatedButton.styleFrom(
                     elevation: 2,
-                    backgroundColor: Colors.blueAccent[400],
+                    backgroundColor: Color(0xFFCAA04D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(10),
                     ),

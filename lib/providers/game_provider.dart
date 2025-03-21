@@ -337,6 +337,18 @@ class GameProvider with ChangeNotifier {
   void sellGirl(String girlId) {
     final girl = _girlRepository.getGirlById(girlId);
     if (girl != null) {
+      print("Unassigning girl $girlId from all farms...");
+      for (var farm in _farmRepository.getAllFarms()) {
+        for (var floor in farm.floors) {
+          if (floor.assignedGirlId == girlId) {
+            print(
+                "Unassigning girl $girlId from ${farm.name}, floor ${floor.id}");
+            floor.assignedGirlId = null;
+            _farmRepository.updateFarm(farm);
+          }
+        }
+      }
+
       final credits = _resourceRepository.getResourceByName('Credits');
       if (credits != null) {
         double sellPrice = 0;
@@ -351,13 +363,15 @@ class GameProvider with ChangeNotifier {
             sellPrice = 20;
             break;
         }
-        // Consider other stats like attackPoints, defensePoints, etc.
         sellPrice *= (1 + girl.attackPoints * 0.01);
         credits.amount += sellPrice;
         _resourceRepository.updateResource(credits);
         _girlRepository.deleteGirl(girlId);
+        print("Sold girl $girlId for $sellPrice credits.");
         notifyListeners();
       }
+    } else {
+      print("Girl with ID $girlId not found.");
     }
   }
 

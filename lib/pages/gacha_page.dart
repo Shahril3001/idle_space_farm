@@ -149,12 +149,18 @@ class GachaGirlPage extends StatelessWidget {
 
     return _buildGachaSection(
       context: context,
-      title: '👧 Character Gacha',
+      image: Image.asset(
+        "assets/images/icons/summon-girl.png", // Equipment Gacha Image
+        width: 150,
+        height: 150,
+        fit: BoxFit.cover,
+      ),
+      title: 'Summon Girl',
       subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
-      button1: _buildGachaButton(
-          context, gameProvider, '1x Pull', 1, Icons.casino, Colors.blue, true),
-      button2: _buildGachaButton(context, gameProvider, '10x Pull', 10,
-          Icons.auto_awesome, Colors.purple, true),
+      button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
+          Icons.casino, Color(0xFFCAA04D), true),
+      button2: _buildGachaButton(context, gameProvider, '10x Pulls', 10,
+          Icons.auto_awesome, Color(0xFFCAA04D), true),
     );
   }
 }
@@ -166,12 +172,18 @@ class GachaItemPage extends StatelessWidget {
 
     return _buildGachaSection(
       context: context,
-      title: '🛠️ Equipment Gacha',
+      image: Image.asset(
+        "assets/images/icons/summon-item.png", // Equipment Gacha Image
+        width: 150,
+        height: 150,
+        fit: BoxFit.cover,
+      ),
+      title: 'Summon Equipment',
       subtitle: '🎒 Get new weapons & armor!',
-      button1: _buildGachaButton(context, gameProvider, '1x Equipment', 1,
-          Icons.shield, Colors.orange, false),
-      button2: _buildGachaButton(context, gameProvider, '10x Equipment', 10,
-          Icons.backpack, Colors.red, false),
+      button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
+          Icons.shield, Color(0xFFCAA04D), false),
+      button2: _buildGachaButton(context, gameProvider, '10x Pulls', 10,
+          Icons.backpack, Color(0xFFCAA04D), false),
     );
   }
 }
@@ -179,6 +191,7 @@ class GachaItemPage extends StatelessWidget {
 // ✅ **UI now follows your image layout**
 Widget _buildGachaSection({
   required BuildContext context,
+  Widget? image,
   required String title,
   required String subtitle,
   required Widget button1,
@@ -186,6 +199,7 @@ Widget _buildGachaSection({
 }) {
   return Center(
     child: _buildGlassCard(
+      image: image,
       title: title,
       content: subtitle,
       button1: button1,
@@ -196,6 +210,7 @@ Widget _buildGachaSection({
 
 // 🔹 **Improved Glass UI with Margin**
 Widget _buildGlassCard({
+  Widget? image,
   required String title,
   required String content,
   required Widget button1,
@@ -206,7 +221,7 @@ Widget _buildGlassCard({
     child: Card(
       elevation: 10,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(5),
+        borderRadius: BorderRadius.circular(10),
       ),
       color: Colors.black.withOpacity(0.8),
       child: Padding(
@@ -214,11 +229,13 @@ Widget _buildGlassCard({
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            if (image != null) image,
+            SizedBox(height: 10),
             Text(
               title,
               style: TextStyle(
                 fontFamily: 'GameFont',
-                fontSize: 24,
+                fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.amberAccent,
               ),
@@ -228,7 +245,7 @@ Widget _buildGlassCard({
               content,
               style: TextStyle(
                 fontFamily: 'GameFont',
-                fontSize: 18,
+                fontSize: 14,
                 color: Colors.white,
               ),
               textAlign: TextAlign.center,
@@ -260,7 +277,8 @@ Widget _buildGachaButton(
     bool isCharacterGacha) {
   return ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(vertical: 15),
+      padding: EdgeInsets.symmetric(
+          vertical: 5, horizontal: 15), // Added horizontal padding
       backgroundColor: color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
@@ -291,12 +309,12 @@ Widget _buildGachaButton(
         }
       }
     },
-    icon: Icon(icon, size: 28, color: Colors.white),
+    icon: Icon(icon, size: 18, color: Colors.white),
     label: Text(
       label,
       style: TextStyle(
         fontFamily: 'GameFont',
-        fontSize: 18,
+        fontSize: 14,
         color: Colors.white,
       ),
     ),
@@ -309,7 +327,7 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: Colors.deepPurple.shade800,
+        backgroundColor: Colors.amberAccent.withOpacity(0.5),
         title: Text(
           '✨ Gacha Results ✨',
           style: TextStyle(

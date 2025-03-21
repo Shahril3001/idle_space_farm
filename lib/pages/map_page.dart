@@ -4,7 +4,45 @@ import '../models/farm_model.dart';
 import '../providers/game_provider.dart';
 import 'farm_page.dart'; // Import the farm page
 
-class MapPage extends StatelessWidget {
+class MapPage extends StatefulWidget {
+  @override
+  _MapPageState createState() => _MapPageState();
+}
+
+class _MapPageState extends State<MapPage> {
+  late TransformationController _controller;
+  bool _initialized = false;
+
+  final double mapWidth = 1500;
+  final double mapHeight = 1500;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TransformationController();
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_initialized) {
+      _centerMap();
+      _initialized = true;
+    }
+  }
+
+  void _centerMap() {
+    final Size screenSize = MediaQuery.of(context).size;
+    final double screenWidth = screenSize.width;
+    final double screenHeight = screenSize.height;
+
+    // Calculate the required translation to center the map
+    double offsetX = (screenWidth / 2) - (mapWidth / 2);
+    double offsetY = (screenHeight / 2) - (mapHeight / 2);
+
+    _controller.value = Matrix4.identity()..translate(offsetX, offsetY);
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
@@ -13,38 +51,34 @@ class MapPage extends StatelessWidget {
     return Scaffold(
       appBar: CustomAppBar(
         title: 'Eldoria Map',
-        height: 40, // Adjust the height of the custom app bar
-        padding: EdgeInsets.zero, // Custom padding
-        margin: EdgeInsets.zero, // Custom margin
+        height: 40,
+        padding: EdgeInsets.zero,
+        margin: EdgeInsets.zero,
       ),
       body: Center(
         child: InteractiveViewer(
+          transformationController: _controller, // Center the map on load
           minScale: 0.5,
           maxScale: 4.0,
-          panEnabled: true, // Allow panning
-          constrained: false, // Let the content be larger than the screen
+          panEnabled: true,
+          constrained: false,
           child: Stack(
             children: [
-              // Map Image as the Background
               Image.asset(
                 "assets/images/map/eldoria_map.png",
-                width: 1500, // Large width for scrolling
-                height: 1500, // Large height for scrolling
+                width: mapWidth,
+                height: mapHeight,
                 fit: BoxFit.cover,
               ),
-
-              // Overlay the farm locations
               ...farms.map((farm) {
                 return Positioned(
                   left: farm.position.dx,
                   top: farm.position.dy,
                   child: GestureDetector(
-                    behavior: HitTestBehavior.opaque,
                     onTap: () => _showFarmDetails(context, farm),
                     child: Column(
                       children: [
-                        Icon(Icons.location_on,
-                            size: 60, color: Colors.red), // Bigger Icon
+                        Icon(Icons.location_on, size: 60, color: Colors.red),
                         Container(
                           padding:
                               EdgeInsets.symmetric(vertical: 8, horizontal: 14),
@@ -56,7 +90,7 @@ class MapPage extends StatelessWidget {
                             farm.name,
                             style: TextStyle(
                               color: Colors.white,
-                              fontSize: 18, // Bigger Text
+                              fontSize: 18,
                               fontWeight: FontWeight.bold,
                             ),
                           ),
@@ -78,20 +112,28 @@ class MapPage extends StatelessWidget {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          title: Text(farm.name),
+          backgroundColor: Colors.black.withOpacity(0.8),
+          title: Text(
+            farm.name,
+            style: TextStyle(color: Colors.white),
+          ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
-              Text("Resource: ${farm.resourceType}"),
-              Text("Production: ${farm.resourcePerSecond} per sec"),
-              Text("Level: ${farm.level}"),
-              Text("Upgrade Cost: ${farm.upgradeCost}"),
+              Text("Resource: ${farm.resourceType}",
+                  style: TextStyle(color: Colors.white)),
+              Text("Production: ${farm.resourcePerSecond} per sec",
+                  style: TextStyle(color: Colors.white)),
+              Text("Level: ${farm.level}",
+                  style: TextStyle(color: Colors.white)),
+              Text("Upgrade Cost: ${farm.upgradeCost}",
+                  style: TextStyle(color: Colors.white)),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Close"),
+              child: Text("Close", style: TextStyle(color: Colors.white)),
             ),
             ElevatedButton(
               onPressed: () {
@@ -101,7 +143,10 @@ class MapPage extends StatelessWidget {
                   MaterialPageRoute(builder: (context) => FarmPage(farm: farm)),
                 );
               },
-              child: Text("Go to Farm"),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Color(0xFFCAA04D),
+              ),
+              child: Text("Go to Farm", style: TextStyle(color: Colors.white)),
             ),
           ],
         );
