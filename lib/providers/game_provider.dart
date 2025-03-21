@@ -86,9 +86,12 @@ class GameProvider with ChangeNotifier {
   void _initializeGameData() {
     print("DEBUG: Initializing game data...");
     if (_resourceRepository.getAllResources().isEmpty) {
-      _resourceRepository.addResource(Resource(name: 'Energy', amount: 100.0));
-      _resourceRepository.addResource(Resource(name: 'Minerals', amount: 50.0));
-      _resourceRepository.addResource(Resource(name: 'Credits', amount: 500.0));
+      _resourceRepository
+          .addResource(Resource(name: 'Energy', amount: 1000000.0));
+      _resourceRepository
+          .addResource(Resource(name: 'Minerals', amount: 1000000.0));
+      _resourceRepository
+          .addResource(Resource(name: 'Credits', amount: 1000000.0));
     }
 
     if (_farmRepository.getAllFarms().isEmpty) {

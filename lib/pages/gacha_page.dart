@@ -17,31 +17,39 @@ class _GachaMainPageState extends State<GachaMainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Summoning',
-        height: 40, // Height of the AppBar only
+        title: 'Summoning Altar',
+        height: 40,
         padding: EdgeInsets.zero,
         margin: EdgeInsets.zero,
       ),
-      body: Column(
-        children: [
-          // Custom Navigation Widget (Separate from AppBar)
-          _buildCustomNavigationBar(),
-          // PageView for Swiping Between Pages
-          Expanded(
-            child: PageView(
-              controller: _pageController,
-              onPageChanged: (index) {
-                setState(() {
-                  _currentPageIndex = index;
-                });
-              },
-              children: [
-                GachaGirlPage(),
-                GachaItemPage(),
-              ],
-            ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: AssetImage('assets/images/ui/app-bg.png'),
+            fit: BoxFit.cover,
           ),
-        ],
+        ),
+        child: Column(
+          children: [
+            // Custom Navigation Widget (Separate from AppBar)
+            _buildCustomNavigationBar(),
+            // PageView for Swiping Between Pages
+            Expanded(
+              child: PageView(
+                controller: _pageController,
+                onPageChanged: (index) {
+                  setState(() {
+                    _currentPageIndex = index;
+                  });
+                },
+                children: [
+                  GachaGirlPage(),
+                  GachaItemPage(),
+                ],
+              ),
+            ),
+          ],
+        ),
       ),
     );
   }
@@ -50,13 +58,13 @@ class _GachaMainPageState extends State<GachaMainPage> {
   Widget _buildCustomNavigationBar() {
     return Container(
       height: 48, // Height of the navigation bar
-      color: Colors.brown, // Custom background color
+      color: Colors.black.withOpacity(0.9),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildNavButton('Girls', 0),
+          _buildNavButton('Girl', 0),
           SizedBox(width: 20),
-          _buildNavButton('Items', 1),
+          _buildNavButton('Equipment', 1),
         ],
       ),
     );
@@ -77,10 +85,10 @@ class _GachaMainPageState extends State<GachaMainPage> {
       },
       style: TextButton.styleFrom(
         foregroundColor:
-            _currentPageIndex == index ? Colors.amber : Colors.white,
+            _currentPageIndex == index ? Colors.amberAccent : Colors.white,
         textStyle: TextStyle(
           fontFamily: 'GameFont',
-          fontSize: 18,
+          fontSize: 17,
           fontWeight: FontWeight.bold,
         ),
       ),
@@ -123,7 +131,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           title,
           style: TextStyle(
             fontFamily: 'GameFont',
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
@@ -198,9 +206,9 @@ Widget _buildGlassCard({
     child: Card(
       elevation: 10,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(5),
       ),
-      color: Colors.white.withOpacity(0.15),
+      color: Colors.black.withOpacity(0.8),
       child: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -212,7 +220,7 @@ Widget _buildGlassCard({
                 fontFamily: 'GameFont',
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Colors.amber,
+                color: Colors.amberAccent,
               ),
             ),
             Divider(color: Colors.white54),
@@ -306,7 +314,7 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
           '✨ Gacha Results ✨',
           style: TextStyle(
             fontFamily: 'GameFont',
-            color: Colors.amber,
+            color: Colors.amberAccent,
           ),
         ),
         content: SingleChildScrollView(

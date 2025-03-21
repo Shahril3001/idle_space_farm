@@ -6,6 +6,7 @@ import 'exchange_page.dart';
 import 'farm_page.dart';
 import 'gacha_page.dart';
 import 'girl_list_page.dart';
+import 'dashboard_page.dart'; // Import the DashboardPage
 
 class HomePage extends StatefulWidget {
   @override
@@ -13,11 +14,12 @@ class HomePage extends StatefulWidget {
 }
 
 class _HomePageState extends State<HomePage> {
-  int _selectedIndex = 0;
+  int _selectedIndex = 2; // Set default index to 0 (DashboardPage)
 
   final List<Widget> _pages = [
     GachaMainPage(),
     ManageGirlListPage(),
+    DashboardPage(),
     MapPage(),
     TransactionExchangePage(),
   ];
@@ -53,7 +55,7 @@ class _HomePageState extends State<HomePage> {
               children: [
                 _buildResourceDisplay(gameProvider),
                 Expanded(
-                  child: _pages[_selectedIndex],
+                  child: _pages[_selectedIndex], // Display the selected page
                 ),
               ],
             ),
@@ -62,7 +64,7 @@ class _HomePageState extends State<HomePage> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withOpacity(0.9),
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.only(
@@ -76,36 +78,43 @@ class _HomePageState extends State<HomePage> {
             type: BottomNavigationBarType.fixed,
             selectedItemColor: Colors.amberAccent,
             unselectedItemColor: Colors.grey,
+            selectedIconTheme:
+                IconThemeData(size: 35), // Zoom effect for selected icon
+            unselectedIconTheme:
+                IconThemeData(size: 30), // Default size for unselected icons
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
-                icon: Image.asset(
+                icon: _buildBottomNavIcon(
                   'assets/images/icons/summon.png',
-                  width: 30,
-                  height: 30,
+                  _selectedIndex == 0, // Check if this item is selected
                 ),
                 label: 'Summon',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
+                icon: _buildBottomNavIcon(
                   'assets/images/icons/valkyrie.png',
-                  width: 30,
-                  height: 30,
+                  _selectedIndex == 1, // Check if this item is selected
                 ),
-                label: 'Valkyrie',
+                label: 'Girl',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
+                icon: _buildBottomNavIcon(
+                  'assets/images/icons/adventure.png',
+                  _selectedIndex == 2, // Check if this item is selected
+                ),
+                label: 'Main',
+              ),
+              BottomNavigationBarItem(
+                icon: _buildBottomNavIcon(
                   'assets/images/icons/farm.png',
-                  width: 30,
-                  height: 30,
+                  _selectedIndex == 3, // Check if this item is selected
                 ),
                 label: 'Map',
               ),
               BottomNavigationBarItem(
-                icon: Image.asset(
+                icon: _buildBottomNavIcon(
                   'assets/images/icons/shop.png',
-                  width: 30,
-                  height: 30,
+                  _selectedIndex == 4, // Check if this item is selected
                 ),
                 label: 'Shop',
               ),
@@ -116,32 +125,66 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  Widget _buildBottomNavIcon(String iconPath, bool isSelected) {
+    return Container(
+      padding: EdgeInsets.all(8), // Add padding for the background
+      decoration: BoxDecoration(
+        color: isSelected
+            ? Colors.amberAccent.withOpacity(0.2)
+            : Colors.transparent,
+        borderRadius:
+            BorderRadius.circular(10), // Rounded corners for the background
+      ),
+      child: Image.asset(
+        iconPath,
+        width:
+            isSelected ? 35 : 30, // Zoom effect: larger size for selected icon
+        height: isSelected ? 35 : 30, // Change icon color if selected
+      ),
+    );
+  }
+
   Widget _buildResourceDisplay(GameProvider gameProvider) {
     return SafeArea(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
         decoration: BoxDecoration(
-          color: Colors.black.withOpacity(0.8),
+          color: Colors.black.withOpacity(0.9),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
-            _resourceText(Icons.monetization_on, "", gameProvider.getCredits(),
-                Colors.amberAccent),
             _resourceText(
-                Icons.landscape, "", gameProvider.getMinerals(), Colors.cyan),
+              Image.asset('assets/images/icons/golds.png',
+                  width: 24, height: 24),
+              "",
+              gameProvider.getCredits(),
+              Colors.amberAccent,
+            ),
             _resourceText(
-                Icons.flash_on, "", gameProvider.getEnergy(), Colors.redAccent),
+              Image.asset('assets/images/icons/minerals.png',
+                  width: 24, height: 24),
+              "",
+              gameProvider.getMinerals(),
+              Colors.cyan,
+            ),
+            _resourceText(
+              Image.asset('assets/images/icons/mana.png',
+                  width: 24, height: 24),
+              "",
+              gameProvider.getEnergy(),
+              Colors.redAccent,
+            ),
           ],
         ),
       ),
     );
   }
 
-  Widget _resourceText(IconData icon, String label, double value, Color color) {
+  Widget _resourceText(Widget icon, String label, double value, Color color) {
     return Row(
       children: [
-        Icon(icon, color: color, size: 24),
+        icon, // Accepts any widget (Icon or Image)
         SizedBox(width: 4),
         Text(
           "$label: ${value.toStringAsFixed(0)}",

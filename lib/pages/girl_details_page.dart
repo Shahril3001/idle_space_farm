@@ -17,7 +17,7 @@ class GirlDetailsPage extends StatelessWidget {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage("assets/background_status.jpg"),
+              image: AssetImage('assets/images/ui/app-bg.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -27,76 +27,76 @@ class GirlDetailsPage extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
                 // Character Portrait with Glow Effect
-                Hero(
-                  tag: 'girl-image-${girl.id}',
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      Image.asset(
-                        'assets/glow_effect.png',
-                        width: 180,
-                        height: 180,
-                      ),
-                      CircleAvatar(
-                        radius: 100,
-                        backgroundImage: AssetImage(girl.image),
-                      ),
-                    ],
-                  ),
-                ),
+                _buildCharacterPortrait(),
                 SizedBox(height: 10),
-                Text(
-                  girl.name,
-                  style: TextStyle(
-                      fontFamily: 'GameFont',
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white),
-                ),
+                _buildCharacterName(),
                 SizedBox(height: 20),
 
                 // Stats with Bars
-                _buildStatBar("HP", girl.hp, Colors.red, Icons.favorite),
-                _buildStatBar("MP", girl.mp, Colors.blue, Icons.bolt),
-                _buildStatBar("SP", girl.sp, Colors.green, Icons.flash_on),
+                _buildStatSection(),
                 SizedBox(height: 20),
 
                 // Attributes Section
-                _buildAttributes(),
+                _buildAttributesSection(),
                 SizedBox(height: 20),
 
                 // Interactive Buttons
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    _buildButton("Upgrade", Icons.arrow_upward, Colors.purple,
-                        () {
-                      bool success = gameProvider.upgradeGirl(girl.id);
-                      _showFeedback(context, success, girl.name);
-                    }),
-                    SizedBox(width: 20),
-                    _buildButton("Sell", Icons.sell, Colors.red, () {
-                      _confirmSell(context, gameProvider, girl);
-                    }),
-                  ],
-                ),
+                _buildActionButtons(context, gameProvider),
               ],
             ),
           ),
         ),
-        bottomNavigationBar: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: ElevatedButton(
-            onPressed: () => Navigator.pop(context),
-            child: Text("Back"),
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.grey[800],
-              shape: RoundedRectangleBorder(
-                  borderRadius: BorderRadius.circular(10)),
-            ),
-          ),
-        ),
+        bottomNavigationBar: _buildBackButton(context),
       ),
+    );
+  }
+
+  Widget _buildCharacterPortrait() {
+    return Hero(
+      tag: 'girl-image-${girl.id}',
+      child: Stack(
+        alignment: Alignment.center,
+        children: [
+          Image.asset(
+            'assets/glow_effect.png',
+            width: 180,
+            height: 180,
+          ),
+          CircleAvatar(
+            radius: 100,
+            backgroundImage: AssetImage(girl.image),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildCharacterName() {
+    return Text(
+      girl.name,
+      style: TextStyle(
+        fontFamily: 'GameFont',
+        fontSize: 24,
+        fontWeight: FontWeight.bold,
+        color: Colors.white,
+        shadows: [
+          Shadow(
+            color: Colors.black.withOpacity(0.5),
+            blurRadius: 5,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStatSection() {
+    return Column(
+      children: [
+        _buildStatBar("HP", girl.hp, Colors.red, Icons.favorite),
+        _buildStatBar("MP", girl.mp, Colors.blue, Icons.bolt),
+        _buildStatBar("SP", girl.sp, Colors.green, Icons.flash_on),
+      ],
     );
   }
 
@@ -109,24 +109,28 @@ class GirlDetailsPage extends StatelessWidget {
           SizedBox(width: 10),
           Text('$label:',
               style: TextStyle(
-                  fontSize: 16, fontWeight: FontWeight.bold, color: color)),
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: color,
+              )),
           SizedBox(width: 10),
           Expanded(
             child: LinearProgressIndicator(
-              value: 1.0, // Always full
+              value: value / 100, // Assuming max value is 100
               backgroundColor: Colors.grey[800],
               color: color,
               minHeight: 12,
             ),
           ),
           SizedBox(width: 10),
-          Text(value.toString(), style: TextStyle(fontSize: 16)),
+          Text(value.toString(),
+              style: TextStyle(fontSize: 16, color: Colors.white)),
         ],
       ),
     );
   }
 
-  Widget _buildAttributes() {
+  Widget _buildAttributesSection() {
     return Card(
       elevation: 5,
       color: Colors.black54,
@@ -148,19 +152,6 @@ class GirlDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildButton(
-      String text, IconData icon, Color color, VoidCallback onPressed) {
-    return ElevatedButton.icon(
-      onPressed: onPressed,
-      icon: Icon(icon, color: Colors.white),
-      label: Text(text, style: TextStyle(color: Colors.white)),
-      style: ElevatedButton.styleFrom(
-        backgroundColor: color,
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
-      ),
-    );
-  }
-
   Widget _buildAttributeRow(IconData icon, String label, String value) {
     return Row(
       children: [
@@ -168,9 +159,10 @@ class GirlDetailsPage extends StatelessWidget {
         SizedBox(width: 10),
         Text("$label: ",
             style: TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
-                color: Colors.white)),
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            )),
         Spacer(),
         Text(value, style: TextStyle(fontSize: 16, color: Colors.amberAccent)),
       ],
@@ -190,13 +182,71 @@ class GirlDetailsPage extends StatelessWidget {
     );
   }
 
+  Widget _buildActionButtons(BuildContext context, GameProvider gameProvider) {
+    return Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        _buildButton("Upgrade", Icons.arrow_upward, Colors.purple, () {
+          bool success = gameProvider.upgradeGirl(girl.id);
+          _showFeedback(context, success, girl.name);
+        }),
+        SizedBox(width: 20),
+        _buildButton("Sell", Icons.sell, Colors.red, () {
+          _confirmSell(context, gameProvider, girl);
+        }),
+      ],
+    );
+  }
+
+  Widget _buildButton(
+      String text, IconData icon, Color color, VoidCallback onPressed) {
+    return ElevatedButton.icon(
+      onPressed: onPressed,
+      icon: Icon(icon, color: Colors.white),
+      label: Text(text, style: TextStyle(color: Colors.white)),
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color,
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+        padding: EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+      ),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Container(
+      color: Colors.transparent, // Make the container transparent
+      padding: const EdgeInsets.all(16.0),
+      child: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        child: Text(
+          "Back",
+          style: TextStyle(
+            color: Colors.white,
+            fontFamily: 'GameFont',
+          ),
+        ),
+        style: ElevatedButton.styleFrom(
+          backgroundColor:
+              Colors.grey[800]!.withOpacity(0.8), // Semi-transparent background
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(10),
+          ),
+          padding: EdgeInsets.symmetric(horizontal: 40, vertical: 15),
+        ),
+      ),
+    );
+  }
+
   void _showFeedback(BuildContext context, bool success, String name) {
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
-        content:
-            Text(success ? '$name upgraded! 🎉' : '❌ Not enough resources!'),
+        content: Text(
+          success ? '$name upgraded! 🎉' : '❌ Not enough resources!',
+          style: TextStyle(fontFamily: 'GameFont'),
+        ),
         backgroundColor: success ? Colors.green : Colors.red,
         duration: Duration(seconds: 2),
+        behavior: SnackBarBehavior.floating,
       ),
     );
   }
@@ -211,7 +261,9 @@ class GirlDetailsPage extends StatelessWidget {
           content: Text('Are you sure you want to sell ${girl.name}?'),
           actions: [
             TextButton(
-                onPressed: () => Navigator.pop(context), child: Text('Cancel')),
+              onPressed: () => Navigator.pop(context),
+              child: Text('Cancel', style: TextStyle(color: Colors.grey)),
+            ),
             ElevatedButton(
               onPressed: () {
                 gameProvider.sellGirl(girl.id);

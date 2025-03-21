@@ -39,7 +39,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
 
     return Scaffold(
       appBar: CustomAppBar(
-        title: 'Knight',
+        title: 'Girl',
         height: 40, // Adjust the height of the custom app bar
         padding: EdgeInsets.zero, // Custom padding
         margin: EdgeInsets.zero, // Custom margin
@@ -59,10 +59,22 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                 _buildSortAndFilterUI(),
                 Expanded(
                   child: girlFarmers.isEmpty
-                      ? Center(
-                          child: Text(
-                            'No girls available.',
-                            style: TextStyle(color: Colors.white, fontSize: 18),
+                      ? Container(
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 16,
+                              vertical: 8), // Add padding for better spacing
+                          decoration: BoxDecoration(
+                            color: Colors.black
+                                .withOpacity(0.8), // Black with 80% opacity
+                            borderRadius: BorderRadius.circular(
+                                8), // Optional: Add rounded corners
+                          ),
+                          child: Center(
+                            child: Text(
+                              'No girls available.',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 13),
+                            ),
                           ),
                         )
                       : ListView.builder(
@@ -78,52 +90,63 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                         GirlDetailsPage(girl: girl)),
                               ),
                               child: Card(
-                                elevation: 8,
-                                margin: EdgeInsets.symmetric(vertical: 6),
+                                color: Colors.black.withOpacity(
+                                    0.8), // Black background with 80% opacity
+                                elevation:
+                                    2, // Lower elevation for a subtle shadow
                                 shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(12)),
-                                child: Container(
-                                  decoration: BoxDecoration(
-                                    gradient: LinearGradient(
-                                      colors: [
-                                        Colors.grey.shade700,
-                                        Colors.grey.shade900,
-                                      ],
-                                      begin: Alignment.topLeft,
-                                      end: Alignment.bottomRight,
-                                    ),
-                                    borderRadius: BorderRadius.circular(12),
+                                  borderRadius: BorderRadius.circular(
+                                      8), // Slightly rounded corners
+                                ),
+                                margin: EdgeInsets.symmetric(
+                                    vertical:
+                                        4), // Reduce margin around the card
+                                child: ListTile(
+                                  contentPadding: EdgeInsets.symmetric(
+                                      horizontal: 12,
+                                      vertical: 8), // Reduce internal padding
+                                  leading: CircleAvatar(
+                                    backgroundImage: AssetImage(
+                                        girl.image), // Use the girl's image
+                                    radius: 25, // Slightly smaller avatar
                                   ),
-                                  child: ListTile(
-                                    leading: CircleAvatar(
-                                      backgroundImage: AssetImage(girl.image),
-                                      radius: 30,
+                                  title: Text(
+                                    girl.name,
+                                    style: TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                      color: Colors
+                                          .white, // White text for better contrast
+                                      fontSize:
+                                          16, // Slightly smaller font size
                                     ),
-                                    title: Text(
-                                      girl.name,
-                                      style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white),
-                                    ),
-                                    subtitle: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.start,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Text('Level: ${girl.level}',
-                                                style: TextStyle(
-                                                    fontSize: 14,
-                                                    color: Colors.white70)),
-                                          ],
-                                        ),
-                                      ],
-                                    ),
-                                    trailing:
-                                        _buildActionButtons(girl, gameProvider),
                                   ),
+                                  subtitle: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      SizedBox(
+                                          height:
+                                              2), // Minimal spacing between title and subtitle
+                                      Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Text(
+                                            'Level: ${girl.level} | Race: ${girl.race}',
+                                            style: TextStyle(
+                                              fontSize:
+                                                  13, // Smaller font size for the level
+                                              color: Colors
+                                                  .white70, // Lighter text for the level
+                                            ),
+                                          ),
+                                          // Add more details here if needed
+                                        ],
+                                      ),
+                                    ],
+                                  ),
+                                  trailing: _buildActionButtons(girl,
+                                      gameProvider), // Custom action buttons
                                 ),
                               ),
                             );
@@ -146,14 +169,14 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
           Expanded(
             child: Container(
               decoration: BoxDecoration(
-                color: Colors.purple[800],
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(10),
               ),
               child: TextField(
                 decoration: InputDecoration(
                   hintText: 'Search...',
-                  hintStyle: TextStyle(color: Colors.white70),
-                  prefixIcon: Icon(Icons.search, color: Colors.white),
+                  hintStyle: TextStyle(color: Colors.black),
+                  prefixIcon: Icon(Icons.search, color: Colors.black),
                   border: InputBorder.none,
                   contentPadding:
                       EdgeInsets.symmetric(vertical: 8, horizontal: 12),
@@ -166,7 +189,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
           SizedBox(width: 10),
           Container(
             decoration: BoxDecoration(
-              color: Colors.purple[900],
+              color: Colors.blueAccent[400],
               borderRadius: BorderRadius.circular(10),
             ),
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -180,7 +203,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                   child: Text(value, style: TextStyle(color: Colors.white)),
                 );
               }).toList(),
-              dropdownColor: Colors.purple[900],
+              dropdownColor: Colors.blueAccent[400],
               icon: Icon(Icons.sort, color: Colors.white),
               underline: SizedBox(),
             ),
@@ -195,37 +218,43 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
       mainAxisSize: MainAxisSize.min,
       children: [
         Tooltip(
-          message: 'Upgrade',
-          child: IconButton(
-            icon: Icon(Icons.upgrade, color: Colors.green),
-            onPressed: () {
-              if (gameProvider.upgradeGirl(girl.id)) {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('${girl.name} upgraded! 🎉'),
-                  backgroundColor: Colors.green,
-                ));
-              } else {
-                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                  content: Text('❌ Not enough resources!'),
-                  backgroundColor: Colors.red,
-                ));
-              }
-            },
-          ),
-        ),
+            message: 'Upgrade',
+            child: IconButton(
+              icon: Image.asset(
+                'assets/images/icons/upgrade.png', // Path to your upgrade icon
+                width: 30, // Adjust size as needed
+                height: 30,
+              ),
+              onPressed: () {
+                if (gameProvider.upgradeGirl(girl.id)) {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('${girl.name} upgraded! 🎉'),
+                    backgroundColor: Colors.green,
+                  ));
+                } else {
+                  ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                    content: Text('❌ Not enough resources!'),
+                    backgroundColor: Colors.red,
+                  ));
+                }
+              },
+            )),
         Tooltip(
-          message: 'Sell',
-          child: IconButton(
-            icon: Icon(Icons.sell, color: Colors.orange),
-            onPressed: () {
-              gameProvider.sellGirl(girl.id);
-              ScaffoldMessenger.of(context).showSnackBar(SnackBar(
-                content: Text('${girl.name} sold! 💰'),
-                backgroundColor: Colors.orange,
-              ));
-            },
-          ),
-        ),
+            message: 'Sell',
+            child: IconButton(
+              icon: Image.asset(
+                'assets/images/icons/sell.png', // Replace with your actual image path
+                width: 30, // Adjust size as needed
+                height: 30,
+              ),
+              onPressed: () {
+                gameProvider.sellGirl(girl.id);
+                ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                  content: Text('${girl.name} sold! 💰'),
+                  backgroundColor: Colors.orange,
+                ));
+              },
+            )),
       ],
     );
   }
@@ -266,7 +295,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           title,
           style: TextStyle(
             fontFamily: 'GameFont',
-            fontSize: 24,
+            fontSize: 20,
             fontWeight: FontWeight.bold,
             color: Colors.white,
           ),
