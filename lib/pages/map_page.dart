@@ -112,28 +112,29 @@ class _MapPageState extends State<MapPage> {
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
-          backgroundColor: Colors.black.withOpacity(0.8),
+          backgroundColor: Colors.white,
           title: Text(
             farm.name,
-            style: TextStyle(color: Colors.white),
+            style: TextStyle(color: Colors.black),
           ),
           content: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text("Resource: ${farm.resourceType}",
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
               Text("Production: ${farm.resourcePerSecond} per sec",
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
               Text("Level: ${farm.level}",
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
               Text("Upgrade Cost: ${farm.upgradeCost}",
-                  style: TextStyle(color: Colors.white)),
+                  style: TextStyle(color: Colors.black)),
             ],
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context),
-              child: Text("Close", style: TextStyle(color: Colors.white)),
+              child: Text("Close", style: TextStyle(color: Colors.black)),
             ),
             ElevatedButton(
               onPressed: () {

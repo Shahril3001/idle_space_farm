@@ -107,7 +107,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                       vertical: 8), // Reduce internal padding
                                   leading: CircleAvatar(
                                     backgroundImage: AssetImage(
-                                        girl.image), // Use the girl's image
+                                        girl.imageFace), // Use the girl's image
                                     radius: 25, // Slightly smaller avatar
                                   ),
                                   title: Text(
@@ -189,7 +189,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
           SizedBox(width: 10),
           Container(
             decoration: BoxDecoration(
-              color: Colors.blueAccent[400],
+              color: Color(0xFFCAA04D),
               borderRadius: BorderRadius.circular(10),
             ),
             padding: EdgeInsets.symmetric(horizontal: 8),
@@ -203,7 +203,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                   child: Text(value, style: TextStyle(color: Colors.white)),
                 );
               }).toList(),
-              dropdownColor: Colors.blueAccent[400],
+              dropdownColor: Color(0xFFCAA04D),
               icon: Icon(Icons.sort, color: Colors.white),
               underline: SizedBox(),
             ),

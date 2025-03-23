@@ -25,24 +25,25 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       rarity: fields[5] as String,
       stars: fields[6] as int,
       image: fields[7] as String,
-      attackPoints: fields[8] as int,
-      defensePoints: fields[9] as int,
-      agilityPoints: fields[10] as int,
-      hp: fields[11] as int,
-      mp: fields[12] as int,
-      sp: fields[13] as int,
-      abilities: (fields[14] as List).cast<String>(),
-      race: fields[15] as String,
-      type: fields[16] as String,
-      region: fields[17] as String,
-      description: fields[18] as String,
+      imageFace: fields[8] as String,
+      attackPoints: fields[9] as int,
+      defensePoints: fields[10] as int,
+      agilityPoints: fields[11] as int,
+      hp: fields[12] as int,
+      mp: fields[13] as int,
+      sp: fields[14] as int,
+      abilities: (fields[15] as List).cast<String>(),
+      race: fields[16] as String,
+      type: fields[17] as String,
+      region: fields[18] as String,
+      description: fields[19] as String,
     );
   }
 
   @override
   void write(BinaryWriter writer, GirlFarmer obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -60,26 +61,28 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       ..writeByte(7)
       ..write(obj.image)
       ..writeByte(8)
-      ..write(obj.attackPoints)
+      ..write(obj.imageFace)
       ..writeByte(9)
-      ..write(obj.defensePoints)
+      ..write(obj.attackPoints)
       ..writeByte(10)
-      ..write(obj.agilityPoints)
+      ..write(obj.defensePoints)
       ..writeByte(11)
-      ..write(obj.hp)
+      ..write(obj.agilityPoints)
       ..writeByte(12)
-      ..write(obj.mp)
+      ..write(obj.hp)
       ..writeByte(13)
-      ..write(obj.sp)
+      ..write(obj.mp)
       ..writeByte(14)
-      ..write(obj.abilities)
+      ..write(obj.sp)
       ..writeByte(15)
-      ..write(obj.race)
+      ..write(obj.abilities)
       ..writeByte(16)
-      ..write(obj.type)
+      ..write(obj.race)
       ..writeByte(17)
-      ..write(obj.region)
+      ..write(obj.type)
       ..writeByte(18)
+      ..write(obj.region)
+      ..writeByte(19)
       ..write(obj.description);
   }
 

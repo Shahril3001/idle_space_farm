@@ -123,7 +123,7 @@ class FarmPage extends StatelessWidget {
         width: double.infinity, // Takes full width of parent
         padding: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 12.0),
         decoration: BoxDecoration(
-          color: Color(0xFFCAA04D),
+          color: Color(0xFF1D1618),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Text(
@@ -221,6 +221,13 @@ class FarmPage extends StatelessWidget {
                 Text('${floor.id}',
                     style:
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
+                Center(
+                  child: CircleAvatar(
+                    backgroundImage: AssetImage(assignedGirl?.image ??
+                        "assets/images/girls/noimage.png"),
+                    radius: 50,
+                  ),
+                ),
                 SizedBox(height: 8),
                 Text('Assigned: ${assignedGirl?.name ?? "None"}'),
                 Text('Level: ${floor.level}'),
@@ -290,6 +297,7 @@ class FarmPage extends StatelessWidget {
         if (!floor.isUnlocked)
           Positioned.fill(
             child: Container(
+              width: double.infinity,
               color: Colors.black.withOpacity(0.3), // Semi-transparent overlay
               child: Center(
                 child: Icon(Icons.lock, color: Colors.white, size: 40),
@@ -331,17 +339,26 @@ class FarmPage extends StatelessWidget {
       context: context,
       builder: (context) {
         return AlertDialog(
-          title: Text(girlFarmer.name),
+          backgroundColor: Colors.black.withOpacity(0.7),
+          title: Text(girlFarmer.name, style: TextStyle(color: Colors.white)),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              CircleAvatar(
-                  backgroundImage: NetworkImage(girlFarmer.image), radius: 40),
-              SizedBox(height: 12),
+              Center(
+                child: CircleAvatar(
+                  backgroundImage: AssetImage(girlFarmer.image),
+                  radius: 60,
+                ),
+              ),
+              SizedBox(height: 5),
+              Text('Level: ${girlFarmer.level}',
+                  style: TextStyle(fontSize: 14, color: Colors.white)),
+              Text('Rarity: ${girlFarmer.rarity}',
+                  style: TextStyle(fontSize: 14, color: Colors.white)),
               Text(
-                  'Efficiency: ${girlFarmer.miningEfficiency.toStringAsFixed(2)}'),
-              Text('Current Farm: ${girlFarmer.assignedFarm ?? "None"}'),
+                  'Efficiency: ${girlFarmer.miningEfficiency.toStringAsFixed(2)}',
+                  style: TextStyle(fontSize: 14, color: Colors.white)),
             ],
           ),
           actions: [
@@ -357,14 +374,15 @@ class FarmPage extends StatelessWidget {
   Widget _buildBackButton(BuildContext context) {
     return Container(
       width: double.infinity,
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
+        // ignore: sort_child_properties_last
         child: Text("Back",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFCAA04D),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           padding: EdgeInsets.symmetric(vertical: 10),

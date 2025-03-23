@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'battlemap_page.dart';
+
 class DashboardPage extends StatelessWidget {
   const DashboardPage({Key? key}) : super(key: key);
 
@@ -16,127 +18,68 @@ class DashboardPage extends StatelessWidget {
         ),
         child: Stack(
           children: [
-            // Settings Icon Button at Top Right (using image asset)
-            Positioned(
-              top: 16,
-              right: 16,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add button functionality here
-                  print('Button pressed');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.black.withOpacity(0.8), // Button background color
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12), // Button padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize
-                      .min, // Ensure the Column takes only the space it needs
-                  children: [
-                    Image.asset(
-                      'assets/images/icons/settings.png', // Path to icon image
-                      width: 30,
-                      height: 30,
-                    ),
-                    SizedBox(height: 2), // Space between icon and text
-                    Text(
-                      'Setting',
-                      style: TextStyle(
-                        color: Colors.white, // Text color
-                        fontSize: 12, // Text weight
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+            // Your main content here (e.g., background, character, UI elements)
 
-            // Icon Button at Bottom Left (using image asset)
-            Positioned(
-              bottom: 16,
-              left: 16,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add button functionality here
-                  print('Button pressed');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.black.withOpacity(0.8), // Button background color
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12), // Button padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize
-                      .min, // Ensure the Column takes only the space it needs
-                  children: [
-                    Image.asset(
-                      'assets/images/icons/settings.png', // Path to icon image
-                      width: 30,
-                      height: 30,
-                    ),
-                    SizedBox(height: 2), // Space between icon and text
-                    Text(
-                      'Setting',
-                      style: TextStyle(
-                        color: Colors.white, // Text color
-                        fontSize: 12, // Text weight
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Icon Button at Bottom Right (using image asset)
-            Positioned(
-              bottom: 16,
-              right: 16,
-              child: ElevatedButton(
-                onPressed: () {
-                  // Add button functionality here
-                  print('Button pressed');
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor:
-                      Colors.black.withOpacity(0.8), // Button background color
-                  padding: EdgeInsets.symmetric(
-                      horizontal: 16, vertical: 12), // Button padding
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(10), // Rounded corners
-                  ),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize
-                      .min, // Ensure the Column takes only the space it needs
-                  children: [
-                    Image.asset(
-                      'assets/images/icons/battle.png', // Path to icon image
-                      width: 30,
-                      height: 30,
-                    ),
-                    SizedBox(height: 2), // Space between icon and text
-                    Text(
-                      'Dungeon',
-                      style: TextStyle(
-                        color: Colors.white, // Text color
-                        fontSize: 12, // Text weight
-                      ),
-                    ),
-                  ],
-                ),
-              ),
+            Align(
+              alignment: Alignment.bottomCenter, // Align buttons to the bottom
+              child:
+                  _buildBottomButtons(context), // Pass context for navigation
             ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildBottomButtons(BuildContext context) {
+    return Align(
+      alignment: Alignment.topCenter,
+      child: Padding(
+        padding: const EdgeInsets.only(top: 10.0),
+        child: Row(
+          mainAxisAlignment:
+              MainAxisAlignment.spaceEvenly, // Evenly spaced buttons
+          children: [
+            _buildIconButton(
+                'assets/images/icons/achievements.png', 'Milestone', () {
+              print('Dungeon pressed');
+            }),
+            _buildIconButton('assets/images/icons/reward.png', 'Reward', () {
+              print('Dungeon pressed');
+            }),
+            _buildIconButton('assets/images/icons/battle.png', 'Dungeon', () {
+              Navigator.push(context,
+                  MaterialPageRoute(builder: (context) => MapScreen()));
+            }),
+            _buildIconButton('assets/images/icons/settings.png', 'Setting', () {
+              print('Dungeon pressed');
+            }),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildIconButton(
+      String iconPath, String label, VoidCallback onPressed) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black.withOpacity(0.8),
+        padding: EdgeInsets.zero,
+        minimumSize: Size(80, 80),
+        fixedSize: Size(80, 80),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+      ),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Image.asset(iconPath, width: 30, height: 30),
+          SizedBox(height: 2),
+          Text(label, style: TextStyle(color: Colors.white, fontSize: 12)),
+        ],
       ),
     );
   }

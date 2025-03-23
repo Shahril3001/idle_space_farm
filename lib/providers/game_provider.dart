@@ -254,6 +254,7 @@ class GameProvider with ChangeNotifier {
             rarity: selectedGirl.rarity,
             stars: selectedGirl.stars,
             image: selectedGirl.image,
+            imageFace: selectedGirl.imageFace,
             attackPoints: selectedGirl.attackPoints,
             defensePoints: selectedGirl.defensePoints,
             agilityPoints: selectedGirl.agilityPoints,
@@ -280,7 +281,7 @@ class GameProvider with ChangeNotifier {
 
     if (girl != null && minerals != null) {
       final upgradeCost =
-          (150 * pow(2, girl.level - 1)).toInt(); // Cost scaling
+          (150 + (girl.level - 1) * 150).toInt(); // Cost scaling
 
       print("Current Minerals: ${minerals.amount}");
       print("Upgrade Cost: $upgradeCost");
@@ -296,16 +297,19 @@ class GameProvider with ChangeNotifier {
         // Increase miningEfficiency based on rarity
         switch (girl.rarity) {
           case 'Common':
-            girl.miningEfficiency += 1 + Random().nextInt(4); // +1 to 4
+            girl.miningEfficiency +=
+                (Random().nextDouble() * 0.03) + 0.01; // +0.01 to 0.04
             break;
           case 'Rare':
-            girl.miningEfficiency += 4 + Random().nextInt(4); // +4 to 7
+            girl.miningEfficiency +=
+                (Random().nextDouble() * 0.03) + 0.04; // +0.04 to 0.07
             break;
           case 'Unique':
-            girl.miningEfficiency += 8 + Random().nextInt(3); // +8 to 10
+            girl.miningEfficiency +=
+                (Random().nextDouble() * 0.02) + 0.08; // +0.08 to 0.10
             break;
           default:
-            girl.miningEfficiency += 1; // Default fallback
+            girl.miningEfficiency += 0.01; // Default fallback
         }
 
         // Increase other stats

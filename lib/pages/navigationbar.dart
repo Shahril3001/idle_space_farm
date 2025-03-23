@@ -43,7 +43,8 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
+    return SafeArea(
+        child: Scaffold(
       body: Consumer<GameProvider>(
         builder: (context, gameProvider, child) {
           if (!gameProvider.isInitialized) {
@@ -122,7 +123,7 @@ class _HomePageState extends State<HomePage> {
           ),
         ),
       ),
-    );
+    ));
   }
 
   Widget _buildBottomNavIcon(String iconPath, bool isSelected) {

@@ -342,7 +342,7 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
                 leading: ClipRRect(
                   borderRadius: BorderRadius.circular(8),
                   child: Image.asset(
-                    girl.image,
+                    girl.imageFace,
                     width: 40,
                     height: 40,
                     fit: BoxFit.cover,

@@ -27,39 +27,42 @@ class GirlFarmer {
   int stars; // 1-6
 
   @HiveField(7)
-  String image; // Path to the girl's image
+  String image; // Path to the girl's full-body image
 
   @HiveField(8)
-  int attackPoints;
+  String imageFace; // Path to the girl's face image
 
   @HiveField(9)
-  int defensePoints;
+  int attackPoints;
 
   @HiveField(10)
-  int agilityPoints;
+  int defensePoints;
 
   @HiveField(11)
-  int hp;
+  int agilityPoints;
 
   @HiveField(12)
-  int mp;
+  int hp;
 
   @HiveField(13)
-  int sp;
+  int mp;
 
   @HiveField(14)
-  List<String> abilities; // List of skills/abilities
+  int sp;
 
   @HiveField(15)
-  String race; // Human, Elf, Demon, etc.
+  List<String> abilities; // List of skills/abilities
 
   @HiveField(16)
-  String type; // Warrior, Mage, Assassin, etc.
+  String race; // Human, Elf, Demon, etc.
 
   @HiveField(17)
-  String region; // East, West, North, etc.
+  String type; // Warrior, Mage, Assassin, etc.
 
   @HiveField(18)
+  String region; // East, West, North, etc.
+
+  @HiveField(19)
   String description; // Detailed character description
 
   GirlFarmer(
@@ -71,6 +74,7 @@ class GirlFarmer {
       required this.rarity,
       required this.stars,
       required this.image,
+      required this.imageFace,
       this.attackPoints = 10,
       this.defensePoints = 5,
       this.agilityPoints = 7,

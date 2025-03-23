@@ -7,11 +7,14 @@ import 'models/resource_model.dart';
 import 'models/farm_model.dart';
 import 'models/girl_farmer_model.dart';
 import 'models/equipment_model.dart';
+import 'models/enemy_model.dart'; // Import Enemy model
 import 'providers/game_provider.dart';
+import 'providers/battle_provider.dart'; // Import BattleProvider
 import 'repositories/farm_repository.dart';
 import 'repositories/resource_repository.dart';
 import 'repositories/item_repository.dart';
 import 'repositories/girl_repository.dart';
+import 'repositories/enemy_repository.dart'; // Import EnemyRepository
 import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
@@ -31,8 +34,10 @@ void main() async {
   if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GirlFarmerAdapter());
   if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(EquipmentAdapter());
   if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(FloorAdapter());
+  if (!Hive.isAdapterRegistered(5))
+    Hive.registerAdapter(EnemyAdapter()); // Register EnemyAdapter
 
-  // Open the main Hive box
+  // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
 
   // Initialize repositories
@@ -40,6 +45,7 @@ void main() async {
   final farmRepository = FarmRepository(box);
   final equipmentRepository = EquipmentRepository(box);
   final girlRepository = GirlRepository(box);
+  final enemyRepository = EnemyRepository(box); // Initialize EnemyRepository
 
   runApp(
     MultiProvider(
@@ -52,6 +58,12 @@ void main() async {
             girlRepository: girlRepository,
           ),
         ),
+        ChangeNotifierProvider(
+          create: (_) => BattleProvider(
+            enemyRepository:
+                enemyRepository, // Pass EnemyRepository to BattleProvider
+          ),
+        ),
       ],
       child: MyApp(),
     ),
@@ -59,7 +71,8 @@ void main() async {
 }
 
 Future<void> clearHiveData() async {
-  await Hive.deleteBoxFromDisk('idle_space_farm');
+  await Hive.deleteBoxFromDisk(
+      'idle_space_farm'); // Clear enemy box if it exists
 }
 
 class MyApp extends StatelessWidget {
