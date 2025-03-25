@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../models/farm_model.dart';
 import '../providers/game_provider.dart';
 import 'farm_page.dart'; // Import the farm page
@@ -64,8 +65,9 @@ class _MapPageState extends State<MapPage> {
           constrained: false,
           child: Stack(
             children: [
-              Image.asset(
-                "assets/images/map/eldoria_map.png",
+              Image(
+                image: ImageCacheManager.getImage(
+                    "assets/images/map/eldoria_map.png"),
                 width: mapWidth,
                 height: mapHeight,
                 fit: BoxFit.cover,

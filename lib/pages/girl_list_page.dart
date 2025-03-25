@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../models/girl_farmer_model.dart';
 import '../providers/game_provider.dart';
 import 'girl_details_page.dart';
@@ -47,7 +48,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/app-bg.png'),
+            image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -240,22 +241,28 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context); // Close dialog
-                          if (gameProvider.upgradeGirl(girl.id)) {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('${girl.name} upgraded! 🎉'),
-                                backgroundColor: Color(0xFFCAA04D),
+                          Navigator.pop(
+                              context); // Close the confirmation dialog
+                          bool success = gameProvider.upgradeGirl(girl.id);
+
+                          // Show the result in another AlertDialog
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text(success ? 'Success' : 'Failed'),
+                              content: Text(
+                                success
+                                    ? '${girl.name} upgraded! 🎉'
+                                    : '❌ Not enough resources!',
                               ),
-                            );
-                          } else {
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(
-                                content: Text('❌ Not enough resources!'),
-                                backgroundColor: Colors.red,
-                              ),
-                            );
-                          }
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('OK'),
+                                ),
+                              ],
+                            ),
+                          );
                         },
                         child: Text('Upgrade'),
                       ),
@@ -290,12 +297,22 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                       ),
                       TextButton(
                         onPressed: () {
-                          Navigator.pop(context); // Close dialog
+                          Navigator.pop(
+                              context); // Close the confirmation dialog
                           gameProvider.sellGirl(girl.id);
-                          ScaffoldMessenger.of(context).showSnackBar(
-                            SnackBar(
-                              content: Text('${girl.name} sold! 💰'),
-                              backgroundColor: Color(0xFFCAA04D),
+
+                          // Show result in AlertDialog instead of SnackBar
+                          showDialog(
+                            context: context,
+                            builder: (context) => AlertDialog(
+                              title: Text('Sold!'),
+                              content: Text('${girl.name} has been sold! 💰'),
+                              actions: [
+                                TextButton(
+                                  onPressed: () => Navigator.pop(context),
+                                  child: Text('OK'),
+                                ),
+                              ],
                             ),
                           );
                         },

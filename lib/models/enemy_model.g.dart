@@ -26,18 +26,23 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       hp: fields[6] as int,
       mp: fields[7] as int,
       sp: fields[8] as int,
-      abilities: (fields[9] as List).cast<String>(),
+      abilities: (fields[9] as List).cast<AbilitiesModel>(),
       rarity: fields[10] as String,
       type: fields[11] as String,
       region: fields[12] as String,
       description: fields[13] as String,
+      maxHp: fields[14] as int,
+      maxMp: fields[15] as int,
+      maxSp: fields[16] as int,
+      criticalPoint: fields[17] as int,
+      currentCooldowns: (fields[18] as Map).cast<String, int>(),
     );
   }
 
   @override
   void write(BinaryWriter writer, Enemy obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -65,7 +70,17 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       ..writeByte(12)
       ..write(obj.region)
       ..writeByte(13)
-      ..write(obj.description);
+      ..write(obj.description)
+      ..writeByte(14)
+      ..write(obj.maxHp)
+      ..writeByte(15)
+      ..write(obj.maxMp)
+      ..writeByte(16)
+      ..write(obj.maxSp)
+      ..writeByte(17)
+      ..write(obj.criticalPoint)
+      ..writeByte(18)
+      ..write(obj.currentCooldowns);
   }
 
   @override

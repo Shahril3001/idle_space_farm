@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../providers/game_provider.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/equipment_model.dart';
@@ -25,7 +26,7 @@ class _GachaMainPageState extends State<GachaMainPage> {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/app-bg.png'),
+            image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -327,43 +328,67 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
     context: context,
     builder: (context) {
       return AlertDialog(
-        backgroundColor: Colors.amberAccent.withOpacity(0.5),
+        backgroundColor: Colors.grey.withOpacity(0.7),
         title: Text(
-          '✨ Gacha Results ✨',
+          'Summoning Results',
+          textAlign: TextAlign.center,
           style: TextStyle(
             fontFamily: 'GameFont',
             color: Colors.amberAccent,
           ),
         ),
         content: SingleChildScrollView(
-          child: Column(
-            children: girls.map((girl) {
-              return ListTile(
-                leading: ClipRRect(
-                  borderRadius: BorderRadius.circular(8),
-                  child: Image.asset(
-                    girl.imageFace,
-                    width: 40,
-                    height: 40,
-                    fit: BoxFit.cover,
-                    errorBuilder: (_, __, ___) => Icon(
-                      Icons.person,
-                      size: 40,
-                      color: Colors.white,
-                    ),
+          scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+          child: Row(
+            children: [
+              SizedBox(
+                width: girls.length > 4
+                    ? 320
+                    : girls.length * 20, // Adjust width dynamically
+                child: GridView.builder(
+                  shrinkWrap: true, // Prevent infinite height issues
+                  physics:
+                      NeverScrollableScrollPhysics(), // Disable internal scroll
+                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                    crossAxisCount: 3, // 4 columns
+                    crossAxisSpacing: 1,
+                    mainAxisSpacing: 1,
+                    childAspectRatio: 1, // Adjust aspect ratio if needed
                   ),
+                  itemCount: girls.length,
+                  itemBuilder: (context, index) {
+                    final girl = girls[index];
+                    return Column(
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(8),
+                          child: Image.asset(
+                            girl.imageFace,
+                            width: 60, // Adjust size as needed
+                            height: 60,
+                            fit: BoxFit.cover,
+                            errorBuilder: (_, __, ___) => Icon(
+                              Icons.person,
+                              size: 60,
+                              color: Colors.white,
+                            ),
+                          ),
+                        ),
+                        SizedBox(height: 4),
+                        Text(
+                          girl.name,
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                              fontFamily: 'GameFont',
+                              color: Colors.white,
+                              fontSize: 12),
+                        ),
+                      ],
+                    );
+                  },
                 ),
-                title: Text(
-                  girl.name,
-                  style: TextStyle(fontFamily: 'GameFont', color: Colors.white),
-                ),
-                subtitle: Text(
-                  '${girl.rarity} - ⭐${girl.stars}',
-                  style:
-                      TextStyle(fontFamily: 'GameFont', color: Colors.white70),
-                ),
-              );
-            }).toList(),
+              ),
+            ],
           ),
         ),
         actions: [

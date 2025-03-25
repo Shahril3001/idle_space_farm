@@ -1,7 +1,7 @@
 import 'dart:math';
-
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../main.dart';
 import '../models/floor_model.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/farm_model.dart';
@@ -33,7 +33,7 @@ class FarmPage extends StatelessWidget {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: AssetImage('assets/images/ui/mine.png'),
+              image: ImageCacheManager.getImage('assets/images/ui/mine.png'),
               fit: BoxFit.cover,
             ),
           ),

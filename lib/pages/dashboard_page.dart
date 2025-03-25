@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import '../main.dart';
 import 'battlemap_page.dart';
 
 class DashboardPage extends StatelessWidget {
@@ -12,7 +12,7 @@ class DashboardPage extends StatelessWidget {
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
-            image: AssetImage('assets/images/ui/castle.png'),
+            image: ImageCacheManager.getImage('assets/images/ui/castle.png'),
             fit: BoxFit.cover,
           ),
         ),
@@ -76,7 +76,10 @@ class DashboardPage extends StatelessWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Image.asset(iconPath, width: 30, height: 30),
+          Image(
+              image: ImageCacheManager.getImage(iconPath),
+              width: 30,
+              height: 30),
           SizedBox(height: 2),
           Text(label, style: TextStyle(color: Colors.white, fontSize: 12)),
         ],

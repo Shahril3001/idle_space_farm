@@ -1,6 +1,5 @@
 import 'package:hive/hive.dart';
 import '../models/enemy_model.dart';
-import '../data/enemy_data.dart'; // Import the enemy_data.dart file
 
 class EnemyRepository {
   final Box<dynamic> _box;

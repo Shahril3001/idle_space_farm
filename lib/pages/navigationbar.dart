@@ -103,7 +103,7 @@ class _HomePageState extends State<HomePage> {
                   'assets/images/icons/adventure.png',
                   _selectedIndex == 2, // Check if this item is selected
                 ),
-                label: 'Main',
+                label: 'Castle',
               ),
               BottomNavigationBarItem(
                 icon: _buildBottomNavIcon(

@@ -5,6 +5,7 @@ import 'package:provider/provider.dart';
 import 'models/floor_model.dart';
 import 'models/resource_model.dart';
 import 'models/farm_model.dart';
+import 'models/ability_model.dart';
 import 'models/girl_farmer_model.dart';
 import 'models/equipment_model.dart';
 import 'models/enemy_model.dart'; // Import Enemy model
@@ -13,11 +14,40 @@ import 'providers/battle_provider.dart'; // Import BattleProvider
 import 'repositories/farm_repository.dart';
 import 'repositories/resource_repository.dart';
 import 'repositories/item_repository.dart';
-import 'repositories/girl_repository.dart';
-import 'repositories/enemy_repository.dart'; // Import EnemyRepository
+import 'repositories/girl_repository.dart'; // Import EnemyRepository
 import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
+
+class ImageCacheManager {
+  static final Map<String, ImageProvider> _cache = {};
+
+  static ImageProvider getImage(String path) {
+    return _cache.putIfAbsent(path, () => AssetImage(path));
+  }
+
+  static void preloadImages(BuildContext context) {
+    List<String> images = [
+      'assets/images/ui/castle.png',
+      'assets/images/icons/achievements.png',
+      'assets/images/icons/reward.png',
+      'assets/images/icons/battle.png',
+      'assets/images/icons/settings.png',
+      'assets/images/icons/farm.png',
+      'assets/images/ui/app-bg.png',
+      'assets/images/ui/mine.png',
+      'assets/images/map/eldoria_map.png',
+    ];
+    for (var img in images) {
+      precacheImage(getImage(img), context);
+    }
+  }
+
+  static void clearCache() {
+    _cache.clear();
+    PaintingBinding.instance.imageCache.clear();
+  }
+}
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -33,10 +63,12 @@ void main() async {
   if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(FarmAdapter());
   if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GirlFarmerAdapter());
   if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(EquipmentAdapter());
-  if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(FloorAdapter());
-  if (!Hive.isAdapterRegistered(5))
-    Hive.registerAdapter(EnemyAdapter()); // Register EnemyAdapter
-
+  if (!Hive.isAdapterRegistered(4))
+    // ignore: curly_braces_in_flow_control_structures
+    Hive.registerAdapter(FloorAdapter()); // Register EnemyAdapter
+  if (!Hive.isAdapterRegistered(4))
+    // ignore: curly_braces_in_flow_control_structures
+    Hive.registerAdapter(AbilitiesModelAdapter());
   // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
 
@@ -44,8 +76,7 @@ void main() async {
   final resourceRepository = ResourceRepository(box);
   final farmRepository = FarmRepository(box);
   final equipmentRepository = EquipmentRepository(box);
-  final girlRepository = GirlRepository(box);
-  final enemyRepository = EnemyRepository(box); // Initialize EnemyRepository
+  final girlRepository = GirlRepository(box); // Initialize EnemyRepository
 
   runApp(
     MultiProvider(
@@ -59,10 +90,9 @@ void main() async {
           ),
         ),
         ChangeNotifierProvider(
-          create: (_) => BattleProvider(
-            enemyRepository:
-                enemyRepository, // Pass EnemyRepository to BattleProvider
-          ),
+          create: (_) =>
+              BattleProvider(// Pass EnemyRepository to BattleProvider
+                  ),
         ),
       ],
       child: MyApp(),
@@ -103,6 +133,11 @@ class _AppLifecycleWrapperState extends State<AppLifecycleWrapper>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
+
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ImageCacheManager.preloadImages(context);
+    });
+
     Future.microtask(
         () => Provider.of<GameProvider>(context, listen: false).onAppStart());
   }

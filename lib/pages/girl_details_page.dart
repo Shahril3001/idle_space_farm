@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../models/ability_model.dart';
 import '../models/girl_farmer_model.dart';
 import '../providers/game_provider.dart';
 
@@ -22,7 +23,6 @@ class GirlDetailsPage extends StatelessWidget {
             ),
           ),
           child: SingleChildScrollView(
-            // Wrap the entire content in a SingleChildScrollView
             child: Padding(
               padding: const EdgeInsets.all(20.0),
               child: Column(
@@ -32,12 +32,14 @@ class GirlDetailsPage extends StatelessWidget {
                   SizedBox(height: 20),
                   _buildCharacterName(),
                   SizedBox(height: 10),
-                  _buildStatSection(), // Custom stat icons
+                  _buildStatSection(),
                   SizedBox(height: 10),
-                  _buildAttributesSection(), // Custom attribute icons
+                  _buildDescriptionSection(),
+                  SizedBox(height: 10),
+                  _buildAttributesSection(),
                   SizedBox(height: 10),
                   _buildActionButtons(context, gameProvider),
-                  SizedBox(height: 20), // Add spacing before the back button
+                  SizedBox(height: 20),
                   _buildBackButton(context),
                 ],
               ),
@@ -57,27 +59,25 @@ class GirlDetailsPage extends StatelessWidget {
         children: [
           // Full-body image
           Container(
-            width: 300, // Adjust the width as needed
-            height: 400, // Adjust the height as needed
+            width: 300,
+            height: 400,
             decoration: BoxDecoration(
-              borderRadius:
-                  BorderRadius.circular(20), // Optional: Add rounded corners
+              borderRadius: BorderRadius.circular(20),
               image: DecorationImage(
-                image: AssetImage(girl.image), // Use the full-body image
+                image: AssetImage(girl.image),
                 fit: BoxFit.cover,
               ),
             ),
           ),
-          // Optional: Overlay the circular avatar on top of the full-body image
+          // Circular avatar overlay
           Positioned(
-            bottom: 10, // Adjust the position as needed
+            bottom: 10,
             child: Container(
               width: 100,
               height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
-                border: Border.all(
-                    color: Color(0xFFCAA04D), width: 3), // Inner border
+                border: Border.all(color: Color(0xFFCAA04D), width: 3),
                 image: DecorationImage(
                   image: AssetImage(girl.imageFace),
                   fit: BoxFit.cover,
@@ -111,18 +111,19 @@ class GirlDetailsPage extends StatelessWidget {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
-        _buildStatBox(
-            "HP", girl.hp, Colors.redAccent, 'assets/images/icons/healthp.png'),
-        _buildStatBox(
-            "MP", girl.mp, Colors.blueAccent, 'assets/images/icons/manap.png'),
-        _buildStatBox("SP", girl.sp, Colors.greenAccent,
+        _buildStatBox("HP", girl.hp, girl.maxHp, Colors.redAccent,
+            'assets/images/icons/healthp.png'),
+        _buildStatBox("MP", girl.mp, girl.maxMp, Colors.blueAccent,
+            'assets/images/icons/manap.png'),
+        _buildStatBox("SP", girl.sp, girl.maxSp, Colors.greenAccent,
             'assets/images/icons/specialp.png'),
       ],
     );
   }
 
   /// Custom stat box with image icons
-  Widget _buildStatBox(String label, int value, Color color, String iconPath) {
+  Widget _buildStatBox(
+      String label, int value, int maxValue, Color color, String iconPath) {
     return Container(
       width: 100,
       padding: EdgeInsets.all(10),
@@ -141,19 +142,18 @@ class GirlDetailsPage extends StatelessWidget {
           Container(
             width: 70,
             child: ClipRRect(
-              borderRadius:
-                  BorderRadius.circular(8), // Adjust the radius as needed
+              borderRadius: BorderRadius.circular(8),
               child: LinearProgressIndicator(
-                value: value / value, // Ensure `maxValue` is defined
+                value:
+                    value / maxValue, // Use maxValue for progress calculation
                 backgroundColor: Colors.grey[800],
                 color: color,
                 minHeight: 10,
               ),
             ),
           ),
-
           SizedBox(height: 5),
-          Text(value.toString(),
+          Text("$value / $maxValue", // Display current and max values
               style: TextStyle(fontSize: 13, color: Colors.white)),
         ],
       ),
@@ -185,8 +185,58 @@ class GirlDetailsPage extends StatelessWidget {
             _buildAttributeRow('assets/images/icons/agility.png', 'Agility',
                 "${girl.agilityPoints}"),
             SizedBox(height: 10),
-            _buildAttributeRow('assets/images/icons/mine.png', 'Mine',
+            _buildAttributeRow('assets/images/icons/critical.png', 'Critical',
+                "${girl.criticalPoint}%"),
+            SizedBox(height: 10),
+            _buildAttributeRow('assets/images/icons/mine.png', 'Mining',
                 "${girl.miningEfficiency}"),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Description section
+  Widget _buildDescriptionSection() {
+    return Card(
+      elevation: 5,
+      color: Colors.black.withOpacity(0.8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            _buildAttributeRow(
+                'assets/images/icons/race.png', 'Race', girl.race),
+            SizedBox(height: 10),
+            _buildAttributeRow(
+                'assets/images/icons/class.png', 'Class', girl.type),
+            SizedBox(height: 10),
+            _buildAttributeRow(
+                'assets/images/icons/region.png', 'Region', girl.region),
+            SizedBox(height: 10),
+            Divider(color: Colors.white54),
+            SizedBox(height: 10),
+            Text(
+              'Description',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 10),
+            Text(
+              girl.description,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.white70,
+              ),
+            ),
+            SizedBox(height: 10),
+            Divider(color: Colors.white54),
+            _buildAbilitiesSection(),
           ],
         ),
       ),
@@ -197,7 +247,7 @@ class GirlDetailsPage extends StatelessWidget {
   Widget _buildAttributeRow(String iconPath, String label, String value) {
     return Row(
       children: [
-        Image.asset(iconPath, width: 24, height: 24), // Custom icon
+        Image.asset(iconPath, width: 24, height: 24),
         SizedBox(width: 10),
         Text("$label:",
             style: TextStyle(
@@ -217,6 +267,76 @@ class GirlDetailsPage extends StatelessWidget {
         return Icon(index < stars ? Icons.star : Icons.star_border,
             color: Color(0xFFCAA04D), size: 22);
       }),
+    );
+  }
+
+  /// Abilities section
+  Widget _buildAbilitiesSection() {
+    return Card(
+      elevation: 5,
+      color: Colors.black.withOpacity(0.8),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+      child: Padding(
+        padding: const EdgeInsets.symmetric(vertical: 8.0, horizontal: 0.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              'Abilities',
+              style: TextStyle(
+                fontSize: 16,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            SizedBox(height: 10),
+            ...girl.abilities
+                .map((ability) => _buildAbilityRow(ability))
+                // ignore: unnecessary_to_list_in_spreads
+                .toList(),
+          ],
+        ),
+      ),
+    );
+  }
+
+  /// Custom ability row with ability details
+  Widget _buildAbilityRow(AbilitiesModel ability) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(Icons.star, color: Colors.amber, size: 16),
+            SizedBox(width: 10),
+            Text(
+              ability.name,
+              style: TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
+            Spacer(),
+            Text(
+              "MP Cost: ${ability.mpCost}",
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.blueAccent,
+              ),
+            ),
+          ],
+        ),
+        SizedBox(height: 5),
+        Text(
+          ability.description,
+          style: TextStyle(
+            fontSize: 12,
+            color: Colors.white70,
+          ),
+        ),
+        Divider(color: Colors.white54),
+      ],
     );
   }
 
@@ -254,11 +374,11 @@ class GirlDetailsPage extends StatelessWidget {
           children: [
             Image.asset(
               imagePath,
-              width: 24, // Adjust icon size
+              width: 24,
               height: 24,
               fit: BoxFit.contain,
             ),
-            SizedBox(width: 8), // Spacing between image and text
+            SizedBox(width: 8),
             Text(
               text,
               style: TextStyle(color: Colors.white),
@@ -297,7 +417,7 @@ class GirlDetailsPage extends StatelessWidget {
         return AlertDialog(
           title: Text(success ? 'Success' : 'Error'),
           content: Text(
-            success ? '$name upgraded! 🎉' : '❌ Not enough resources!',
+            success ? '$name leveled up! �' : '❌ Not enough resources!',
             style: TextStyle(fontFamily: 'GameFont'),
           ),
           actions: [
@@ -329,8 +449,7 @@ class GirlDetailsPage extends StatelessWidget {
               onPressed: () {
                 gameProvider.sellGirl(girl.id);
                 Navigator.pop(context);
-                _showFeedback(context, true,
-                    '${girl.name} sold! 💰'); // Now using AlertDialog
+                _showFeedback(context, true, '${girl.name} sold! 💰');
               },
               style: ElevatedButton.styleFrom(backgroundColor: Colors.red),
               child: Text('Sell', style: TextStyle(color: Colors.white)),

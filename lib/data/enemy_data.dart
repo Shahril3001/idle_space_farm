@@ -1,10 +1,9 @@
 // enemy_data.dart
 import 'dart:math';
-
 import 'package:flutter/material.dart';
+import '../models/ability_model.dart';
 import '../models/enemy_model.dart';
 
-// Example enemy data
 final List<Enemy> enemiesData = [
   Enemy(
     id: "1",
@@ -16,7 +15,16 @@ final List<Enemy> enemiesData = [
     hp: 50,
     mp: 20,
     sp: 10,
-    abilities: ["Slash"],
+    abilities: [
+      AbilitiesModel(
+        abilitiesID: "ability_001",
+        name: "Slash",
+        description: "A basic melee attack.",
+        attackBonus: 5,
+        mpCost: 3,
+        cooldown: 2,
+      ),
+    ],
     rarity: "Common",
     type: "Fighter",
     region: "Forest",
@@ -32,7 +40,16 @@ final List<Enemy> enemiesData = [
     hp: 80,
     mp: 30,
     sp: 20,
-    abilities: ["Bash"],
+    abilities: [
+      AbilitiesModel(
+        abilitiesID: "ability_002",
+        name: "Bash",
+        description: "A powerful strike that stuns the enemy.",
+        attackBonus: 10,
+        mpCost: 5,
+        cooldown: 3,
+      ),
+    ],
     rarity: "Common",
     type: "Warrior",
     region: "Mountain",

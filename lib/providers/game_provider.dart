@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import '../models/ability_model.dart';
 import '../models/floor_model.dart';
 import '../models/resource_model.dart';
 import '../models/farm_model.dart';
@@ -261,7 +262,11 @@ class GameProvider with ChangeNotifier {
             hp: selectedGirl.hp,
             mp: selectedGirl.mp,
             sp: selectedGirl.sp,
-            abilities: selectedGirl.abilities,
+            maxHp: selectedGirl.hp,
+            maxMp: selectedGirl.mp,
+            maxSp: selectedGirl.sp,
+            abilities:
+                List<AbilitiesModel>.from(selectedGirl.abilities), // Deep copy
             race: selectedGirl.race,
             type: selectedGirl.type,
             region: selectedGirl.region,
@@ -270,6 +275,8 @@ class GameProvider with ChangeNotifier {
         }
       }
 
+      // Debugging: Print pulled girls
+      print("Pulled girls: ${girls.map((girl) => girl.name).toList()}");
       return girls;
     }
     return []; // Not enough credits
@@ -280,6 +287,12 @@ class GameProvider with ChangeNotifier {
     final minerals = _resourceRepository.getResourceByName('Minerals');
 
     if (girl != null && minerals != null) {
+      final int maxLevel = 100; // Define a maximum level
+      if (girl.level >= maxLevel) {
+        print("${girl.name} has reached the maximum level of $maxLevel.");
+        return false; // Failure
+      }
+
       final upgradeCost =
           (150 + (girl.level - 1) * 150).toInt(); // Cost scaling
 
@@ -316,15 +329,187 @@ class GameProvider with ChangeNotifier {
         girl.attackPoints += 2;
         girl.defensePoints += 2;
         girl.agilityPoints += 1;
-        girl.hp += 20;
-        girl.mp += 10;
-        girl.sp += 5;
 
+        // Increase max stats and restore current stats to max
+        girl.maxHp += 20;
+        girl.hp = girl.maxHp;
+
+        girl.maxMp += 10;
+        girl.mp = girl.maxMp;
+
+        girl.maxSp += 5;
+        girl.sp = girl.maxSp;
+
+        // Increase critical point (e.g., +1% chance per level)
+        girl.criticalPoint += 1;
+
+        // Class
+        // Divine Cleric
+        // Phantom Reaver
+        // Runebinder
+        // Arcane Sage
+        // Blademaster
+        // Warden
+        // Elementalist
+        // Dread Knight
+
+        // Unlock new abilities at certain levels and conditions
+        // if (girl.level == 5 && girl.type == "") {
+        //   girl.addAbility(AbilitiesModel(
+        //     abilitiesID: "ability_002",
+        //     name: "Heal",
+        //     description: "Restores HP to the user.",
+        //     hpBonus: 20,
+        //     mpCost: 15,
+        //   ));
+        // }
+        if (girl.level == 2 && girl.type == "") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_001",
+            name: "Second Wind",
+            description: "Restores a small amount of HP.",
+            hpBonus: 10,
+            spCost: 5,
+            cooldown: 4,
+          ));
+        }
+
+        if (girl.level == 2 && girl.race == "Human") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_002",
+            name: "Heal",
+            description: "Restores HP to the user.",
+            hpBonus: 20,
+            mpCost: 15,
+          ));
+        }
+        if (girl.level == 2 && girl.race == "Eldren") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_002",
+            name: "Nature's Blessing",
+            description: "Increases agility and defense.",
+            attackBonus: 15,
+            spCost: 10,
+            cooldown: 3,
+          ));
+        }
+        if (girl.level == 2 && girl.race == "Therian") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_003",
+            name: "Beastial Fury",
+            description: "Increases attack and agility for a short duration.",
+            attackBonus: 10,
+            agilityBonus: 10,
+            spCost: 12,
+            cooldown: 6,
+          ));
+        }
+        if (girl.level == 2 && girl.race == "Dracovar") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_004",
+            name: "Dragon's Breath",
+            description: "Deals fire damage to all enemies.",
+            attackBonus: 20,
+            spCost: 15,
+            cooldown: 5,
+          ));
+        }
+        if (girl.level == 2 && girl.race == "Daevan") {
+          girl.addAbility(AbilitiesModel(
+            abilitiesID: "ability_005",
+            name: "Shadow Step",
+            description: "Teleports behind the enemy, increasing agility.",
+            agilityBonus: 10,
+            spCost: 7,
+            cooldown: 3,
+          ));
+        }
+        // if (girl.level == 5) {
+        //   if (girl.type == "Divine Cleric") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_011",
+        //       name: "Holy Light",
+        //       description:
+        //           "A radiant light heals allies and damages undead enemies.",
+        //       hpBonus: 25,
+        //       attackBonus: 10,
+        //       mpCost: 15,
+        //     ));
+        //   } else if (girl.type == "Phantom Reaver") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_014",
+        //       name: "Phantom Slash",
+        //       description:
+        //           "A spectral blade cuts through enemies, ignoring some defense.",
+        //       attackBonus: 20,
+        //       criticalPoint: 15,
+        //       mpCost: 12,
+        //     ));
+        //   }
+        // } else if (girl.level == 10) {
+        //   if (girl.type == "Runebinder") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_017",
+        //       name: "Rune Explosion",
+        //       description: "Triggers a stored rune to deal massive damage.",
+        //       attackBonus: 30,
+        //       mpCost: 25,
+        //     ));
+        //   } else if (girl.type == "Arcane Sage") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_020",
+        //       name: "Mystic Bolt",
+        //       description:
+        //           "Unleashes a concentrated magical energy bolt at the enemy.",
+        //       attackBonus: 22,
+        //       mpCost: 14,
+        //     ));
+        //   }
+        // } else if (girl.level == 15) {
+        //   if (girl.type == "Blademaster") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_023",
+        //       name: "Blade Dance",
+        //       description: "A flurry of strikes hitting multiple enemies.",
+        //       attackBonus: 18,
+        //       agilityBonus: 10,
+        //       spCost: 12,
+        //     ));
+        //   } else if (girl.type == "Warden") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_026",
+        //       name: "Guardian's Wrath",
+        //       description:
+        //           "A powerful counterattack after blocking an enemy hit.",
+        //       attackBonus: 20,
+        //       defenseBonus: 15,
+        //       spCost: 10,
+        //     ));
+        //   }
+        // } else if (girl.level == 20) {
+        //   if (girl.type == "Elementalist") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_029",
+        //       name: "Lightning Storm",
+        //       description: "Summons lightning to strike multiple enemies.",
+        //       attackBonus: 28,
+        //       mpCost: 22,
+        //     ));
+        //   } else if (girl.type == "Dread Knight") {
+        //     girl.addAbility(AbilitiesModel(
+        //       abilitiesID: "ability_032",
+        //       name: "Dark Cleave",
+        //       description: "A heavy attack that drains some HP from enemies.",
+        //       attackBonus: 25,
+        //       hpBonus: 10,
+        //       mpCost: 15,
+        //     ));
+        //   }
+        // }
+
+        // Save the updated girl
         _girlRepository.updateGirl(girl);
 
-        print("Minerals After Upgrade: ${minerals.amount}");
-        print(
-            "Upgraded ${girl.name} to level ${girl.level}. New miningEfficiency: ${girl.miningEfficiency}");
         notifyListeners();
         return true; // Success
       } else {
