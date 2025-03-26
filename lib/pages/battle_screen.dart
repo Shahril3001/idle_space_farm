@@ -15,7 +15,8 @@ class BattleScreen extends StatelessWidget {
     required this.enemies,
     required this.difficulty,
     required this.region,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -42,10 +43,11 @@ class _BattleContent extends StatefulWidget {
     required this.heroes,
     required this.enemies,
     required this.difficulty,
-  });
+    Key? key,
+  }) : super(key: key);
 
   @override
-  __BattleContentState createState() => __BattleContentState();
+  State<_BattleContent> createState() => __BattleContentState();
 }
 
 class __BattleContentState extends State<_BattleContent> {
@@ -72,7 +74,7 @@ class __BattleContentState extends State<_BattleContent> {
       child: Column(
         children: [
           Text("Round ${provider.currentRound}",
-              style: TextStyle(fontSize: 24)),
+              style: const TextStyle(fontSize: 24)),
           const SizedBox(height: 20),
           Expanded(
             child: Row(
@@ -84,7 +86,7 @@ class __BattleContentState extends State<_BattleContent> {
             ),
           ),
           _buildBattleLog(provider),
-          _buildBattleControls(provider),
+          _buildBattleControls(provider, context),
         ],
       ),
     );
@@ -158,58 +160,23 @@ class __BattleContentState extends State<_BattleContent> {
     );
   }
 
-  Widget _buildBattleControls(BattleProvider provider) {
+  Widget _buildBattleControls(BattleProvider provider, BuildContext context) {
     return Row(
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         ElevatedButton(
-          onPressed: provider.isProcessingTurn
-              ? null
-              : () => _handleNextTurn(provider),
+          onPressed:
+              provider.isProcessingTurn ? null : () => provider.nextTurn(),
           child: const Text("Next Turn"),
         ),
         ElevatedButton(
           onPressed: provider.isProcessingTurn
               ? null
-              : () => _handleAutoBattle(provider),
+              : () => provider.autoBattle(context),
           child: const Text("Auto Battle"),
         ),
       ],
     );
-  }
-
-  void _handleNextTurn(BattleProvider provider) {
-    provider.nextTurn();
-    _checkBattleResult(provider);
-  }
-
-  void _handleAutoBattle(BattleProvider provider) {
-    provider.autoBattle();
-    _checkBattleResult(provider);
-  }
-
-  void _checkBattleResult(BattleProvider provider) {
-    if (provider.isBattleOver) {
-      showDialog(
-        context: context,
-        barrierDismissible: false,
-        builder: (context) => AlertDialog(
-          title: Text(provider.battleResult == "Win" ? "Victory!" : "Defeat!"),
-          content: Text(provider.battleResult == "Win"
-              ? "Congratulations! You won the battle!"
-              : "Oh no! You lost the battle."),
-          actions: [
-            TextButton(
-              child: const Text('OK'),
-              onPressed: () {
-                provider.resetBattle();
-                Navigator.popUntil(context, (route) => route.isFirst);
-              },
-            ),
-          ],
-        ),
-      );
-    }
   }
 
   Color _getHpColor(double percent) {
