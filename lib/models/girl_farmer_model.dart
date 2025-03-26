@@ -110,6 +110,35 @@ class GirlFarmer {
     this.currentCooldowns = const {}, // Initialize with an empty map
   });
 
+  GirlFarmer copyWithFreshStats() {
+    return GirlFarmer(
+      id: id,
+      name: name,
+      level: level,
+      miningEfficiency: miningEfficiency,
+      assignedFarm: assignedFarm,
+      rarity: rarity,
+      stars: stars,
+      image: image,
+      imageFace: imageFace,
+      attackPoints: attackPoints,
+      defensePoints: defensePoints,
+      agilityPoints: agilityPoints,
+      hp: maxHp, // Reset to full HP
+      maxHp: maxHp,
+      mp: mp,
+      maxMp: maxMp,
+      sp: sp,
+      maxSp: maxSp,
+      abilities: abilities.map((a) => a.freshCopy()).toList(),
+      race: race,
+      type: type,
+      region: region,
+      description: description,
+      criticalPoint: criticalPoint,
+    );
+  }
+
   // Add an ability
   void addAbility(AbilitiesModel ability) {
     abilities.add(ability);
@@ -182,6 +211,10 @@ class GirlFarmer {
         description: "Restores HP to the user.",
         hpBonus: 20,
         mpCost: 15,
+        type: AbilityType.heal,
+        targetType: TargetType.single,
+        affectsEnemies: false,
+        criticalPoint: 15,
       ));
     }
   }

@@ -16,6 +16,7 @@ class BattleProvider with ChangeNotifier {
   bool _isBattleOver = false;
   String _battleResult = "";
   final List<String> _battleLog = [];
+  bool _hasBattleStarted = false;
   bool _isProcessingTurn = false;
   Timer? _battleTimer;
   int _currentRound = 1; // Track the current round
@@ -29,112 +30,61 @@ class BattleProvider with ChangeNotifier {
   String get battleResult => _battleResult;
   List<String> get battleLog => _battleLog;
   bool get isProcessingTurn => _isProcessingTurn;
+  bool get hasBattleStarted => _hasBattleStarted;
   int get currentRound => _currentRound; // Expose current round
 
-  // Start a new battle
   void startBattle(
-      List<GirlFarmer> heroes, int dungeonLevel, String difficulty) {
-    print(
-        "Starting battle with ${heroes.length} heroes and difficulty $difficulty");
+    List<GirlFarmer> heroes,
+    int dungeonLevel,
+    String difficulty, {
+    List<Enemy>? predefinedEnemies,
+    String region = 'DefaultRegion',
+  }) {
+    _cleanupPreviousBattle();
 
     // Generate fresh enemies
-    _enemies = generateEnemies(dungeonLevel, difficulty);
+    _enemies = predefinedEnemies != null
+        ? predefinedEnemies.map((e) => Enemy.freshCopy(e)).toList()
+        : generateEnemies(dungeonLevel, difficulty, region: region);
 
-    // Reset heroes' HP to their max HP
-    _heroes = heroes
-        .map((hero) => GirlFarmer(
-              id: hero.id, // Required field
-              name: hero.name, // Required field
-              level: hero.level, // Required field
-              miningEfficiency: hero.miningEfficiency, // Required field
-              assignedFarm: hero.assignedFarm, // Optional field
-              rarity: hero.rarity, // Required field
-              stars: hero.stars, // Required field
-              image: hero.image, // Required field
-              imageFace: hero.imageFace, // Required field
-              attackPoints: hero.attackPoints, // Required field
-              defensePoints: hero.defensePoints, // Required field
-              agilityPoints: hero.agilityPoints, // Required field
-              hp: hero.maxHp, // Reset HP to maxHp
-              mp: hero.mp, // Required field
-              sp: hero.sp, // Required field
-              abilities: hero.abilities, // Required field
-              race: hero.race, // Required field
-              type: hero.type, // Required field
-              region: hero.region, // Required field
-              description: hero.description, // Required field
-              maxHp: hero.maxHp, // Required field
-              maxMp: hero.maxMp, // Required field
-              maxSp: hero.maxSp, // Required field
-              criticalPoint: hero.criticalPoint, // Required field
-            ))
-        .toList();
+    _heroes = heroes.map((h) => h.copyWithFreshStats()).toList();
 
-    // Reset battle state
     _isBattleOver = false;
     _battleResult = "";
     _battleLog.clear();
     _currentRound = 1;
+    _hasBattleStarted = true;
 
-    // Debug: Print hero and enemy HP to verify reset
-    for (final hero in _heroes!) {
-      print("Hero ${hero.name} HP after reset: ${hero.hp}");
-    }
-    for (final enemy in _enemies!) {
-      print("Enemy ${enemy.name} HP: ${enemy.hp}");
-    }
+    debugPrint('Battle started with fresh enemies:');
+    _enemies?.forEach((e) => debugPrint('${e.name} HP:${e.hp}/${e.maxHp}'));
 
+    _battleLog.add("Battle started!");
     notifyListeners();
   }
 
-  // Reset the battle state
-  void resetBattle(List<GirlFarmer> originalHeroes) {
-    // Reset heroes' HP to their max HP
-    _heroes = originalHeroes
-        .map((hero) => GirlFarmer(
-              id: hero.id, // Required field
-              name: hero.name, // Required field
-              level: hero.level, // Required field
-              miningEfficiency: hero.miningEfficiency, // Required field
-              assignedFarm: hero.assignedFarm, // Optional field
-              rarity: hero.rarity, // Required field
-              stars: hero.stars, // Required field
-              image: hero.image, // Required field
-              imageFace: hero.imageFace, // Required field
-              attackPoints: hero.attackPoints, // Required field
-              defensePoints: hero.defensePoints, // Required field
-              agilityPoints: hero.agilityPoints, // Required field
-              hp: hero.maxHp, // Reset HP to maxHp
-              mp: hero.mp, // Required field
-              sp: hero.sp, // Required field
-              abilities: hero.abilities, // Required field
-              race: hero.race, // Required field
-              type: hero.type, // Required field
-              region: hero.region, // Required field
-              description: hero.description, // Required field
-              maxHp: hero.maxHp, // Required field
-              maxMp: hero.maxMp, // Required field
-              maxSp: hero.maxSp, // Required field
-              criticalPoint: hero.criticalPoint, // Required field
-            ))
-        .toList();
-
-    // Clear enemies
+  void _cleanupPreviousBattle() {
+    _heroes?.clear();
+    _enemies?.clear();
+    _battleLog.clear();
+    _heroes = null;
     _enemies = null;
-
-    // Reset battle state
+    _currentRound = 1;
     _isBattleOver = false;
     _battleResult = "";
-    _battleLog.clear();
-    _battleTimer?.cancel();
-    _currentRound = 1;
+    _isProcessingTurn = false;
+    debugPrint('Cleared previous battle data');
+  }
 
-    print("Battle reset: Heroes and enemies cleared. Ready for a new battle.");
+  // Reset the battle state
+  void resetBattle() {
+    _cleanupPreviousBattle();
+    _hasBattleStarted = false;
+    print("BattleProvider: Battle state fully reset.");
     notifyListeners();
   }
 
   // Simulate a turn in the battle with delays
-  void nextTurn() async {
+  Future<void> nextTurn() async {
     if (_isBattleOver ||
         _heroes == null ||
         _enemies == null ||
@@ -149,7 +99,7 @@ class BattleProvider with ChangeNotifier {
     notifyListeners();
 
     // Determine turn order based on agility
-    final allParticipants = [..._heroes!, ..._enemies!];
+    final allParticipants = <dynamic>[..._heroes!, ..._enemies!];
     allParticipants.sort((a, b) {
       final aAgility =
           a is GirlFarmer ? a.agilityPoints : (a as Enemy).agilityPoints;
@@ -160,18 +110,21 @@ class BattleProvider with ChangeNotifier {
 
     // Process each participant's turn
     for (final participant in allParticipants) {
-      if ((participant is GirlFarmer && participant.hp <= 0) ||
-          (participant is Enemy && participant.hp <= 0)) {
+      // Fix: Check hp based on type
+      final isDead = participant is GirlFarmer
+          ? participant.hp <= 0
+          : (participant as Enemy).hp <= 0;
+
+      if (isDead) {
         continue; // Skip if dead
       }
 
       if (participant is GirlFarmer) {
         await _processHeroTurn(participant);
       } else if (participant is Enemy) {
-        await _processEnemyTurn(participant);
+        await _processEnemyTurn(participant as Enemy);
       }
 
-      // Check if battle is over after each turn
       if (_checkBattleOver()) break;
 
       // Add delay for smooth execution
@@ -188,8 +141,7 @@ class BattleProvider with ChangeNotifier {
 
     // Increment the round counter
     _currentRound++;
-    notifyListeners();
-
+    _checkBattleOver();
     _isProcessingTurn = false;
     notifyListeners();
     print("Turn completed.");
@@ -366,20 +318,26 @@ class BattleProvider with ChangeNotifier {
         _heroes == null ||
         _enemies == null ||
         _isProcessingTurn) {
-      print(
-          "Cannot start auto-battle: Battle over, heroes/enemies null, or already processing.");
+      debugPrint("Cannot start auto-battle: Invalid state");
       return;
     }
 
-    print("Starting auto-battle...");
-    _battleTimer = Timer.periodic(Duration(seconds: 1), (timer) {
+    debugPrint("Starting auto-battle...");
+    _battleTimer = Timer.periodic(const Duration(seconds: 1), (timer) async {
       if (_isBattleOver) {
         timer.cancel();
-        print("Auto-battle stopped: Battle is over.");
+        debugPrint("Auto-battle stopped: Battle is over.");
+        notifyListeners(); // Important for triggering UI updates
         return;
       }
 
-      nextTurn();
+      await nextTurn();
+
+      // Check if battle ended during this turn
+      if (_isBattleOver) {
+        timer.cancel();
+        notifyListeners(); // Ensure UI knows battle ended
+      }
     });
   }
 

@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:hive/hive.dart';
-import 'ability_model.dart'; // Import the AbilitiesModel
+import 'ability_model.dart';
 
 part 'enemy_model.g.dart';
 
@@ -34,7 +34,7 @@ class Enemy {
   int sp;
 
   @HiveField(9)
-  List<AbilitiesModel> abilities; // List of AbilitiesModel
+  List<AbilitiesModel> abilities;
 
   @HiveField(10)
   final String rarity;
@@ -49,19 +49,19 @@ class Enemy {
   final String description;
 
   @HiveField(14)
-  int maxHp; // Maximum HP
+  int maxHp;
 
   @HiveField(15)
-  int maxMp; // Maximum MP
+  int maxMp;
 
   @HiveField(16)
-  int maxSp; // Maximum SP
+  int maxSp;
 
   @HiveField(17)
-  int criticalPoint; // Critical hit chance or damage multiplier
+  int criticalPoint;
 
   @HiveField(18)
-  Map<String, int> currentCooldowns; // Track cooldowns for abilities
+  Map<String, int> currentCooldowns;
 
   Enemy({
     required this.id,
@@ -73,7 +73,7 @@ class Enemy {
     required this.hp,
     required this.mp,
     required this.sp,
-    required this.abilities, // Initialize with a list of AbilitiesModel
+    required this.abilities,
     required this.rarity,
     required this.type,
     required this.region,
@@ -82,17 +82,39 @@ class Enemy {
     this.maxMp = 50,
     this.maxSp = 30,
     this.criticalPoint = 5,
-    this.currentCooldowns = const {}, // Initialize with an empty map
+    this.currentCooldowns = const {},
   });
 
-  // Use an ability on a target
+  factory Enemy.freshCopy(Enemy other) {
+    return Enemy(
+      id: '${other.id}-${DateTime.now().millisecondsSinceEpoch}',
+      name: other.name,
+      level: other.level,
+      attackPoints: other.attackPoints,
+      defensePoints: other.defensePoints,
+      agilityPoints: other.agilityPoints,
+      hp: other.maxHp,
+      mp: other.maxMp,
+      sp: other.maxSp,
+      abilities: other.abilities.map((a) => a.freshCopy()).toList(),
+      rarity: other.rarity,
+      type: other.type,
+      region: other.region,
+      description: other.description,
+      maxHp: other.maxHp,
+      maxMp: other.maxMp,
+      maxSp: other.maxSp,
+      criticalPoint: other.criticalPoint,
+      currentCooldowns: {},
+    );
+  }
+
   bool useAbility(AbilitiesModel ability, dynamic target) {
     if (!abilities.contains(ability)) {
       print("${name} does not know ${ability.name}.");
       return false;
     }
 
-    // Check cooldown
     if (currentCooldowns[ability.abilitiesID] != null &&
         currentCooldowns[ability.abilitiesID]! > 0) {
       print(
@@ -100,16 +122,13 @@ class Enemy {
       return false;
     }
 
-    // Use the ability
     final success = ability.useAbility(this, target);
     if (success) {
-      // Set cooldown
       currentCooldowns[ability.abilitiesID] = ability.cooldown;
     }
     return success;
   }
 
-  // Update cooldowns at the end of each turn
   void updateCooldowns() {
     currentCooldowns.forEach((abilitiesID, cooldown) {
       if (cooldown > 0) {
@@ -118,11 +137,10 @@ class Enemy {
     });
   }
 
-  // Restore stats (optional: reset cooldowns)
   void restoreStats() {
     hp = maxHp;
     mp = maxMp;
     sp = maxSp;
-    currentCooldowns.clear(); // Reset all cooldowns
+    currentCooldowns.clear();
   }
 }

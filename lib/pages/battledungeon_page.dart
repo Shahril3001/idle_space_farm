@@ -3,16 +3,29 @@ import 'battlepreparation_page.dart';
 
 class DungeonScreen extends StatelessWidget {
   final List<String> difficulties = ["Easy", "Medium", "Hard"];
+  final String dungeonName;
+  final String difficulty;
+  final int minLevel;
+  final int maxLevel;
+  final String region; // Add this
+
+  DungeonScreen({
+    required this.dungeonName,
+    required this.difficulty,
+    required this.minLevel,
+    required this.maxLevel,
+    required this.region, // Add this
+  });
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text("Dungeon",
+        title: Text("$region Dungeon",
             style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold)),
         centerTitle: true,
         elevation: 0,
-        backgroundColor: Colors.deepPurple, // Custom app bar color
+        backgroundColor: Colors.deepPurple,
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -24,7 +37,7 @@ class DungeonScreen extends StatelessWidget {
               style: TextStyle(
                 fontSize: 28,
                 fontWeight: FontWeight.bold,
-                color: Colors.deepPurple, // Consistent theme color
+                color: Colors.deepPurple,
               ),
             ),
             SizedBox(height: 30),
@@ -41,18 +54,19 @@ class DungeonScreen extends StatelessWidget {
                     curve: Curves.easeInOut,
                     child: ElevatedButton(
                       onPressed: () {
-                        // Navigate to PreparationScreen with selected difficulty
                         Navigator.push(
                           context,
                           MaterialPageRoute(
-                            builder: (context) =>
-                                PreparationScreen(difficulty: difficulty),
+                            builder: (context) => PreparationScreen(
+                              difficulty: difficulty,
+                              dungeonLevel: minLevel,
+                              region: region,
+                            ),
                           ),
                         );
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _getDifficultyColor(
-                            difficulty), // Custom button color
+                        backgroundColor: _getDifficultyColor(difficulty),
                         padding:
                             EdgeInsets.symmetric(vertical: 20, horizontal: 40),
                         shape: RoundedRectangleBorder(
@@ -91,7 +105,6 @@ class DungeonScreen extends StatelessWidget {
     );
   }
 
-  // Helper function to get difficulty-specific colors
   Color _getDifficultyColor(String difficulty) {
     switch (difficulty) {
       case "Easy":
@@ -105,7 +118,6 @@ class DungeonScreen extends StatelessWidget {
     }
   }
 
-  // Helper function to get difficulty-specific icons
   IconData _getDifficultyIcon(String difficulty) {
     switch (difficulty) {
       case "Easy":

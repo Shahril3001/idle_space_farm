@@ -9,15 +9,22 @@ final List<AbilitiesModel> abilitiesList = [
     hpBonus: 10,
     spCost: 5,
     cooldown: 4,
+    type: AbilityType.heal,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
   // Elves Ability
   AbilitiesModel(
     abilitiesID: "ability_002",
     name: "Nature's Blessing",
     description: "Increases agility and defense.",
-    attackBonus: 15,
+    defenseBonus: 15,
+    agilityBonus: 10,
     spCost: 10,
     cooldown: 3,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
   // Demi Human Ability
   AbilitiesModel(
@@ -28,15 +35,22 @@ final List<AbilitiesModel> abilitiesList = [
     agilityBonus: 10,
     spCost: 12,
     cooldown: 6,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
   // Dragonoid Ability
   AbilitiesModel(
     abilitiesID: "ability_004",
     name: "Dragon's Breath",
     description: "Deals fire damage to all enemies.",
-    attackBonus: 20,
+    hpBonus: 20, // Now using hpBonus for damage in attack abilities
     spCost: 15,
     cooldown: 5,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
+    criticalPoint: 10,
   ),
   // Demon Ability
   AbilitiesModel(
@@ -46,16 +60,24 @@ final List<AbilitiesModel> abilitiesList = [
     agilityBonus: 10,
     spCost: 7,
     cooldown: 3,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Fireball - Single target attack
   AbilitiesModel(
     abilitiesID: "ability_006",
     name: "Fireball",
     description: "A fiery projectile that deals damage to the enemy.",
-    attackBonus: 15,
+    hpBonus: 15,
     mpCost: 10,
     cooldown: 3,
-    criticalPoint: 10, // 10% chance for a critical hit
+    criticalPoint: 10,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Heal - Single target heal
   AbilitiesModel(
     abilitiesID: "ability_007",
     name: "Heal",
@@ -63,7 +85,11 @@ final List<AbilitiesModel> abilitiesList = [
     hpBonus: 20,
     mpCost: 15,
     cooldown: 5,
+    type: AbilityType.heal,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Agility Boost - Single target buff
   AbilitiesModel(
     abilitiesID: "ability_008",
     name: "Agility Boost",
@@ -71,51 +97,75 @@ final List<AbilitiesModel> abilitiesList = [
     agilityBonus: 10,
     spCost: 5,
     cooldown: 4,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Shield Bash - Single target attack with defense bonus
   AbilitiesModel(
     abilitiesID: "ability_009",
     name: "Shield Bash",
     description: "A powerful strike that stuns the enemy.",
-    attackBonus: 10,
+    hpBonus: 10,
     defenseBonus: 5,
     mpCost: 8,
     cooldown: 4,
-    criticalPoint: 15, // 15% chance for a critical hit
+    criticalPoint: 15,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Poison Dart - Single target attack with DoT potential
   AbilitiesModel(
     abilitiesID: "ability_010",
     name: "Poison Dart",
     description: "A dart coated with poison that deals damage over time.",
-    attackBonus: 5,
+    hpBonus: 5,
     mpCost: 6,
     cooldown: 2,
-    criticalPoint: 20, // 20% chance for a critical hit
+    criticalPoint: 20,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Mana Surge - Self-target MP restore
   AbilitiesModel(
     abilitiesID: "ability_011",
     name: "Mana Surge",
     description: "Restores MP to the user.",
-    mpCost: -20, // Negative cost means it restores MP
+    mpCost: -20,
     cooldown: 6,
+    type: AbilityType.heal, // Considered a heal for resources
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Berserk - Self-target buff with drawback
   AbilitiesModel(
     abilitiesID: "ability_012",
     name: "Berserk",
     description: "Increases attack power at the cost of defense.",
     attackBonus: 25,
-    defenseBonus: -10, // Negative bonus reduces defense
+    defenseBonus: -10,
     spCost: 15,
     cooldown: 6,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Earthquake - AoE attack
   AbilitiesModel(
     abilitiesID: "ability_013",
     name: "Earthquake",
     description: "A powerful ground attack that damages all enemies.",
-    attackBonus: 30,
+    hpBonus: 30,
     mpCost: 20,
     cooldown: 8,
-    criticalPoint: 5, // 5% chance for a critical hit
+    criticalPoint: 5,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
+  // Stealth - Self-target buff
   AbilitiesModel(
     abilitiesID: "ability_014",
     name: "Stealth",
@@ -123,7 +173,11 @@ final List<AbilitiesModel> abilitiesList = [
     agilityBonus: 20,
     spCost: 10,
     cooldown: 7,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Revive - Single target resurrection
   AbilitiesModel(
     abilitiesID: "ability_015",
     name: "Revive",
@@ -131,17 +185,25 @@ final List<AbilitiesModel> abilitiesList = [
     hpBonus: 50,
     mpCost: 30,
     cooldown: 10,
+    type: AbilityType.heal,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
   // Divine Cleric Abilities
+  // Holy Light - AoE heal that damages undead
   AbilitiesModel(
     abilitiesID: "ability_016",
     name: "Holy Light",
     description: "A radiant light heals allies and damages undead enemies.",
     hpBonus: 25,
-    attackBonus: 10,
     mpCost: 15,
     cooldown: 5,
+    type: AbilityType.heal, // Primary effect is healing
+    targetType: TargetType.all,
+    affectsEnemies: false,
+    // Note: You might need special handling for the undead damage aspect
   ),
+  // Divine Shield - Single target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_017",
     name: "Divine Shield",
@@ -149,35 +211,50 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 50,
     mpCost: 20,
     cooldown: 8,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Purify - Single target status cleanse
   AbilitiesModel(
     abilitiesID: "ability_018",
     name: "Purify",
     description: "Removes all negative effects from an ally.",
     mpCost: 10,
     cooldown: 6,
+    type: AbilityType.buff, // Considered a buff as it removes debuffs
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
-
   // Phantom Reaver Abilities
+  // Phantom Slash - Single target attack that ignores some defense
   AbilitiesModel(
     abilitiesID: "ability_019",
     name: "Phantom Slash",
     description:
         "A spectral blade cuts through enemies, ignoring some defense.",
-    attackBonus: 20,
+    hpBonus: 20,
     criticalPoint: 15,
     mpCost: 12,
     cooldown: 4,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Soul Drain - Single target attack with self-heal
   AbilitiesModel(
     abilitiesID: "ability_020",
     name: "Soul Drain",
     description: "Steals HP from an enemy and restores it to the user.",
-    attackBonus: 15,
-    hpBonus: 15,
+    hpBonus: 15, // Damage to enemy
     mpCost: 10,
     cooldown: 5,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
+    // Note: You'll need special handling for the self-heal portion
   ),
+  // Shadow Veil - Self-target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_021",
     name: "Shadow Veil",
@@ -186,17 +263,24 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 10,
     mpCost: 18,
     cooldown: 7,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
-
   // Runebinder Abilities
+  // Rune Explosion - Single target high damage
   AbilitiesModel(
     abilitiesID: "ability_022",
     name: "Rune Explosion",
     description: "Triggers a stored rune to deal massive damage.",
-    attackBonus: 30,
+    hpBonus: 30,
     mpCost: 25,
     cooldown: 8,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Arcane Barrier - Self-target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_023",
     name: "Arcane Barrier",
@@ -204,80 +288,110 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 25,
     mpCost: 20,
     cooldown: 6,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Mana Infusion - AoE MP restore
   AbilitiesModel(
     abilitiesID: "ability_024",
     name: "Mana Infusion",
     description: "Restores MP to all allies over time.",
     mpCost: -25,
     cooldown: 10,
+    type: AbilityType.heal, // For resource restoration
+    targetType: TargetType.all,
+    affectsEnemies: false,
   ),
-
   // Arcane Sage Abilities
+  // Mystic Bolt - Single target magic attack
   AbilitiesModel(
     abilitiesID: "ability_025",
     name: "Mystic Bolt",
     description: "Unleashes a concentrated magical energy bolt at the enemy.",
-    attackBonus: 22,
+    hpBonus: 22,
     mpCost: 14,
     cooldown: 4,
     criticalPoint: 10,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Spell Echo - Self-target buff
   AbilitiesModel(
     abilitiesID: "ability_026",
     name: "Spell Echo",
     description: "Grants a chance to recast the last spell for free.",
     mpCost: 0,
     cooldown: 7,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Arcane Torrent - AoE magic debuff
   AbilitiesModel(
     abilitiesID: "ability_027",
     name: "Arcane Torrent",
     description: "A surge of magic weakens enemy spellcasters' MP.",
-    attackBonus: 10,
+    hpBonus: 10, // MP damage would need special handling
     mpCost: 15,
     cooldown: 6,
+    type: AbilityType.debuff,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
-
   // Blademaster Abilities
+  // Blade Dance - AoE physical attack
   AbilitiesModel(
     abilitiesID: "ability_028",
     name: "Blade Dance",
     description: "A flurry of strikes hitting multiple enemies.",
-    attackBonus: 18,
-    agilityBonus: 10,
+    hpBonus: 18,
     spCost: 12,
     cooldown: 5,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
+  // Counter Stance - Self-target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_029",
     name: "Counter Stance",
     description: "Enters a stance to counter enemy attacks for 2 turns.",
     defenseBonus: 20,
-    agilityBonus: 5,
     spCost: 15,
     cooldown: 8,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Crimson Slash - Single target attack with conditional bonus
   AbilitiesModel(
     abilitiesID: "ability_030",
     name: "Crimson Slash",
     description: "A brutal slash that deals extra damage if below 50% HP.",
-    attackBonus: 25,
+    hpBonus: 25,
     criticalPoint: 20,
     spCost: 15,
     cooldown: 6,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
-
   // Warden Abilities
+  // Guardian's Wrath - Counterattack ability
   AbilitiesModel(
     abilitiesID: "ability_031",
     name: "Guardian's Wrath",
     description: "A powerful counterattack after blocking an enemy hit.",
-    attackBonus: 20,
-    defenseBonus: 15,
+    hpBonus: 20,
     spCost: 10,
     cooldown: 5,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Iron Fortress - Self-target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_032",
     name: "Iron Fortress",
@@ -285,7 +399,11 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 30,
     spCost: 20,
     cooldown: 7,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Taunt - AoE enemy control
   AbilitiesModel(
     abilitiesID: "ability_033",
     name: "Taunt",
@@ -293,18 +411,25 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 10,
     spCost: 8,
     cooldown: 4,
+    type: AbilityType.debuff,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
-
   // Elementalist Abilities
+  // Lightning Storm - AoE magic attack
   AbilitiesModel(
     abilitiesID: "ability_034",
     name: "Lightning Storm",
     description: "Summons lightning to strike multiple enemies.",
-    attackBonus: 28,
+    hpBonus: 28,
     mpCost: 22,
     cooldown: 7,
     criticalPoint: 10,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
+  // Ice Barricade - AoE defensive buff
   AbilitiesModel(
     abilitiesID: "ability_035",
     name: "Ice Barricade",
@@ -312,26 +437,36 @@ final List<AbilitiesModel> abilitiesList = [
     defenseBonus: 20,
     mpCost: 18,
     cooldown: 6,
+    type: AbilityType.buff,
+    targetType: TargetType.all,
+    affectsEnemies: false,
   ),
+  // Inferno - AoE damage over time
   AbilitiesModel(
     abilitiesID: "ability_036",
     name: "Inferno",
     description: "Unleashes a blazing fire that deals damage over time.",
-    attackBonus: 25,
+    hpBonus: 25,
     mpCost: 20,
     cooldown: 6,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
   ),
-
   // Dread Knight Abilities
+  // Dark Cleave - Single target attack with self-heal
   AbilitiesModel(
     abilitiesID: "ability_037",
     name: "Dark Cleave",
     description: "A heavy attack that drains some HP from enemies.",
-    attackBonus: 25,
-    hpBonus: 10,
+    hpBonus: 25,
     mpCost: 15,
     cooldown: 6,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
+  // Unholy Resilience - Self-target defensive buff
   AbilitiesModel(
     abilitiesID: "ability_038",
     name: "Unholy Resilience",
@@ -339,15 +474,22 @@ final List<AbilitiesModel> abilitiesList = [
     hpBonus: 50,
     mpCost: 25,
     cooldown: 10,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
   ),
+  // Cursed Strike - Single target debuff
   AbilitiesModel(
     abilitiesID: "ability_039",
     name: "Cursed Strike",
     description: "Inflicts a debuff that reduces enemy defense.",
-    attackBonus: 20,
+    hpBonus: 20,
     defenseBonus: -10,
     mpCost: 12,
     cooldown: 5,
+    type: AbilityType.debuff,
+    targetType: TargetType.single,
+    affectsEnemies: true,
   ),
 ];
 

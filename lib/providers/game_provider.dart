@@ -287,240 +287,220 @@ class GameProvider with ChangeNotifier {
     final minerals = _resourceRepository.getResourceByName('Minerals');
 
     if (girl != null && minerals != null) {
-      final int maxLevel = 100; // Define a maximum level
+      final int maxLevel = 100;
       if (girl.level >= maxLevel) {
         print("${girl.name} has reached the maximum level of $maxLevel.");
-        return false; // Failure
+        return false;
       }
 
-      final upgradeCost =
-          (150 + (girl.level - 1) * 150).toInt(); // Cost scaling
-
-      print("Current Minerals: ${minerals.amount}");
-      print("Upgrade Cost: $upgradeCost");
+      final upgradeCost = (150 + (girl.level - 1) * 150).toInt();
 
       if (minerals.amount >= upgradeCost) {
-        // ✅ Deduct minerals
+        // Deduct minerals
         minerals.amount -= upgradeCost;
         _resourceRepository.updateResource(minerals);
 
-        // ✅ Upgrade Girl
+        // Upgrade Girl
         girl.level++;
 
         // Increase miningEfficiency based on rarity
         switch (girl.rarity) {
           case 'Common':
-            girl.miningEfficiency +=
-                (Random().nextDouble() * 0.03) + 0.01; // +0.01 to 0.04
+            girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.01;
             break;
           case 'Rare':
-            girl.miningEfficiency +=
-                (Random().nextDouble() * 0.03) + 0.04; // +0.04 to 0.07
+            girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.04;
             break;
           case 'Unique':
-            girl.miningEfficiency +=
-                (Random().nextDouble() * 0.02) + 0.08; // +0.08 to 0.10
+            girl.miningEfficiency += (Random().nextDouble() * 0.02) + 0.08;
             break;
           default:
-            girl.miningEfficiency += 0.01; // Default fallback
+            girl.miningEfficiency += 0.01;
         }
 
-        // Increase other stats
+        // Increase stats
         girl.attackPoints += 2;
         girl.defensePoints += 2;
         girl.agilityPoints += 1;
-
-        // Increase max stats and restore current stats to max
         girl.maxHp += 20;
         girl.hp = girl.maxHp;
-
         girl.maxMp += 10;
         girl.mp = girl.maxMp;
-
         girl.maxSp += 5;
         girl.sp = girl.maxSp;
-
-        // Increase critical point (e.g., +1% chance per level)
         girl.criticalPoint += 1;
 
-        // Class
-        // Divine Cleric
-        // Phantom Reaver
-        // Runebinder
-        // Arcane Sage
-        // Blademaster
-        // Warden
-        // Elementalist
-        // Dread Knight
-
-        // Unlock new abilities at certain levels and conditions
-        // if (girl.level == 5 && girl.type == "") {
-        //   girl.addAbility(AbilitiesModel(
-        //     abilitiesID: "ability_002",
-        //     name: "Heal",
-        //     description: "Restores HP to the user.",
-        //     hpBonus: 20,
-        //     mpCost: 15,
-        //   ));
-        // }
-        if (girl.level == 2 && girl.type == "") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_001",
-            name: "Second Wind",
-            description: "Restores a small amount of HP.",
-            hpBonus: 10,
-            spCost: 5,
-            cooldown: 4,
-          ));
-        }
-
-        if (girl.level == 2 && girl.race == "Human") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_002",
-            name: "Heal",
-            description: "Restores HP to the user.",
-            hpBonus: 20,
-            mpCost: 15,
-          ));
-        }
-        if (girl.level == 2 && girl.race == "Eldren") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_002",
-            name: "Nature's Blessing",
-            description: "Increases agility and defense.",
-            attackBonus: 15,
-            spCost: 10,
-            cooldown: 3,
-          ));
-        }
-        if (girl.level == 2 && girl.race == "Therian") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_003",
-            name: "Beastial Fury",
-            description: "Increases attack and agility for a short duration.",
-            attackBonus: 10,
-            agilityBonus: 10,
-            spCost: 12,
-            cooldown: 6,
-          ));
-        }
-        if (girl.level == 2 && girl.race == "Dracovar") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_004",
-            name: "Dragon's Breath",
-            description: "Deals fire damage to all enemies.",
-            attackBonus: 20,
-            spCost: 15,
-            cooldown: 5,
-          ));
-        }
-        if (girl.level == 2 && girl.race == "Daevan") {
-          girl.addAbility(AbilitiesModel(
-            abilitiesID: "ability_005",
-            name: "Shadow Step",
-            description: "Teleports behind the enemy, increasing agility.",
-            agilityBonus: 10,
-            spCost: 7,
-            cooldown: 3,
-          ));
-        }
-        // if (girl.level == 5) {
-        //   if (girl.type == "Divine Cleric") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_011",
-        //       name: "Holy Light",
-        //       description:
-        //           "A radiant light heals allies and damages undead enemies.",
-        //       hpBonus: 25,
-        //       attackBonus: 10,
-        //       mpCost: 15,
-        //     ));
-        //   } else if (girl.type == "Phantom Reaver") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_014",
-        //       name: "Phantom Slash",
-        //       description:
-        //           "A spectral blade cuts through enemies, ignoring some defense.",
-        //       attackBonus: 20,
-        //       criticalPoint: 15,
-        //       mpCost: 12,
-        //     ));
-        //   }
-        // } else if (girl.level == 10) {
-        //   if (girl.type == "Runebinder") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_017",
-        //       name: "Rune Explosion",
-        //       description: "Triggers a stored rune to deal massive damage.",
-        //       attackBonus: 30,
-        //       mpCost: 25,
-        //     ));
-        //   } else if (girl.type == "Arcane Sage") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_020",
-        //       name: "Mystic Bolt",
-        //       description:
-        //           "Unleashes a concentrated magical energy bolt at the enemy.",
-        //       attackBonus: 22,
-        //       mpCost: 14,
-        //     ));
-        //   }
-        // } else if (girl.level == 15) {
-        //   if (girl.type == "Blademaster") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_023",
-        //       name: "Blade Dance",
-        //       description: "A flurry of strikes hitting multiple enemies.",
-        //       attackBonus: 18,
-        //       agilityBonus: 10,
-        //       spCost: 12,
-        //     ));
-        //   } else if (girl.type == "Warden") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_026",
-        //       name: "Guardian's Wrath",
-        //       description:
-        //           "A powerful counterattack after blocking an enemy hit.",
-        //       attackBonus: 20,
-        //       defenseBonus: 15,
-        //       spCost: 10,
-        //     ));
-        //   }
-        // } else if (girl.level == 20) {
-        //   if (girl.type == "Elementalist") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_029",
-        //       name: "Lightning Storm",
-        //       description: "Summons lightning to strike multiple enemies.",
-        //       attackBonus: 28,
-        //       mpCost: 22,
-        //     ));
-        //   } else if (girl.type == "Dread Knight") {
-        //     girl.addAbility(AbilitiesModel(
-        //       abilitiesID: "ability_032",
-        //       name: "Dark Cleave",
-        //       description: "A heavy attack that drains some HP from enemies.",
-        //       attackBonus: 25,
-        //       hpBonus: 10,
-        //       mpCost: 15,
-        //     ));
-        //   }
-        // }
+        // Unlock abilities based on level and race
+        _unlockAbilities(girl);
 
         // Save the updated girl
         _girlRepository.updateGirl(girl);
-
         notifyListeners();
-        return true; // Success
+        return true;
       } else {
         print("Not enough minerals!");
-        return false; // Failure
+        return false;
       }
     } else {
       print("Error: Girl or Minerals not found.");
-      return false; // Failure
+      return false;
     }
   }
+
+  void _unlockAbilities(GirlFarmer girl) {
+    // First, handle race-specific ability unlocks
+    switch (girl.race) {
+      case "Human":
+        _unlockHumanAbilities(girl);
+        break;
+      case "Eldren":
+        _unlockEldrenAbilities(girl);
+        break;
+    }
+
+    // Then handle class-specific ability unlocks
+    switch (girl.type) {
+      case "Divine Cleric":
+        _unlockDivineClericAbilities(girl);
+        break;
+      case "Phantom Reaver":
+        _unlockPhantomReaverAbilities(girl);
+        break;
+    }
+  }
+
+// Example race-specific ability unlocks
+  void _unlockHumanAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 2:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_001",
+          name: "Second Wind",
+          description: "Restores a small amount of HP.",
+          hpBonus: 10,
+          spCost: 5,
+          cooldown: 4,
+          type: AbilityType.heal,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+      case 5:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_101",
+          name: "Power Strike",
+          description: "A strong basic attack.",
+          hpBonus: 15,
+          spCost: 5,
+          cooldown: 3,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+        ));
+        break;
+      // Add more level milestones as needed
+    }
+  }
+
+  void _unlockEldrenAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 2:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_002",
+          name: "Nature's Blessing",
+          description: "Increases agility and defense.",
+          defenseBonus: 15,
+          agilityBonus: 10,
+          spCost: 10,
+          cooldown: 3,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+      case 5:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_102",
+          name: "Nature's Touch",
+          description: "Minor healing from nature.",
+          hpBonus: 10,
+          mpCost: 8,
+          cooldown: 4,
+          type: AbilityType.heal,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+    }
+  }
+
+// Example class-specific ability unlocks
+  void _unlockDivineClericAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 10:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_016",
+          name: "Holy Light",
+          description:
+              "A radiant light heals allies and damages undead enemies.",
+          hpBonus: 25,
+          mpCost: 15,
+          cooldown: 5,
+          type: AbilityType.heal,
+          targetType: TargetType.all,
+          affectsEnemies: false,
+        ));
+        break;
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_017",
+          name: "Divine Shield",
+          description: "Grants temporary immunity to damage for one turn.",
+          defenseBonus: 50,
+          mpCost: 20,
+          cooldown: 8,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+    }
+  }
+
+  void _unlockPhantomReaverAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 10:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_019",
+          name: "Phantom Slash",
+          description:
+              "A spectral blade cuts through enemies, ignoring some defense.",
+          hpBonus: 20,
+          criticalPoint: 15,
+          mpCost: 12,
+          cooldown: 4,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+        ));
+        break;
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "ability_020",
+          name: "Soul Drain",
+          description: "Steals HP from an enemy and restores it to the user.",
+          hpBonus: 15,
+          mpCost: 10,
+          cooldown: 5,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+        ));
+        break;
+    }
+  }
+
+// Continue with other class-specific ability unlocks...
 
   // Sell Girl
   void sellGirl(String girlId) {
