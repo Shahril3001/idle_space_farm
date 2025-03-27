@@ -67,6 +67,7 @@ flutter:
     - assets/images/girls/
     - assets/images/ui/
     - assets/images/icons/
+    - assets/images/dungeons/
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

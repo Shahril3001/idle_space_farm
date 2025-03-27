@@ -25,7 +25,7 @@ class FarmPage extends StatelessWidget {
     return SafeArea(
       child: Scaffold(
         appBar: CustomAppBar(
-          title: '${farm.name}',
+          title: farm.name,
           height: 40,
           padding: EdgeInsets.zero,
           margin: EdgeInsets.zero,
