@@ -721,7 +721,7 @@ final List<GirlFarmer> girlsData = [
     miningEfficiency: 0.10,
     image: 'assets/images/girls/olivia.png',
     imageFace: 'assets/images/girls/olivia-f.png',
-    race: 'Olivia',
+    race: 'Human',
     type: 'Cleric',
     region: 'Astravia',
     description:

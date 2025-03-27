@@ -372,7 +372,7 @@ class GirlDetailsPage extends StatelessWidget {
                         size: 14, color: Colors.blueAccent),
                     SizedBox(width: 4),
                     Text(
-                      "${ability.mpCost}",
+                      "${ability.mpCost} MP",
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.blueAccent,
@@ -390,7 +390,7 @@ class GirlDetailsPage extends StatelessWidget {
                     Icon(Icons.bolt, size: 14, color: Colors.orangeAccent),
                     SizedBox(width: 4),
                     Text(
-                      "${ability.spCost}",
+                      "${ability.spCost} SP",
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.orangeAccent,

@@ -212,6 +212,7 @@ class DungeonScreen extends StatelessWidget {
       margin: EdgeInsets.only(bottom: 10),
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
+        // ignore: sort_child_properties_last
         child: Text(
           "Back",
           style: TextStyle(
@@ -221,7 +222,7 @@ class DungeonScreen extends StatelessWidget {
           ),
         ),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
+          backgroundColor: Colors.redAccent,
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(15),
           ),

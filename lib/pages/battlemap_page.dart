@@ -242,7 +242,7 @@ class MapScreen extends StatelessWidget {
             style: TextStyle(
                 color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
+          backgroundColor: Colors.redAccent,
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           padding: EdgeInsets.symmetric(vertical: 10),
