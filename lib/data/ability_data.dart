@@ -2,22 +2,80 @@ import '../models/ability_model.dart';
 
 final List<AbilitiesModel> abilitiesList = [
   // Human Ability
+  // 1. Basic - Second Wind
   AbilitiesModel(
-    abilitiesID: "ability_001",
+    abilitiesID: "human_001",
     name: "Second Wind",
-    description: "Restores a small amount of HP.",
-    hpBonus: 10,
+    description: "Restores a small amount of HP in a pinch.",
+    hpBonus: 15,
     spCost: 5,
     cooldown: 4,
     type: AbilityType.heal,
     targetType: TargetType.single,
     affectsEnemies: false,
   ),
-  // Elves Ability
+
+// 2. Basic - Tactical Strike
   AbilitiesModel(
-    abilitiesID: "ability_002",
+    abilitiesID: "human_002",
+    name: "Tactical Strike",
+    description: "A precise attack that ignores some defense.",
+    hpBonus: 25,
+    spCost: 8,
+    cooldown: 3,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
+    criticalPoint: 15,
+  ),
+
+// 3. Rare - Rallying Cry
+  AbilitiesModel(
+    abilitiesID: "human_003",
+    name: "Rallying Cry",
+    description: "Boosts attack of all allies for 3 turns.",
+    attackBonus: 15,
+    spCost: 12,
+    cooldown: 5,
+    type: AbilityType.buff,
+    targetType: TargetType.all,
+    affectsEnemies: false,
+  ),
+
+// 4. Rare - Last Stand
+  AbilitiesModel(
+    abilitiesID: "human_004",
+    name: "Last Stand",
+    description: "When HP is below 30%, gain 50% defense and 20% attack.",
+    defenseBonus: 50,
+    attackBonus: 20,
+    spCost: 15,
+    cooldown: 7,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
+  ),
+
+// 5. Special - Heroic Sacrifice
+  AbilitiesModel(
+    abilitiesID: "human_005",
+    name: "Heroic Sacrifice",
+    description:
+        "Deals massive damage to one enemy but reduces user's HP to 1.",
+    hpBonus: 999, // Special handling needed in code
+    spCost: 25,
+    cooldown: 10,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
+    criticalPoint: 30,
+  ),
+  // Elves Ability
+  // 1. Basic - Nature's Blessing
+  AbilitiesModel(
+    abilitiesID: "eldren_001",
     name: "Nature's Blessing",
-    description: "Increases agility and defense.",
+    description: "Increases agility and defense with natural magic.",
     defenseBonus: 15,
     agilityBonus: 10,
     spCost: 10,
@@ -26,12 +84,66 @@ final List<AbilitiesModel> abilitiesList = [
     targetType: TargetType.single,
     affectsEnemies: false,
   ),
-  // Demi Human Ability
+
+// 2. Basic - Sylvan Arrow
   AbilitiesModel(
-    abilitiesID: "ability_003",
-    name: "Beastial Fury",
-    description: "Increases attack and agility for a short duration.",
-    attackBonus: 10,
+    abilitiesID: "eldren_002",
+    name: "Sylvan Arrow",
+    description: "A magical arrow that never misses its mark.",
+    hpBonus: 20,
+    spCost: 7,
+    cooldown: 2,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
+    criticalPoint: 20, // Higher crit chance
+  ),
+
+// 3. Rare - Moonlight Veil
+  AbilitiesModel(
+    abilitiesID: "eldren_003",
+    name: "Moonlight Veil",
+    description:
+        "Creates a protective barrier that absorbs damage for all allies.",
+    defenseBonus: 30,
+    spCost: 18,
+    cooldown: 6,
+    type: AbilityType.buff,
+    targetType: TargetType.all,
+    affectsEnemies: false,
+  ),
+
+// 4. Rare - Ancient Whisper
+  AbilitiesModel(
+    abilitiesID: "eldren_004",
+    name: "Ancient Whisper",
+    description: "Silences all enemies for 2 turns, preventing magic use.",
+    spCost: 20,
+    cooldown: 8,
+    type: AbilityType.debuff,
+    targetType: TargetType.all,
+    affectsEnemies: true,
+  ),
+
+// 5. Special - World Tree's Gift
+  AbilitiesModel(
+    abilitiesID: "eldren_005",
+    name: "World Tree's Gift",
+    description: "Revives all fallen allies with 50% HP and clears debuffs.",
+    hpBonus: 50, // For revived allies
+    spCost: 30,
+    cooldown: 15,
+    type: AbilityType.heal,
+    targetType: TargetType.all,
+    affectsEnemies: false,
+  ),
+  // Demi Human Ability
+  // 1. Basic - Bestial Fury
+  AbilitiesModel(
+    abilitiesID: "therian_001",
+    name: "Bestial Fury",
+    description: "Increases attack and agility with animalistic rage.",
+    attackBonus: 15,
     agilityBonus: 10,
     spCost: 12,
     cooldown: 6,
@@ -39,12 +151,69 @@ final List<AbilitiesModel> abilitiesList = [
     targetType: TargetType.single,
     affectsEnemies: false,
   ),
-  // Dragonoid Ability
+
+// 2. Basic - Claw Swipe
   AbilitiesModel(
-    abilitiesID: "ability_004",
+    abilitiesID: "therian_002",
+    name: "Claw Swipe",
+    description: "A rapid series of slashes that hit multiple times.",
+    hpBonus: 15,
+    spCost: 5,
+    cooldown: 2,
+    type: AbilityType.attack,
+    targetType: TargetType.single,
+    affectsEnemies: true,
+    criticalPoint: 25, // Multi-hit with crit chance
+  ),
+
+// 3. Rare - Pack Tactics
+  AbilitiesModel(
+    abilitiesID: "therian_003",
+    name: "Pack Tactics",
+    description: "Increases damage for each living ally (up to +50%).",
+    attackBonus: 10, // Base + scaling per ally
+    spCost: 15,
+    cooldown: 5,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
+  ),
+
+// 4. Rare - Primal Howl
+  AbilitiesModel(
+    abilitiesID: "therian_004",
+    name: "Primal Howl",
+    description: "Reduces all enemies' defense and causes fear (miss chance).",
+    defenseBonus: -20, // Debuff
+    spCost: 18,
+    cooldown: 7,
+    type: AbilityType.debuff,
+    targetType: TargetType.all,
+    affectsEnemies: true,
+  ),
+
+// 5. Special - Blood Moon Frenzy
+  AbilitiesModel(
+    abilitiesID: "therian_005",
+    name: "Blood Moon Frenzy",
+    description:
+        "Enters unstoppable frenzy for 3 turns, but loses 10% HP per turn.",
+    attackBonus: 40,
+    agilityBonus: 20,
+    hpBonus: -10, // HP cost per turn
+    spCost: 25,
+    cooldown: 12,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
+  ),
+  // Dragonoid Ability
+  // 1. Basic - Dragon's Breath
+  AbilitiesModel(
+    abilitiesID: "dracovar_001",
     name: "Dragon's Breath",
-    description: "Deals fire damage to all enemies.",
-    hpBonus: 20, // Now using hpBonus for damage in attack abilities
+    description: "Unleashes elemental fury on all enemies.",
+    hpBonus: 25,
     spCost: 15,
     cooldown: 5,
     type: AbilityType.attack,
@@ -52,9 +221,66 @@ final List<AbilitiesModel> abilitiesList = [
     affectsEnemies: true,
     criticalPoint: 10,
   ),
+
+// 2. Basic - Scales of Protection
+  AbilitiesModel(
+    abilitiesID: "dracovar_002",
+    name: "Scales of Protection",
+    description: "Hardens dragon scales to reduce incoming damage.",
+    defenseBonus: 25,
+    spCost: 10,
+    cooldown: 4,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
+  ),
+
+// 3. Rare - Wing Buffet
+  AbilitiesModel(
+    abilitiesID: "dracovar_003",
+    name: "Wing Buffet",
+    description: "Powerful wings knock back enemies, delaying their turns.",
+    agilityBonus: -15, // Reduces enemy agility
+    spCost: 12,
+    cooldown: 6,
+    type: AbilityType.debuff,
+    targetType: TargetType.all,
+    affectsEnemies: true,
+  ),
+
+// 4. Rare - Draconic Awakening
+  AbilitiesModel(
+    abilitiesID: "dracovar_004",
+    name: "Draconic Awakening",
+    description: "Temporarily unlocks true dragon form, boosting all stats.",
+    attackBonus: 20,
+    defenseBonus: 20,
+    agilityBonus: 15,
+    hpBonus: 30,
+    spCost: 20,
+    cooldown: 8,
+    type: AbilityType.buff,
+    targetType: TargetType.single,
+    affectsEnemies: false,
+  ),
+
+// 5. Special - Apocalypse Flame
+  AbilitiesModel(
+    abilitiesID: "dracovar_005",
+    name: "Apocalypse Flame",
+    description:
+        "Unleashes a devastating firestorm that burns enemies for 3 turns.",
+    hpBonus: 40,
+    spCost: 30,
+    cooldown: 15,
+    type: AbilityType.attack,
+    targetType: TargetType.all,
+    affectsEnemies: true,
+    criticalPoint: 20,
+  ),
   // Demon Ability
   AbilitiesModel(
-    abilitiesID: "ability_005",
+    abilitiesID: "daemon_001",
     name: "Shadow Step",
     description: "Teleports behind the enemy, increasing agility.",
     agilityBonus: 10,
@@ -189,6 +415,12 @@ final List<AbilitiesModel> abilitiesList = [
     targetType: TargetType.single,
     affectsEnemies: false,
   ),
+
+  // Warrior
+  // Mage
+  // Rogue
+  // Cleric
+  // Paladin
   // Divine Cleric Abilities
   // Holy Light - AoE heal that damages undead
   AbilitiesModel(

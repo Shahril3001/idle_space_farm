@@ -38,4 +38,12 @@ class GirlRepository {
       await deleteGirl(girl.id);
     }
   }
+
+  void debugPrintGirls() {
+    print('Stored girls: ${_box.values.map((g) => g.name).join(', ')}');
+    _box.values.forEach((girl) {
+      print('${girl.name} abilities:');
+      girl.abilities.forEach((a) => print('- ${a.name} (${a.targetType})'));
+    });
+  }
 }

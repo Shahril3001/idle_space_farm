@@ -221,6 +221,7 @@ class GameProvider with ChangeNotifier {
   List<GirlFarmer> performGachaGirl({int pulls = 1}) {
     final credits = _resourceRepository.getResourceByName('Credits');
     final cost = pulls * 10;
+
     if (credits != null && credits.amount >= cost) {
       credits.amount -= cost;
       _resourceRepository.updateResource(credits);
@@ -229,57 +230,71 @@ class GameProvider with ChangeNotifier {
       final girls = <GirlFarmer>[];
 
       for (var i = 0; i < pulls; i++) {
-        final probability = random.nextDouble();
-        List<GirlFarmer> availableGirls = [];
-
-        if (probability < 0.05) {
-          availableGirls =
-              girlsData.where((girl) => girl.rarity == 'Unique').toList();
-        } else if (probability < 0.30) {
-          availableGirls =
-              girlsData.where((girl) => girl.rarity == 'Rare').toList();
-        } else {
-          availableGirls =
-              girlsData.where((girl) => girl.rarity == 'Common').toList();
-        }
+        // Get girls by rarity (keep your existing probability logic)
+        final availableGirls = _getGirlsByRarity(random.nextDouble());
 
         if (availableGirls.isNotEmpty) {
           final selectedGirl =
               availableGirls[random.nextInt(availableGirls.length)];
-          girls.add(GirlFarmer(
-            id: generateUniqueId(), // Generate a unique ID
-            name: selectedGirl.name,
-            level: selectedGirl.level,
-            miningEfficiency: selectedGirl.miningEfficiency,
-            assignedFarm: selectedGirl.assignedFarm,
-            rarity: selectedGirl.rarity,
-            stars: selectedGirl.stars,
-            image: selectedGirl.image,
-            imageFace: selectedGirl.imageFace,
-            attackPoints: selectedGirl.attackPoints,
-            defensePoints: selectedGirl.defensePoints,
-            agilityPoints: selectedGirl.agilityPoints,
-            hp: selectedGirl.hp,
-            mp: selectedGirl.mp,
-            sp: selectedGirl.sp,
-            maxHp: selectedGirl.hp,
-            maxMp: selectedGirl.mp,
-            maxSp: selectedGirl.sp,
-            abilities:
-                List<AbilitiesModel>.from(selectedGirl.abilities), // Deep copy
-            race: selectedGirl.race,
-            type: selectedGirl.type,
-            region: selectedGirl.region,
-            description: selectedGirl.description,
-          ));
+          final newGirl = _createGirlFromTemplate(selectedGirl);
+          girls.add(newGirl);
+
+          // Debug print abilities
+          print(
+              'Summoned ${newGirl.name} with ${newGirl.abilities.length} abilities:');
+          newGirl.abilities
+              .forEach((a) => print('- ${a.name} (${a.abilitiesID})'));
         }
       }
-
-      // Debugging: Print pulled girls
-      print("Pulled girls: ${girls.map((girl) => girl.name).toList()}");
       return girls;
     }
-    return []; // Not enough credits
+    return [];
+  }
+
+  List<GirlFarmer> _getGirlsByRarity(double probability) {
+    if (probability < 0.05) {
+      return girlsData.where((girl) => girl.rarity == 'Unique').toList();
+    } else if (probability < 0.30) {
+      return girlsData.where((girl) => girl.rarity == 'Rare').toList();
+    }
+    return girlsData.where((girl) => girl.rarity == 'Common').toList();
+  }
+
+  GirlFarmer _createGirlFromTemplate(GirlFarmer template) {
+    return GirlFarmer(
+      id: generateUniqueId(),
+      name: template.name,
+      level: template.level,
+      miningEfficiency: template.miningEfficiency,
+      rarity: template.rarity,
+      stars: template.stars,
+      image: template.image,
+      imageFace: template.imageFace,
+      attackPoints: template.attackPoints,
+      defensePoints: template.defensePoints,
+      agilityPoints: template.agilityPoints,
+      hp: template.hp,
+      mp: template.mp,
+      sp: template.sp,
+      maxHp: template.hp,
+      maxMp: template.mp,
+      maxSp: template.sp,
+      abilities:
+          _initializeAbilities(template.race, template.abilities), // Fixed!
+      race: template.race,
+      type: template.type,
+      region: template.region,
+      description: template.description,
+    );
+  }
+
+  List<AbilitiesModel> _initializeAbilities(
+      String race, List<AbilitiesModel> templateAbilities) {
+    // Always create fresh copies of abilities
+    return templateAbilities.map((ability) => ability.freshCopy()).toList();
+
+    // OR use RaceAbilities if you want to ensure standard starters:
+    // return RaceAbilities.getStarterAbilities(race);
   }
 
   bool upgradeGirl(String girlId) {
@@ -356,6 +371,12 @@ class GameProvider with ChangeNotifier {
       case "Eldren":
         _unlockEldrenAbilities(girl);
         break;
+      case "Therian":
+        _unlockTherianAbilities(girl);
+        break;
+      case "Dracovar":
+        _unlockDracovarAbilities(girl);
+        break;
     }
 
     // Then handle class-specific ability unlocks
@@ -372,63 +393,246 @@ class GameProvider with ChangeNotifier {
 // Example race-specific ability unlocks
   void _unlockHumanAbilities(GirlFarmer girl) {
     switch (girl.level) {
-      case 2:
+      case 15:
         girl.addAbility(AbilitiesModel(
-          abilitiesID: "ability_001",
-          name: "Second Wind",
-          description: "Restores a small amount of HP.",
-          hpBonus: 10,
-          spCost: 5,
-          cooldown: 4,
-          type: AbilityType.heal,
-          targetType: TargetType.single,
-          affectsEnemies: false,
-        ));
-        break;
-      case 5:
-        girl.addAbility(AbilitiesModel(
-          abilitiesID: "ability_101",
-          name: "Power Strike",
-          description: "A strong basic attack.",
-          hpBonus: 15,
-          spCost: 5,
+          abilitiesID: "human_002",
+          name: "Tactical Strike",
+          description: "A precise attack that ignores some defense.",
+          hpBonus: 25,
+          spCost: 8,
           cooldown: 3,
           type: AbilityType.attack,
           targetType: TargetType.single,
           affectsEnemies: true,
+          criticalPoint: 15,
         ));
         break;
-      // Add more level milestones as needed
-    }
-  }
-
-  void _unlockEldrenAbilities(GirlFarmer girl) {
-    switch (girl.level) {
-      case 2:
+      case 35:
         girl.addAbility(AbilitiesModel(
-          abilitiesID: "ability_002",
-          name: "Nature's Blessing",
-          description: "Increases agility and defense.",
-          defenseBonus: 15,
-          agilityBonus: 10,
-          spCost: 10,
-          cooldown: 3,
+          abilitiesID: "human_003",
+          name: "Rallying Cry",
+          description: "Boosts attack of all allies for 3 turns.",
+          attackBonus: 15,
+          spCost: 12,
+          cooldown: 5,
+          type: AbilityType.buff,
+          targetType: TargetType.all,
+          affectsEnemies: false,
+        ));
+        break;
+      case 55:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "human_004",
+          name: "Last Stand",
+          description: "When HP is below 30%, gain 50% defense and 20% attack.",
+          defenseBonus: 50,
+          attackBonus: 20,
+          spCost: 15,
+          cooldown: 7,
           type: AbilityType.buff,
           targetType: TargetType.single,
           affectsEnemies: false,
         ));
         break;
-      case 5:
+      case 80:
         girl.addAbility(AbilitiesModel(
-          abilitiesID: "ability_102",
-          name: "Nature's Touch",
-          description: "Minor healing from nature.",
-          hpBonus: 10,
-          mpCost: 8,
-          cooldown: 4,
+          abilitiesID: "human_005",
+          name: "Heroic Sacrifice",
+          description:
+              "Deals massive damage to one enemy but reduces user's HP to 1.",
+          hpBonus: 999, // Special handling needed in code
+          spCost: 25,
+          cooldown: 10,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+          criticalPoint: 30,
+        ));
+        break;
+    }
+  }
+
+  void _unlockEldrenAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "eldren_002",
+          name: "Sylvan Arrow",
+          description: "A magical arrow that never misses its mark.",
+          hpBonus: 20,
+          spCost: 7,
+          cooldown: 2,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+          criticalPoint: 20, // Higher crit chance
+        ));
+        break;
+      case 35:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "eldren_003",
+          name: "Moonlight Veil",
+          description:
+              "Creates a protective barrier that absorbs damage for all allies.",
+          defenseBonus: 30,
+          spCost: 18,
+          cooldown: 6,
+          type: AbilityType.buff,
+          targetType: TargetType.all,
+          affectsEnemies: false,
+        ));
+        break;
+      case 55:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "eldren_004",
+          name: "Ancient Whisper",
+          description:
+              "Silences all enemies for 2 turns, preventing magic use.",
+          spCost: 20,
+          cooldown: 8,
+          type: AbilityType.debuff,
+          targetType: TargetType.all,
+          affectsEnemies: true,
+        ));
+        break;
+      case 80:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "eldren_005",
+          name: "World Tree's Gift",
+          description:
+              "Revives all fallen allies with 50% HP and clears debuffs.",
+          hpBonus: 50, // For revived allies
+          spCost: 30,
+          cooldown: 15,
           type: AbilityType.heal,
+          targetType: TargetType.all,
+          affectsEnemies: false,
+        ));
+        break;
+    }
+  }
+
+  void _unlockTherianAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "therian_002",
+          name: "Claw Swipe",
+          description: "A rapid series of slashes that hit multiple times.",
+          hpBonus: 15,
+          spCost: 5,
+          cooldown: 2,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+          criticalPoint: 25, // Multi-hit with crit chance
+        ));
+        break;
+      case 35:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "therian_003",
+          name: "Pack Tactics",
+          description: "Increases damage for each living ally (up to +50%).",
+          attackBonus: 10, // Base + scaling per ally
+          spCost: 15,
+          cooldown: 5,
+          type: AbilityType.buff,
           targetType: TargetType.single,
           affectsEnemies: false,
+        ));
+        break;
+      case 55:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "therian_004",
+          name: "Primal Howl",
+          description:
+              "Reduces all enemies' defense and causes fear (miss chance).",
+          defenseBonus: -20, // Debuff
+          spCost: 18,
+          cooldown: 7,
+          type: AbilityType.debuff,
+          targetType: TargetType.all,
+          affectsEnemies: true,
+        ));
+        break;
+      case 80:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "therian_005",
+          name: "Blood Moon Frenzy",
+          description:
+              "Enters unstoppable frenzy for 3 turns, but loses 10% HP per turn.",
+          attackBonus: 40,
+          agilityBonus: 20,
+          hpBonus: -10, // HP cost per turn
+          spCost: 25,
+          cooldown: 12,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+    }
+  }
+
+  void _unlockDracovarAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "dracovar_002",
+          name: "Scales of Protection",
+          description: "Hardens dragon scales to reduce incoming damage.",
+          defenseBonus: 25,
+          spCost: 10,
+          cooldown: 4,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+      case 35:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "dracovar_003",
+          name: "Wing Buffet",
+          description:
+              "Powerful wings knock back enemies, delaying their turns.",
+          agilityBonus: -15, // Reduces enemy agility
+          spCost: 12,
+          cooldown: 6,
+          type: AbilityType.debuff,
+          targetType: TargetType.all,
+          affectsEnemies: true,
+        ));
+        break;
+      case 55:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "dracovar_004",
+          name: "Draconic Awakening",
+          description:
+              "Temporarily unlocks true dragon form, boosting all stats.",
+          attackBonus: 20,
+          defenseBonus: 20,
+          agilityBonus: 15,
+          hpBonus: 30,
+          spCost: 20,
+          cooldown: 8,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+      case 80:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "dracovar_005",
+          name: "Apocalypse Flame",
+          description:
+              "Unleashes a devastating firestorm that burns enemies for 3 turns.",
+          hpBonus: 40,
+          spCost: 30,
+          cooldown: 15,
+          type: AbilityType.attack,
+          targetType: TargetType.all,
+          affectsEnemies: true,
+          criticalPoint: 20,
         ));
         break;
     }

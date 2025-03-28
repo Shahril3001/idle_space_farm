@@ -1,4 +1,6 @@
+import '../models/ability_model.dart';
 import '../models/girl_farmer_model.dart';
+import 'race_abilities.dart';
 import 'dart:math';
 
 final Random _random = Random();
@@ -132,6 +134,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Warrior')['mp']!,
     maxSp: _generateStats('Common', 'Warrior')['sp']!,
     criticalPoint: 3, // Default critical point
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'common-2',
@@ -156,6 +159,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Mage')['mp']!,
     maxSp: _generateStats('Common', 'Mage')['sp']!,
     criticalPoint: 3, // Default critical point
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'common-3',
@@ -180,6 +184,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Rogue')['mp']!,
     maxSp: _generateStats('Common', 'Rogue')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'common-4',
@@ -204,6 +209,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Cleric')['mp']!,
     maxSp: _generateStats('Common', 'Cleric')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Therian'),
   ),
   GirlFarmer(
     id: 'common-5',
@@ -228,6 +234,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Paladin')['mp']!,
     maxSp: _generateStats('Common', 'Paladin')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Dracovar'),
   ),
   GirlFarmer(
     id: 'common-6',
@@ -252,6 +259,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Elementalist')['mp']!,
     maxSp: _generateStats('Common', 'Elementalist')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'common-7',
@@ -276,6 +284,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Rogue')['mp']!,
     maxSp: _generateStats('Common', 'Rogue')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'common-8',
@@ -300,6 +309,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Archer')['mp']!,
     maxSp: _generateStats('Common', 'Archer')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'common-9',
@@ -324,6 +334,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Warrior')['mp']!,
     maxSp: _generateStats('Common', 'Warrior')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Therian'),
   ),
   GirlFarmer(
     id: 'common-10',
@@ -348,6 +359,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Common', 'Archer')['mp']!,
     maxSp: _generateStats('Common', 'Archer')['sp']!,
     criticalPoint: 3,
+    abilities: RaceAbilities.getStarterAbilities('Therian'),
   ),
 
   // Rare Girls (3-4 stars)
@@ -374,6 +386,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Warrior')['mp']!,
     maxSp: _generateStats('Rare', 'Warrior')['sp']!,
     criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'rare-2',
@@ -398,6 +411,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Mage')['mp']!,
     maxSp: _generateStats('Rare', 'Mage')['sp']!,
     criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'rare-3',
@@ -422,6 +436,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Paladin')['mp']!,
     maxSp: _generateStats('Rare', 'Paladin')['sp']!,
     criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'rare-4',
@@ -446,6 +461,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Elementalist')['mp']!,
     maxSp: _generateStats('Rare', 'Elementalist')['sp']!,
     criticalPoint: 5, // Higher critical point for Rare
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'rare-5',
@@ -470,6 +486,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Warrior')['mp']!,
     maxSp: _generateStats('Rare', 'Warrior')['sp']!,
     criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'rare-6',
@@ -494,6 +511,107 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Rare', 'Archer')['mp']!,
     maxSp: _generateStats('Rare', 'Archer')['sp']!,
     criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
+  ),
+  GirlFarmer(
+    id: 'rare-7',
+    name: 'Roxy',
+    rarity: 'Rare',
+    stars: 3,
+    miningEfficiency: 0.05,
+    image: 'assets/images/girls/roxy.png',
+    imageFace: 'assets/images/girls/roxy-f.png',
+    race: 'Human',
+    type: 'Archer',
+    region: 'Sylvaris',
+    description:
+        "Roxy, a rare Runebinder, inscribes powerful runes into her archer weapons. Her knowledge of ancient magic makes her a valuable ally.",
+    hp: _generateStats('Rare', 'Archer')['hp']!,
+    mp: _generateStats('Rare', 'Archer')['mp']!,
+    sp: _generateStats('Rare', 'Archer')['sp']!,
+    attackPoints: _generateStats('Rare', 'Archer')['attackPoints']!,
+    defensePoints: _generateStats('Rare', 'Archer')['defensePoints']!,
+    agilityPoints: _generateStats('Rare', 'Archer')['agilityPoints']!,
+    maxHp: _generateStats('Rare', 'Archer')['hp']!,
+    maxMp: _generateStats('Rare', 'Archer')['mp']!,
+    maxSp: _generateStats('Rare', 'Archer')['sp']!,
+    criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'rare-8',
+    name: 'Sistina',
+    rarity: 'Rare',
+    stars: 3,
+    miningEfficiency: 0.05,
+    image: 'assets/images/girls/sistina.png',
+    imageFace: 'assets/images/girls/sistina-f.png',
+    race: 'Human',
+    type: 'Warrior',
+    region: 'Sylvaris',
+    description:
+        "Sistina, a rare Runebinder, inscribes powerful runes into her archer weapons. Her knowledge of ancient magic makes her a valuable ally.",
+    hp: _generateStats('Rare', 'Warrior')['hp']!,
+    mp: _generateStats('Rare', 'Warrior')['mp']!,
+    sp: _generateStats('Rare', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Rare', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Rare', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Rare', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Rare', 'Warrior')['hp']!,
+    maxMp: _generateStats('Rare', 'Warrior')['mp']!,
+    maxSp: _generateStats('Rare', 'Warrior')['sp']!,
+    criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'rare-9',
+    name: 'Eleanor',
+    rarity: 'Rare',
+    stars: 3,
+    miningEfficiency: 0.05,
+    image: 'assets/images/girls/eleanor.png',
+    imageFace: 'assets/images/girls/eleanor-f.png',
+    race: 'Human',
+    type: 'Warrior',
+    region: 'Sylvaris',
+    description:
+        "Eleanor, a rare Runebinder, inscribes powerful runes into her archer weapons. Her knowledge of ancient magic makes her a valuable ally.",
+    hp: _generateStats('Rare', 'Warrior')['hp']!,
+    mp: _generateStats('Rare', 'Warrior')['mp']!,
+    sp: _generateStats('Rare', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Rare', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Rare', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Rare', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Rare', 'Warrior')['hp']!,
+    maxMp: _generateStats('Rare', 'Warrior')['mp']!,
+    maxSp: _generateStats('Rare', 'Warrior')['sp']!,
+    criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'rare-10',
+    name: 'Lilithra ',
+    rarity: 'Rare',
+    stars: 3,
+    miningEfficiency: 0.05,
+    image: 'assets/images/girls/lilithra.png',
+    imageFace: 'assets/images/girls/lilithra-f.png',
+    race: 'Daemon',
+    type: 'Warrior',
+    region: 'Sylvaris',
+    description:
+        "Lilithra, a decendents from one of Bloodwhisper Dynasty, ruler in Daemon realm, inscribes powerful runes into her sword weapons. Her knowledge of ancient magic makes her a valuable ally.",
+    hp: _generateStats('Rare', 'Warrior')['hp']!,
+    mp: _generateStats('Rare', 'Warrior')['mp']!,
+    sp: _generateStats('Rare', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Rare', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Rare', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Rare', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Rare', 'Warrior')['hp']!,
+    maxMp: _generateStats('Rare', 'Warrior')['mp']!,
+    maxSp: _generateStats('Rare', 'Warrior')['sp']!,
+    criticalPoint: 5,
+    abilities: RaceAbilities.getStarterAbilities('Daemon'),
   ),
 
   // Unique Girls (5-6 stars)
@@ -520,6 +638,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Warrior')['mp']!,
     maxSp: _generateStats('Unique', 'Warrior')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'unique-2',
@@ -544,6 +663,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Mage')['mp']!,
     maxSp: _generateStats('Unique', 'Mage')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Therian'),
   ),
   GirlFarmer(
     id: 'unique-3',
@@ -568,6 +688,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Rogue')['mp']!,
     maxSp: _generateStats('Unique', 'Rogue')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Dracovar'),
   ),
   GirlFarmer(
     id: 'unique-4',
@@ -592,6 +713,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Cleric')['mp']!,
     maxSp: _generateStats('Unique', 'Cleric')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'unique-5',
@@ -616,6 +738,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Cleric')['mp']!,
     maxSp: _generateStats('Unique', 'Cleric')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
     id: 'unique-6',
@@ -640,6 +763,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Elementalist')['mp']!,
     maxSp: _generateStats('Unique', 'Elementalist')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'unique-7',
@@ -664,6 +788,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Warrior')['mp']!,
     maxSp: _generateStats('Unique', 'Warrior')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Eldren'),
   ),
   GirlFarmer(
     id: 'unique-8',
@@ -688,6 +813,7 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Archer')['mp']!,
     maxSp: _generateStats('Unique', 'Archer')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Therian'),
   ),
   GirlFarmer(
     id: 'unique-9',
@@ -712,9 +838,10 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Mage')['mp']!,
     maxSp: _generateStats('Unique', 'Mage')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
   GirlFarmer(
-    id: 'unique-5',
+    id: 'unique-10',
     name: 'Olivia',
     rarity: 'Unique',
     stars: 5,
@@ -736,5 +863,81 @@ final List<GirlFarmer> girlsData = [
     maxMp: _generateStats('Unique', 'Cleric')['mp']!,
     maxSp: _generateStats('Unique', 'Cleric')['sp']!,
     criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'unique-11',
+    name: 'Medis',
+    rarity: 'Unique',
+    stars: 6,
+    miningEfficiency: 0.12,
+    image: 'assets/images/girls/medis.png',
+    imageFace: 'assets/images/girls/medis-f.png',
+    race: 'Human',
+    type: 'Warrior',
+    region: 'Astravia',
+    description:
+        "Medis, a princess and also one of the decendents 5 heroes family warrior, commands the elements with unparalleled mastery. Her wisdom and power make her a beacon of hope in Astravia.",
+    hp: _generateStats('Unique', 'Warrior')['hp']!,
+    mp: _generateStats('Unique', 'Warrior')['mp']!,
+    sp: _generateStats('Unique', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Unique', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Unique', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Unique', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Unique', 'Warrior')['hp']!,
+    maxMp: _generateStats('Unique', 'Warrior')['mp']!,
+    maxSp: _generateStats('Unique', 'Warrior')['sp']!,
+    criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'unique-12',
+    name: 'Jeanne',
+    rarity: 'Unique',
+    stars: 6,
+    miningEfficiency: 0.12,
+    image: 'assets/images/girls/jeanne.png',
+    imageFace: 'assets/images/girls/jeanne-f.png',
+    race: 'Human',
+    type: 'Warrior',
+    region: 'Astravia',
+    description:
+        "Jeanne, one of the decendents 5 heroes family warrior, commands the elements with unparalleled mastery. Her wisdom and power make her a beacon of hope in Astravia.",
+    hp: _generateStats('Unique', 'Warrior')['hp']!,
+    mp: _generateStats('Unique', 'Warrior')['mp']!,
+    sp: _generateStats('Unique', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Unique', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Unique', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Unique', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Unique', 'Warrior')['hp']!,
+    maxMp: _generateStats('Unique', 'Warrior')['mp']!,
+    maxSp: _generateStats('Unique', 'Warrior')['sp']!,
+    criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
+  ),
+  GirlFarmer(
+    id: 'unique-13',
+    name: 'Elizabeth',
+    rarity: 'Unique',
+    stars: 6,
+    miningEfficiency: 0.12,
+    image: 'assets/images/girls/elizabeth.png',
+    imageFace: 'assets/images/girls/elizabeth-f.png',
+    race: 'Human',
+    type: 'Warrior',
+    region: 'Astravia',
+    description:
+        "Elizabeth, daugther from Baron, commands the elements with unparalleled mastery. Her wisdom and power make her a beacon of hope in Astravia.",
+    hp: _generateStats('Unique', 'Warrior')['hp']!,
+    mp: _generateStats('Unique', 'Warrior')['mp']!,
+    sp: _generateStats('Unique', 'Warrior')['sp']!,
+    attackPoints: _generateStats('Unique', 'Warrior')['attackPoints']!,
+    defensePoints: _generateStats('Unique', 'Warrior')['defensePoints']!,
+    agilityPoints: _generateStats('Unique', 'Warrior')['agilityPoints']!,
+    maxHp: _generateStats('Unique', 'Warrior')['hp']!,
+    maxMp: _generateStats('Unique', 'Warrior')['mp']!,
+    maxSp: _generateStats('Unique', 'Warrior')['sp']!,
+    criticalPoint: 10,
+    abilities: RaceAbilities.getStarterAbilities('Human'),
   ),
 ];

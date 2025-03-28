@@ -1,6 +1,6 @@
 import 'dart:math';
 import 'package:hive/hive.dart';
-import 'ability_model.dart'; // Import the AbilitiesModel
+import 'ability_model.dart';
 
 part 'girl_farmer_model.g.dart';
 
@@ -126,9 +126,9 @@ class GirlFarmer {
       agilityPoints: agilityPoints,
       hp: maxHp, // Reset to full HP
       maxHp: maxHp,
-      mp: mp,
+      mp: maxMp, // Reset to full MP
       maxMp: maxMp,
-      sp: sp,
+      sp: maxSp, // Reset to full SP
       maxSp: maxSp,
       abilities: abilities.map((a) => a.freshCopy()).toList(),
       race: race,
@@ -136,6 +136,9 @@ class GirlFarmer {
       region: region,
       description: description,
       criticalPoint: criticalPoint,
+      currentCooldowns: {}, // Fresh modifiable empty map
+      // Alternative if you need to preserve some cooldowns:
+      // currentCooldowns: Map.from(currentCooldowns)..removeWhere((_, cd) => cd <= 0),
     );
   }
 

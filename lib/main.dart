@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'package:idle_space_farm/repositories/ability_repository.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:provider/provider.dart';
 import 'models/floor_model.dart';
@@ -63,12 +64,12 @@ void main() async {
   if (!Hive.isAdapterRegistered(1)) Hive.registerAdapter(FarmAdapter());
   if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GirlFarmerAdapter());
   if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(EquipmentAdapter());
-  if (!Hive.isAdapterRegistered(4))
-    // ignore: curly_braces_in_flow_control_structures
-    Hive.registerAdapter(FloorAdapter()); // Register EnemyAdapter
-  if (!Hive.isAdapterRegistered(4))
-    // ignore: curly_braces_in_flow_control_structures
+  if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(FloorAdapter());
+  if (!Hive.isAdapterRegistered(6))
     Hive.registerAdapter(AbilitiesModelAdapter());
+  if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(AbilityTypeAdapter());
+  if (!Hive.isAdapterRegistered(8)) Hive.registerAdapter(TargetTypeAdapter());
+
   // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
 
@@ -77,6 +78,7 @@ void main() async {
   final farmRepository = FarmRepository(box);
   final equipmentRepository = EquipmentRepository(box);
   final girlRepository = GirlRepository(box); // Initialize EnemyRepository
+  final abilityRepository = AbilityRepository(box);
 
   runApp(
     MultiProvider(
