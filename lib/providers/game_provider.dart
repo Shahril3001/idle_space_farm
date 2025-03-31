@@ -377,6 +377,9 @@ class GameProvider with ChangeNotifier {
       case "Dracovar":
         _unlockDracovarAbilities(girl);
         break;
+      case "Daemon":
+        _unlockDaemonAbilities(girl);
+        break;
     }
 
     // Then handle class-specific ability unlocks
@@ -633,6 +636,67 @@ class GameProvider with ChangeNotifier {
           targetType: TargetType.all,
           affectsEnemies: true,
           criticalPoint: 20,
+        ));
+        break;
+    }
+  }
+
+  void _unlockDaemonAbilities(GirlFarmer girl) {
+    switch (girl.level) {
+      case 15:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "daemon_002",
+          name: "Hellfire Blast",
+          description: "Unleashes a torrent of hellfire on all enemies.",
+          hpBonus: 25, // Damage value
+          mpCost: 15,
+          cooldown: 4,
+          type: AbilityType.attack,
+          targetType: TargetType.all,
+          affectsEnemies: true,
+          criticalPoint: 15,
+        ));
+        break;
+      case 35:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "daemon_004",
+          name: "Soul Drain",
+          description: "Steals life force from an enemy, healing the caster.",
+          hpBonus: 20, // Damage dealt and HP drained
+          mpCost: 12,
+          cooldown: 3,
+          type: AbilityType.attack,
+          targetType: TargetType.single,
+          affectsEnemies: true,
+          drainsHealth: true, // Enables lifesteal
+          criticalPoint: 15,
+        ));
+        break;
+      case 55:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "daemon_003",
+          name: "Demonic Pact",
+          description: "Sacrifices HP to greatly increase attack power.",
+          hpBonus: -15, // HP cost
+          attackBonus: 20,
+          spCost: 10,
+          cooldown: 5,
+          type: AbilityType.buff,
+          targetType: TargetType.single,
+          affectsEnemies: false,
+        ));
+        break;
+      case 80:
+        girl.addAbility(AbilitiesModel(
+          abilitiesID: "daemon_006",
+          name: "Dark Regeneration",
+          description: "Channels dark energy to restore health over time.",
+          hpBonus: 30,
+          mpCost: 20,
+          cooldown: 6,
+          type: AbilityType.heal,
+          targetType: TargetType.single,
+          affectsEnemies: false,
         ));
         break;
     }

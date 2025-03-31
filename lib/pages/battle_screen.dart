@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:idle_space_farm/pages/navigationbar.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../models/girl_farmer_model.dart';
@@ -74,6 +75,7 @@ class _BattleContent extends StatefulWidget {
 class __BattleContentState extends State<_BattleContent> {
   bool _showBattleLog = true;
   late final ScrollController _logScrollController;
+  bool _showingResultDialog = false; // Add this flag
 
   @override
   void initState() {
@@ -87,6 +89,79 @@ class __BattleContentState extends State<_BattleContent> {
         widget.difficulty,
         predefinedEnemies: widget.enemies,
       );
+
+      // Add this listener
+      provider.addListener(() {
+        if (provider.isBattleOver && !_showingResultDialog) {
+          _showingResultDialog = true;
+          _showBattleResultDialog(context, provider);
+        }
+      });
+    });
+  }
+
+  void _showBattleResultDialog(BuildContext context, BattleProvider provider) {
+    showDialog(
+      context: context,
+      barrierDismissible: false,
+      builder: (context) => AlertDialog(
+        title: Text(provider.battleResult),
+        content: Text(provider.battleResult == "Victory"
+            ? "Congratulations! You won the battle!"
+            : "Your party was defeated..."),
+        actions: [
+          TextButton(
+            onPressed: () {
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  transitionDuration: Duration(milliseconds: 500),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      HomePage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: Offset(0, 0.5),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
+              ); // Close the dialog
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  transitionDuration: Duration(milliseconds: 500),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      HomePage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: Offset(0, 0.5),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
+              ); // Go back to previous screen
+              provider.resetBattle(); // Clean up battle state
+            },
+            child: const Text("OK"),
+          ),
+        ],
+      ),
+    ).then((_) {
+      _showingResultDialog = false;
     });
   }
 

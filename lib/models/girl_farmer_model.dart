@@ -7,7 +7,7 @@ part 'girl_farmer_model.g.dart';
 @HiveType(typeId: 2)
 class GirlFarmer {
   @HiveField(0)
-  String id; // Unique identifier
+  String id;
 
   @HiveField(1)
   String name;
@@ -22,16 +22,16 @@ class GirlFarmer {
   String? assignedFarm;
 
   @HiveField(5)
-  String rarity; // Common, Rare, Unique
+  String rarity;
 
   @HiveField(6)
-  int stars; // 1-6
+  int stars;
 
   @HiveField(7)
-  String image; // Path to the girl's full-body image
+  String image;
 
   @HiveField(8)
-  String imageFace; // Path to the girl's face image
+  String imageFace;
 
   @HiveField(9)
   int attackPoints;
@@ -52,34 +52,64 @@ class GirlFarmer {
   int sp;
 
   @HiveField(15)
-  List<AbilitiesModel> abilities; // List of AbilitiesModel
+  List<AbilitiesModel> abilities;
 
   @HiveField(16)
-  String race; // Human, Elf, Demon, etc.
+  String race;
 
   @HiveField(17)
-  String type; // Warrior, Mage, Assassin, etc.
+  String type;
 
   @HiveField(18)
-  String region; // East, West, North, etc.
+  String region;
 
   @HiveField(19)
-  String description; // Detailed character description
+  String description;
 
   @HiveField(20)
-  int maxHp; // Maximum HP
+  int maxHp;
 
   @HiveField(21)
-  int maxMp; // Maximum MP
+  int maxMp;
 
   @HiveField(22)
-  int maxSp; // Maximum SP
+  int maxSp;
 
   @HiveField(23)
-  int criticalPoint; // Critical hit chance or damage multiplier
+  int criticalPoint;
 
   @HiveField(24)
-  Map<String, int> currentCooldowns; // Track cooldowns for abilities
+  Map<String, int> _cooldownsStorage; // Private storage for Hive
+
+  @HiveField(25)
+  List<ElementType> elementAffinities;
+
+  @HiveField(26)
+  List<StatusEffect> statusEffects;
+
+  @HiveField(27)
+  dynamic forcedTarget;
+
+  @HiveField(28)
+  bool skipNextTurn;
+
+  @HiveField(29)
+  bool mindControlled;
+
+  @HiveField(30)
+  dynamic mindController;
+
+  @HiveField(31)
+  List<String> partyMemberIds;
+
+  // Public getter that returns a mutable copy
+
+// To (more efficient version):
+  Map<String, int> get currentCooldowns {
+    return _cooldownsStorage.isEmpty
+        ? <String, int>{}
+        : Map<String, int>.from(_cooldownsStorage);
+  }
 
   GirlFarmer({
     required this.id,
@@ -97,8 +127,7 @@ class GirlFarmer {
     this.hp = 100,
     this.mp = 50,
     this.sp = 30,
-    this.abilities =
-        const [], // Initialize with an empty list of AbilitiesModel
+    this.abilities = const [],
     required this.race,
     required this.type,
     required this.region,
@@ -107,8 +136,20 @@ class GirlFarmer {
     this.maxMp = 50,
     this.maxSp = 30,
     this.criticalPoint = 5,
-    this.currentCooldowns = const {}, // Initialize with an empty map
-  });
+    Map<String, int> currentCooldowns = const {},
+    this.elementAffinities = const [ElementType.none],
+    this.statusEffects = const [],
+    this.forcedTarget = null,
+    this.skipNextTurn = false,
+    this.mindControlled = false,
+    this.mindController = null,
+    this.partyMemberIds = const [],
+  }) : _cooldownsStorage = Map<String, int>.from(currentCooldowns);
+
+  List<GirlFarmer> get partyMembers {
+    // Implement your party member resolution logic here
+    return [];
+  }
 
   GirlFarmer copyWithFreshStats() {
     return GirlFarmer(
@@ -124,68 +165,58 @@ class GirlFarmer {
       attackPoints: attackPoints,
       defensePoints: defensePoints,
       agilityPoints: agilityPoints,
-      hp: maxHp, // Reset to full HP
-      maxHp: maxHp,
-      mp: maxMp, // Reset to full MP
-      maxMp: maxMp,
-      sp: maxSp, // Reset to full SP
-      maxSp: maxSp,
+      hp: maxHp,
+      mp: maxMp,
+      sp: maxSp,
       abilities: abilities.map((a) => a.freshCopy()).toList(),
       race: race,
       type: type,
       region: region,
       description: description,
+      maxHp: maxHp,
+      maxMp: maxMp,
+      maxSp: maxSp,
       criticalPoint: criticalPoint,
-      currentCooldowns: {}, // Fresh modifiable empty map
-      // Alternative if you need to preserve some cooldowns:
-      // currentCooldowns: Map.from(currentCooldowns)..removeWhere((_, cd) => cd <= 0),
+      currentCooldowns: {}, // This creates a new modifiable map
+      statusEffects: [], // This creates a new modifiable list
+      elementAffinities: List.from(elementAffinities),
+      partyMemberIds: List.from(partyMemberIds),
     );
   }
 
-  // Add an ability
   void addAbility(AbilitiesModel ability) {
     abilities.add(ability);
   }
 
-  // Remove an ability
   void removeAbility(String abilitiesID) {
     abilities.removeWhere((ability) => ability.abilitiesID == abilitiesID);
   }
 
-  // Use an ability on a target
   bool useAbility(AbilitiesModel ability, dynamic target) {
     if (!abilities.contains(ability)) {
       print("${name} does not know ${ability.name}.");
       return false;
     }
 
-    // Check cooldown
-    if (currentCooldowns[ability.abilitiesID] != null &&
-        currentCooldowns[ability.abilitiesID]! > 0) {
+    if ((_cooldownsStorage[ability.abilitiesID] ?? 0) > 0) {
       print(
-          "${ability.name} is on cooldown for ${currentCooldowns[ability.abilitiesID]} more turns.");
+          "${ability.name} is on cooldown for ${_cooldownsStorage[ability.abilitiesID]} more turns.");
       return false;
     }
 
-    // Use the ability
     final success = ability.useAbility(this, target);
     if (success) {
-      // Set cooldown
-      currentCooldowns[ability.abilitiesID] = ability.cooldown;
+      _updateCooldown(ability.abilitiesID, ability.cooldown);
     }
     return success;
   }
 
-  // Update cooldowns at the end of each turn
   void updateCooldowns() {
-    currentCooldowns.forEach((abilitiesID, cooldown) {
-      if (cooldown > 0) {
-        currentCooldowns[abilitiesID] = cooldown - 1;
-      }
-    });
+    final updated = Map<String, int>.from(_cooldownsStorage);
+    updated.updateAll((id, cooldown) => cooldown > 0 ? cooldown - 1 : 0);
+    _cooldownsStorage = updated;
   }
 
-  // Upgrade the girl farmer (optional: unlock new abilities)
   void upgrade() {
     level++;
     miningEfficiency *= 1.2;
@@ -193,7 +224,6 @@ class GirlFarmer {
     defensePoints += 2;
     agilityPoints += 1;
 
-    // Increase max stats and restore current stats to max
     maxHp += 20;
     hp = maxHp;
 
@@ -203,10 +233,8 @@ class GirlFarmer {
     maxSp += 5;
     sp = maxSp;
 
-    // Increase critical point (e.g., +1% chance per level)
     criticalPoint += 1;
 
-    // Example: Unlock a new ability at certain levels
     if (level == 5) {
       addAbility(AbilitiesModel(
         abilitiesID: "ability_002",
@@ -222,11 +250,74 @@ class GirlFarmer {
     }
   }
 
-  // Restore stats (optional: reset cooldowns)
+  void processStatusEffects() {
+    for (final effect in statusEffects.toList()) {
+      effect.applyEffect(this);
+      effect.remainingTurns--;
+
+      if (effect.remainingTurns <= 0) {
+        effect.resetStats(this);
+        statusEffects.remove(effect);
+      }
+    }
+  }
+
+  void processControlEffects(List<GirlFarmer> availableAllies) {
+    if (skipNextTurn) {
+      skipNextTurn = false;
+      return;
+    }
+
+    if (mindControlled && mindController != null) {
+      final validTargets = availableAllies.where((a) => a.id != id).toList();
+      if (validTargets.isNotEmpty) {
+        final target = validTargets[Random().nextInt(validTargets.length)];
+        attack(target);
+      }
+    } else if (forcedTarget != null) {
+      attack(forcedTarget);
+    }
+  }
+
+  void attack(dynamic target) {
+    if (target == null) return;
+    final damage = max(1, attackPoints - (target.defensePoints ~/ 2));
+    target.hp = (target.hp - damage).clamp(0, target.maxHp);
+    print("$name attacks ${target.name} for $damage damage!");
+  }
+
   void restoreStats() {
     hp = maxHp;
     mp = maxMp;
     sp = maxSp;
-    currentCooldowns.clear(); // Reset all cooldowns
+    _cooldownsStorage = {};
+    statusEffects.clear();
+    forcedTarget = null;
+    skipNextTurn = false;
+    mindControlled = false;
+    mindController = null;
+  }
+
+  /// Public method to set a cooldown
+  void setCooldown(String abilityId, int value) {
+    _updateCooldown(abilityId, value); // Reuse existing private method
+  }
+
+  /// Public method to clear all cooldowns
+  void clearCooldowns() {
+    _cooldownsStorage.clear();
+  }
+
+  /// Public method to get a specific cooldown value
+  int getCooldown(String abilityId) {
+    return _cooldownsStorage[abilityId] ?? 0;
+  }
+
+  // Private method to safely update cooldowns
+  // This should remain as is:
+  void _updateCooldown(String abilityId, int value) {
+    final updated = Map<String, int>.from(_cooldownsStorage);
+    updated[abilityId] = value;
+    _cooldownsStorage = updated;
   }
 }

@@ -36,13 +36,19 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       maxSp: fields[16] as int,
       criticalPoint: fields[17] as int,
       currentCooldowns: (fields[18] as Map).cast<String, int>(),
+      elementAffinities: (fields[19] as List).cast<ElementType>(),
+      statusEffects: (fields[20] as List).cast<StatusEffect>(),
+      forcedTarget: fields[21] as dynamic,
+      skipNextTurn: fields[22] as bool,
+      mindControlled: fields[23] as bool,
+      mindController: fields[24] as dynamic,
     );
   }
 
   @override
   void write(BinaryWriter writer, Enemy obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(25)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -80,7 +86,19 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       ..writeByte(17)
       ..write(obj.criticalPoint)
       ..writeByte(18)
-      ..write(obj.currentCooldowns);
+      ..write(obj.currentCooldowns)
+      ..writeByte(19)
+      ..write(obj.elementAffinities)
+      ..writeByte(20)
+      ..write(obj.statusEffects)
+      ..writeByte(21)
+      ..write(obj.forcedTarget)
+      ..writeByte(22)
+      ..write(obj.skipNextTurn)
+      ..writeByte(23)
+      ..write(obj.mindControlled)
+      ..writeByte(24)
+      ..write(obj.mindController);
   }
 
   @override

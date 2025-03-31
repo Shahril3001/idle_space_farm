@@ -41,14 +41,20 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       maxMp: fields[21] as int,
       maxSp: fields[22] as int,
       criticalPoint: fields[23] as int,
-      currentCooldowns: (fields[24] as Map).cast<String, int>(),
-    );
+      elementAffinities: (fields[25] as List).cast<ElementType>(),
+      statusEffects: (fields[26] as List).cast<StatusEffect>(),
+      forcedTarget: fields[27] as dynamic,
+      skipNextTurn: fields[28] as bool,
+      mindControlled: fields[29] as bool,
+      mindController: fields[30] as dynamic,
+      partyMemberIds: (fields[31] as List).cast<String>(),
+    ).._cooldownsStorage = (fields[24] as Map).cast<String, int>();
   }
 
   @override
   void write(BinaryWriter writer, GirlFarmer obj) {
     writer
-      ..writeByte(25)
+      ..writeByte(32)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -98,7 +104,21 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       ..writeByte(23)
       ..write(obj.criticalPoint)
       ..writeByte(24)
-      ..write(obj.currentCooldowns);
+      ..write(obj._cooldownsStorage)
+      ..writeByte(25)
+      ..write(obj.elementAffinities)
+      ..writeByte(26)
+      ..write(obj.statusEffects)
+      ..writeByte(27)
+      ..write(obj.forcedTarget)
+      ..writeByte(28)
+      ..write(obj.skipNextTurn)
+      ..writeByte(29)
+      ..write(obj.mindControlled)
+      ..writeByte(30)
+      ..write(obj.mindController)
+      ..writeByte(31)
+      ..write(obj.partyMemberIds);
   }
 
   @override

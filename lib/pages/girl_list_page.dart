@@ -78,8 +78,15 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                             ),
                           ),
                         )
-                      : ListView.builder(
+                      : GridView.builder(
                           physics: BouncingScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 0.6,
+                          ),
                           itemCount: girlFarmers.length,
                           itemBuilder: (context, index) {
                             final girl = girlFarmers[index];
@@ -91,63 +98,51 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                         GirlDetailsPage(girl: girl)),
                               ),
                               child: Card(
-                                color: Colors.black.withOpacity(
-                                    0.8), // Black background with 80% opacity
-                                elevation:
-                                    2, // Lower elevation for a subtle shadow
+                                color: Colors.black.withOpacity(0.8),
+                                elevation: 2,
                                 shape: RoundedRectangleBorder(
-                                  borderRadius: BorderRadius.circular(
-                                      8), // Slightly rounded corners
+                                  borderRadius: BorderRadius.circular(8),
                                 ),
-                                margin: EdgeInsets.symmetric(
-                                    vertical:
-                                        4), // Reduce margin around the card
-                                child: ListTile(
-                                  contentPadding: EdgeInsets.symmetric(
-                                      horizontal: 12,
-                                      vertical: 8), // Reduce internal padding
-                                  leading: CircleAvatar(
-                                    backgroundImage: AssetImage(
-                                        girl.imageFace), // Use the girl's image
-                                    radius: 25, // Slightly smaller avatar
-                                  ),
-                                  title: Text(
-                                    girl.name,
-                                    style: TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors
-                                          .white, // White text for better contrast
-                                      fontSize:
-                                          16, // Slightly smaller font size
-                                    ),
-                                  ),
-                                  subtitle: Column(
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Column(
                                     crossAxisAlignment:
-                                        CrossAxisAlignment.start,
+                                        CrossAxisAlignment.center,
                                     children: [
-                                      SizedBox(
-                                          height:
-                                              2), // Minimal spacing between title and subtitle
-                                      Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.spaceBetween,
-                                        children: [
-                                          Text(
-                                            'Level: ${girl.level} | Race: ${girl.race}',
-                                            style: TextStyle(
-                                              fontSize:
-                                                  13, // Smaller font size for the level
-                                              color: Colors
-                                                  .white70, // Lighter text for the level
-                                            ),
-                                          ),
-                                          // Add more details here if needed
-                                        ],
+                                      CircleAvatar(
+                                        backgroundImage:
+                                            AssetImage(girl.imageFace),
+                                        radius:
+                                            50, // Larger avatar for grid view
                                       ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        girl.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color: Colors.white,
+                                          fontSize: 14,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        'Level: ${girl.level}',
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                      Text(
+                                        girl.race,
+                                        style: TextStyle(
+                                          fontSize: 12,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                      Spacer(),
                                     ],
                                   ),
-                                  trailing: _buildActionButtons(girl,
-                                      gameProvider), // Custom action buttons
                                 ),
                               ),
                             );
@@ -211,121 +206,6 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
           ),
         ],
       ),
-    );
-  }
-
-  Widget _buildActionButtons(GirlFarmer girl, GameProvider gameProvider) {
-    return Row(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Tooltip(
-          message: 'Upgrade',
-          child: IconButton(
-            icon: Image.asset(
-              'assets/images/icons/upgrade.png', // Path to your upgrade icon
-              width: 30, // Adjust size as needed
-              height: 30,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Confirm Upgrade'),
-                    content: Text('Do you want to upgrade ${girl.name}?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context), // Cancel action
-                        child: Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(
-                              context); // Close the confirmation dialog
-                          bool success = gameProvider.upgradeGirl(girl.id);
-
-                          // Show the result in another AlertDialog
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text(success ? 'Success' : 'Failed'),
-                              content: Text(
-                                success
-                                    ? '${girl.name} upgraded! 🎉'
-                                    : '❌ Not enough resources!',
-                              ),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text('Upgrade'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ),
-        Tooltip(
-          message: 'Sell',
-          child: IconButton(
-            icon: Image.asset(
-              'assets/images/icons/sell.png', // Replace with your actual image path
-              width: 30, // Adjust size as needed
-              height: 30,
-            ),
-            onPressed: () {
-              showDialog(
-                context: context,
-                builder: (BuildContext context) {
-                  return AlertDialog(
-                    title: Text('Confirm Sale'),
-                    content:
-                        Text('Are you sure you want to sell ${girl.name}?'),
-                    actions: [
-                      TextButton(
-                        onPressed: () =>
-                            Navigator.pop(context), // Cancel action
-                        child: Text('Cancel'),
-                      ),
-                      TextButton(
-                        onPressed: () {
-                          Navigator.pop(
-                              context); // Close the confirmation dialog
-                          gameProvider.sellGirl(girl.id);
-
-                          // Show result in AlertDialog instead of SnackBar
-                          showDialog(
-                            context: context,
-                            builder: (context) => AlertDialog(
-                              title: Text('Sold!'),
-                              content: Text('${girl.name} has been sold! 💰'),
-                              actions: [
-                                TextButton(
-                                  onPressed: () => Navigator.pop(context),
-                                  child: Text('OK'),
-                                ),
-                              ],
-                            ),
-                          );
-                        },
-                        child: Text('Sell'),
-                      ),
-                    ],
-                  );
-                },
-              );
-            },
-          ),
-        ),
-      ],
     );
   }
 }

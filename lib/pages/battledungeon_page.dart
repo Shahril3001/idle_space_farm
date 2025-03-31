@@ -321,13 +321,13 @@ class DungeonScreen extends StatelessWidget {
   String _getDifficultyImagePath(String difficulty) {
     switch (difficulty) {
       case "Easy":
-        return "assets/images/icons/race.png";
+        return "assets/images/icons/easy.png";
       case "Medium":
-        return "assets/images/icons/race.png";
+        return "assets/images/icons/medium.png";
       case "Hard":
-        return "assets/images/icons/race.png";
+        return "assets/images/icons/hard.png";
       default:
-        return "assets/images/icons/race.png";
+        return "assets/images/icons/easy.png";
     }
   }
 }

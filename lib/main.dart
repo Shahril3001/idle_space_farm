@@ -1,4 +1,7 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
 import 'package:idle_space_farm/repositories/ability_repository.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
@@ -22,12 +25,9 @@ import 'pages/girl_list_page.dart';
 
 class ImageCacheManager {
   static final Map<String, ImageProvider> _cache = {};
+  static final Map<String, Uint8List> _memoryCache = {};
 
-  static ImageProvider getImage(String path) {
-    return _cache.putIfAbsent(path, () => AssetImage(path));
-  }
-
-  static void preloadImages(BuildContext context) {
+  static Future<void> preloadAndCache(BuildContext context) async {
     List<String> images = [
       'assets/images/ui/castle.png',
       'assets/images/icons/achievements.png',
@@ -40,17 +40,31 @@ class ImageCacheManager {
       'assets/images/map/eldoria_map.png',
     ];
     for (var img in images) {
-      precacheImage(getImage(img), context);
+      final byteData = await rootBundle.load(img);
+      _memoryCache[img] = byteData.buffer.asUint8List();
+      _cache[img] = MemoryImage(_memoryCache[img]!);
+      precacheImage(_cache[img]!, context);
     }
+  }
+
+  static ImageProvider getImage(String path) {
+    if (_cache.containsKey(path)) {
+      return _cache[path]!;
+    }
+    // Fallback to AssetImage if not preloaded
+    return AssetImage(path);
   }
 
   static void clearCache() {
     _cache.clear();
+    _memoryCache.clear();
     PaintingBinding.instance.imageCache.clear();
   }
 }
 
 void main() async {
+  debugPrintRebuildDirtyWidgets =
+      false; // Optional: disable rebuild debug prints
   WidgetsFlutterBinding.ensureInitialized();
   final appDocumentDirectory =
       await path_provider.getApplicationDocumentsDirectory();
@@ -65,10 +79,22 @@ void main() async {
   if (!Hive.isAdapterRegistered(2)) Hive.registerAdapter(GirlFarmerAdapter());
   if (!Hive.isAdapterRegistered(3)) Hive.registerAdapter(EquipmentAdapter());
   if (!Hive.isAdapterRegistered(4)) Hive.registerAdapter(FloorAdapter());
-  if (!Hive.isAdapterRegistered(6))
+  if (!Hive.isAdapterRegistered(6)) {
     Hive.registerAdapter(AbilitiesModelAdapter());
+  }
   if (!Hive.isAdapterRegistered(7)) Hive.registerAdapter(AbilityTypeAdapter());
   if (!Hive.isAdapterRegistered(8)) Hive.registerAdapter(TargetTypeAdapter());
+  if (!Hive.isAdapterRegistered(9)) Hive.registerAdapter(StatusEffectAdapter());
+  if (!Hive.isAdapterRegistered(10)) {
+    Hive.registerAdapter(ControlEffectAdapter());
+  }
+  if (!Hive.isAdapterRegistered(11)) {
+    Hive.registerAdapter(ControlEffectTypeAdapter());
+  }
+
+  if (!Hive.isAdapterRegistered(12)) {
+    Hive.registerAdapter(ElementTypeAdapter());
+  }
 
   // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
@@ -111,6 +137,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
+      debugShowCheckedModeBanner: false,
       title: 'Idle Space Farm',
       theme: ThemeData(
         primarySwatch: Colors.blue,
@@ -137,7 +164,7 @@ class _AppLifecycleWrapperState extends State<AppLifecycleWrapper>
     WidgetsBinding.instance.addObserver(this);
 
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      ImageCacheManager.preloadImages(context);
+      ImageCacheManager.preloadAndCache(context);
     });
 
     Future.microtask(

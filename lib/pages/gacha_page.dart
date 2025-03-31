@@ -16,40 +16,42 @@ class _GachaMainPageState extends State<GachaMainPage> {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Summoning Altar',
-        height: 40,
-        padding: EdgeInsets.zero,
-        margin: EdgeInsets.zero,
-      ),
-      body: Container(
-        decoration: BoxDecoration(
-          image: DecorationImage(
-            image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
-            fit: BoxFit.cover,
-          ),
+    return SafeArea(
+      child: Scaffold(
+        appBar: CustomAppBar(
+          title: 'Summoning Altar',
+          height: 40,
+          padding: EdgeInsets.zero,
+          margin: EdgeInsets.zero,
         ),
-        child: Column(
-          children: [
-            // Custom Navigation Widget (Separate from AppBar)
-            _buildCustomNavigationBar(),
-            // PageView for Swiping Between Pages
-            Expanded(
-              child: PageView(
-                controller: _pageController,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentPageIndex = index;
-                  });
-                },
-                children: [
-                  GachaGirlPage(),
-                  GachaItemPage(),
-                ],
-              ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+              fit: BoxFit.cover,
             ),
-          ],
+          ),
+          child: Column(
+            children: [
+              // Custom Navigation Widget (Separate from AppBar)
+              _buildCustomNavigationBar(),
+              // PageView for Swiping Between Pages
+              Expanded(
+                child: PageView(
+                  controller: _pageController,
+                  onPageChanged: (index) {
+                    setState(() {
+                      _currentPageIndex = index;
+                    });
+                  },
+                  children: [
+                    GachaGirlPage(),
+                    GachaItemPage(),
+                  ],
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
