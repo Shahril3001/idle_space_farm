@@ -203,6 +203,42 @@ enum ElementType {
   divine,
 }
 
+// Add this right after your ElementType enum definition
+extension ElementTypeExtension on ElementType {
+  String get iconAsset {
+    switch (this) {
+      case ElementType.none:
+        return 'assets/images/icons/elemental-none.png';
+      case ElementType.fire:
+        return 'assets/images/icons/elemental-fire.png';
+      case ElementType.water:
+        return 'assets/images/icons/elemental-water.png';
+      case ElementType.earth:
+        return 'assets/images/icons/elemental-earth.png';
+      case ElementType.wind:
+        return 'assets/images/icons/elemental-wind.png';
+      case ElementType.thunder:
+        return 'assets/images/icons/elemental-thunder.png';
+      case ElementType.snow:
+        return 'assets/images/icons/elemental-ice.png';
+      case ElementType.nature:
+        return 'assets/images/icons/elemental-nature.png';
+      case ElementType.dark:
+        return 'assets/images/icons/elemental-dark.png';
+      case ElementType.light:
+        return 'assets/images/icons/elemental-light.png';
+      case ElementType.poison:
+        return 'assets/images/icons/elemental-poison.png';
+      case ElementType.divine:
+        return 'assets/images/icons/elemental-divine.png';
+    }
+  }
+
+  String get displayName {
+    return name[0].toUpperCase() + name.substring(1);
+  }
+}
+
 class ElementalSystem {
   static const Map<ElementType, List<ElementType>> strengths = {
     ElementType.fire: [ElementType.nature, ElementType.snow],
