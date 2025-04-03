@@ -3,8 +3,6 @@ import 'package:idle_space_farm/pages/map_page.dart';
 import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import 'exchange_page.dart';
-import 'farm_page.dart';
-import 'gacha_page.dart';
 import 'girl_list_page.dart';
 import 'dashboard_page.dart'; // Import the DashboardPage
 
@@ -17,7 +15,7 @@ class _HomePageState extends State<HomePage> {
   int _selectedIndex = 2; // Set default index to 0 (DashboardPage)
 
   final List<Widget> _pages = [
-    GachaMainPage(),
+    TransactionExchangePage(),
     ManageGirlListPage(),
     DashboardPage(),
     MapPage(),
@@ -86,7 +84,7 @@ class _HomePageState extends State<HomePage> {
             items: <BottomNavigationBarItem>[
               BottomNavigationBarItem(
                 icon: _buildBottomNavIcon(
-                  'assets/images/icons/summon.png',
+                  'assets/images/icons/transaction.png',
                   _selectedIndex == 0, // Check if this item is selected
                 ),
                 label: 'Summon',

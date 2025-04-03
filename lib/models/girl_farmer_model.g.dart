@@ -48,13 +48,14 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       mindControlled: fields[29] as bool,
       mindController: fields[30] as dynamic,
       partyMemberIds: (fields[31] as List).cast<String>(),
+      isUntargetable: fields[32] as bool,
     ).._cooldownsStorage = (fields[24] as Map).cast<String, int>();
   }
 
   @override
   void write(BinaryWriter writer, GirlFarmer obj) {
     writer
-      ..writeByte(32)
+      ..writeByte(33)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -118,7 +119,9 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
       ..writeByte(30)
       ..write(obj.mindController)
       ..writeByte(31)
-      ..write(obj.partyMemberIds);
+      ..write(obj.partyMemberIds)
+      ..writeByte(32)
+      ..write(obj.isUntargetable);
   }
 
   @override

@@ -22,4 +22,22 @@ class Floor {
     this.isUnlocked = false,
     this.assignedGirlId,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'level': level,
+      'isUnlocked': isUnlocked,
+      'assignedGirlId': assignedGirlId,
+    };
+  }
+
+  factory Floor.fromMap(Map<String, dynamic> map) {
+    return Floor(
+      id: map['id'] as String,
+      level: map['level'] as int,
+    )
+      ..isUnlocked = map['isUnlocked'] as bool
+      ..assignedGirlId = map['assignedGirlId'] as String?;
+  }
 }

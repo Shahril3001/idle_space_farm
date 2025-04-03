@@ -51,4 +51,33 @@ class Farm {
   Offset get position => Offset(positionData[0], positionData[1]);
 
   double get totalResourceGain => resourcePerSecond * level;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'resourcePerSecond': resourcePerSecond,
+      'unlockCost': unlockCost,
+      'resourceType': resourceType,
+      'upgradeCost': upgradeCost,
+      'position': {'dx': position.dx, 'dy': position.dy},
+      'floors': floors.map((floor) => floor.toMap()).toList(),
+    };
+  }
+
+  factory Farm.fromMap(Map<String, dynamic> map) {
+    return Farm(
+      name: map['name'] as String,
+      resourcePerSecond: map['resourcePerSecond'] as double,
+      unlockCost: map['unlockCost'] as double,
+      resourceType: map['resourceType'] as String,
+      upgradeCost: map['upgradeCost'] as double,
+      position: Offset(
+        (map['position'] as Map<String, dynamic>)['dx'] as double,
+        (map['position'] as Map<String, dynamic>)['dy'] as double,
+      ),
+      floors: (map['floors'] as List)
+          .map((f) => Floor.fromMap(f as Map<String, dynamic>))
+          .toList(),
+    );
+  }
 }

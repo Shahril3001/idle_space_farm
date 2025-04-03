@@ -33,9 +33,15 @@ class EquipmentRepository {
 
   // Clear all equipment
   Future<void> clearAllEquipment() async {
-    final equipment = getAllEquipment();
-    for (var item in equipment) {
-      await deleteEquipment(item.name);
+    final equipmentKeys =
+        _box.keys.where((key) => key.toString().startsWith('equipment_'));
+    await _box.deleteAll(equipmentKeys);
+  }
+
+  Future<void> saveAllEquipment(List<Equipment> equipment) async {
+    await clearAllEquipment();
+    for (final item in equipment) {
+      await addEquipment(item);
     }
   }
 }

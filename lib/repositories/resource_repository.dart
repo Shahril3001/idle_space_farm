@@ -25,4 +25,19 @@ class ResourceRepository {
   Future<void> deleteResource(String name) async {
     await _box.delete('resource_$name');
   }
+
+  Future<void> clearAllResources() async {
+    // Delete all resource keys
+    final resourceKeys =
+        _box.keys.where((key) => key.toString().startsWith('resource_'));
+    await _box.deleteAll(resourceKeys);
+  }
+
+  // Add this method to support the save/load system
+  Future<void> saveAllResources(List<Resource> resources) async {
+    await clearAllResources(); // Clear existing resources first
+    for (final resource in resources) {
+      await addResource(resource);
+    }
+  }
 }

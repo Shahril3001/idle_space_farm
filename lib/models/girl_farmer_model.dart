@@ -7,7 +7,7 @@ part 'girl_farmer_model.g.dart';
 @HiveType(typeId: 2)
 class GirlFarmer {
   @HiveField(0)
-  String id;
+  final String id;
 
   @HiveField(1)
   String name;
@@ -22,16 +22,16 @@ class GirlFarmer {
   String? assignedFarm;
 
   @HiveField(5)
-  String rarity;
+  final String rarity;
 
   @HiveField(6)
   int stars;
 
   @HiveField(7)
-  String image;
+  final String image;
 
   @HiveField(8)
-  String imageFace;
+  final String imageFace;
 
   @HiveField(9)
   int attackPoints;
@@ -55,13 +55,13 @@ class GirlFarmer {
   List<AbilitiesModel> abilities;
 
   @HiveField(16)
-  String race;
+  final String race;
 
   @HiveField(17)
-  String type;
+  final String type;
 
   @HiveField(18)
-  String region;
+  final String region;
 
   @HiveField(19)
   String description;
@@ -79,7 +79,7 @@ class GirlFarmer {
   int criticalPoint;
 
   @HiveField(24)
-  Map<String, int> _cooldownsStorage; // Private storage for Hive
+  Map<String, int> _cooldownsStorage;
 
   @HiveField(25)
   List<ElementType> elementAffinities;
@@ -102,14 +102,10 @@ class GirlFarmer {
   @HiveField(31)
   List<String> partyMemberIds;
 
-  // Public getter that returns a mutable copy
+  @HiveField(32)
+  bool isUntargetable;
 
-// To (more efficient version):
-  Map<String, int> get currentCooldowns {
-    return _cooldownsStorage.isEmpty
-        ? <String, int>{}
-        : Map<String, int>.from(_cooldownsStorage);
-  }
+  Map<String, int> get currentCooldowns => Map.from(_cooldownsStorage);
 
   GirlFarmer({
     required this.id,
@@ -139,18 +135,41 @@ class GirlFarmer {
     Map<String, int> currentCooldowns = const {},
     this.elementAffinities = const [ElementType.none],
     this.statusEffects = const [],
-    this.forcedTarget = null,
+    this.forcedTarget,
     this.skipNextTurn = false,
     this.mindControlled = false,
-    this.mindController = null,
+    this.mindController,
     this.partyMemberIds = const [],
-  }) : _cooldownsStorage = Map<String, int>.from(currentCooldowns);
+    this.isUntargetable = false,
+  }) : _cooldownsStorage = Map.from(currentCooldowns);
 
-  List<GirlFarmer> get partyMembers {
-    // Implement your party member resolution logic here
-    return [];
+  /// Resolves party members from a list of all available girl farmers
+  List<GirlFarmer> getPartyMembers(List<GirlFarmer> allGirlFarmers) {
+    return partyMemberIds.map((id) {
+      try {
+        return allGirlFarmers.firstWhere((girl) => girl.id == id);
+      } catch (e) {
+        throw Exception('Party member not found: $id');
+      }
+    }).toList();
   }
 
+  /// Checks if a specific girl farmer is in the party
+  bool isInParty(String girlFarmerId) => partyMemberIds.contains(girlFarmerId);
+
+  /// Adds a member to the party
+  void addPartyMember(String girlFarmerId) {
+    if (!partyMemberIds.contains(girlFarmerId)) {
+      partyMemberIds = List.from(partyMemberIds)..add(girlFarmerId);
+    }
+  }
+
+  /// Removes a member from the party
+  void removePartyMember(String girlFarmerId) {
+    partyMemberIds = List.from(partyMemberIds)..remove(girlFarmerId);
+  }
+
+  /// Creates a fresh copy with reset stats
   GirlFarmer copyWithFreshStats() {
     return GirlFarmer(
       id: id,
@@ -177,62 +196,69 @@ class GirlFarmer {
       maxMp: maxMp,
       maxSp: maxSp,
       criticalPoint: criticalPoint,
-      currentCooldowns: {}, // This creates a new modifiable map
-      statusEffects: [], // This creates a new modifiable list
+      currentCooldowns: {},
+      statusEffects: [],
       elementAffinities: List.from(elementAffinities),
       partyMemberIds: List.from(partyMemberIds),
     );
   }
 
+  /// Adds a new ability
   void addAbility(AbilitiesModel ability) {
-    abilities.add(ability);
+    if (!abilities.any((a) => a.abilitiesID == ability.abilitiesID)) {
+      abilities.add(ability);
+    }
   }
 
-  void removeAbility(String abilitiesID) {
-    abilities.removeWhere((ability) => ability.abilitiesID == abilitiesID);
+  /// Removes an ability
+  void removeAbility(String abilityId) {
+    abilities.removeWhere((a) => a.abilitiesID == abilityId);
   }
 
-  bool useAbility(AbilitiesModel ability, dynamic target) {
+  /// Uses an ability with party awareness
+  bool useAbility(AbilitiesModel ability, dynamic target,
+      {List<GirlFarmer>? allPartyMembers}) {
     if (!abilities.contains(ability)) {
-      print("${name} does not know ${ability.name}.");
+      print("$name doesn't know ${ability.name}");
       return false;
     }
 
-    if ((_cooldownsStorage[ability.abilitiesID] ?? 0) > 0) {
-      print(
-          "${ability.name} is on cooldown for ${_cooldownsStorage[ability.abilitiesID]} more turns.");
+    if (getCooldown(ability.abilitiesID) > 0) {
+      print("${ability.name} is on cooldown");
       return false;
+    }
+
+    // Handle party-based abilities
+    if (ability.abilitiesID == "therian_003" && allPartyMembers != null) {
+      target = getPartyMembers(allPartyMembers);
     }
 
     final success = ability.useAbility(this, target);
     if (success) {
-      _updateCooldown(ability.abilitiesID, ability.cooldown);
+      setCooldown(ability.abilitiesID, ability.cooldown);
     }
     return success;
   }
 
+  /// Updates all cooldowns
   void updateCooldowns() {
-    final updated = Map<String, int>.from(_cooldownsStorage);
-    updated.updateAll((id, cooldown) => cooldown > 0 ? cooldown - 1 : 0);
-    _cooldownsStorage = updated;
+    _cooldownsStorage =
+        _cooldownsStorage.map((k, v) => MapEntry(k, max(0, v - 1)));
   }
 
+  /// Levels up the character
   void upgrade() {
     level++;
     miningEfficiency *= 1.2;
     attackPoints += 2;
     defensePoints += 2;
     agilityPoints += 1;
-
     maxHp += 20;
     hp = maxHp;
-
     maxMp += 10;
     mp = maxMp;
-
     maxSp += 5;
     sp = maxSp;
-
     criticalPoint += 1;
 
     if (level == 5) {
@@ -250,18 +276,20 @@ class GirlFarmer {
     }
   }
 
+  /// Processes status effects
   void processStatusEffects() {
-    for (final effect in statusEffects.toList()) {
+    statusEffects.removeWhere((effect) {
       effect.applyEffect(this);
       effect.remainingTurns--;
-
       if (effect.remainingTurns <= 0) {
         effect.resetStats(this);
-        statusEffects.remove(effect);
+        return true;
       }
-    }
+      return false;
+    });
   }
 
+  /// Processes control effects
   void processControlEffects(List<GirlFarmer> availableAllies) {
     if (skipNextTurn) {
       skipNextTurn = false;
@@ -271,14 +299,14 @@ class GirlFarmer {
     if (mindControlled && mindController != null) {
       final validTargets = availableAllies.where((a) => a.id != id).toList();
       if (validTargets.isNotEmpty) {
-        final target = validTargets[Random().nextInt(validTargets.length)];
-        attack(target);
+        attack(validTargets[Random().nextInt(validTargets.length)]);
       }
     } else if (forcedTarget != null) {
       attack(forcedTarget);
     }
   }
 
+  /// Basic attack
   void attack(dynamic target) {
     if (target == null) return;
     final damage = max(1, attackPoints - (target.defensePoints ~/ 2));
@@ -286,38 +314,83 @@ class GirlFarmer {
     print("$name attacks ${target.name} for $damage damage!");
   }
 
+  /// Resets all stats
   void restoreStats() {
     hp = maxHp;
     mp = maxMp;
     sp = maxSp;
-    _cooldownsStorage = {};
+    _cooldownsStorage.clear();
     statusEffects.clear();
     forcedTarget = null;
     skipNextTurn = false;
     mindControlled = false;
     mindController = null;
+    isUntargetable = false;
   }
 
-  /// Public method to set a cooldown
+  // Cooldown management
   void setCooldown(String abilityId, int value) {
-    _updateCooldown(abilityId, value); // Reuse existing private method
+    _cooldownsStorage[abilityId] = value;
   }
 
-  /// Public method to clear all cooldowns
-  void clearCooldowns() {
-    _cooldownsStorage.clear();
+  void clearCooldowns() => _cooldownsStorage.clear();
+
+  int getCooldown(String abilityId) => _cooldownsStorage[abilityId] ?? 0;
+
+  Map<String, dynamic> toMap() {
+    return {
+      'id': id,
+      'name': name,
+      'level': level,
+      'miningEfficiency': miningEfficiency,
+      'rarity': rarity,
+      'stars': stars,
+      'image': image,
+      'imageFace': imageFace,
+      'attackPoints': attackPoints,
+      'defensePoints': defensePoints,
+      'agilityPoints': agilityPoints,
+      'hp': hp,
+      'mp': mp,
+      'sp': sp,
+      'maxHp': maxHp,
+      'maxMp': maxMp,
+      'maxSp': maxSp,
+      'criticalPoint': criticalPoint,
+      'abilities': abilities.map((a) => a.toMap()).toList(),
+      'race': race,
+      'type': type,
+      'region': region,
+      'description': description,
+    };
   }
 
-  /// Public method to get a specific cooldown value
-  int getCooldown(String abilityId) {
-    return _cooldownsStorage[abilityId] ?? 0;
-  }
-
-  // Private method to safely update cooldowns
-  // This should remain as is:
-  void _updateCooldown(String abilityId, int value) {
-    final updated = Map<String, int>.from(_cooldownsStorage);
-    updated[abilityId] = value;
-    _cooldownsStorage = updated;
+  factory GirlFarmer.fromMap(Map<String, dynamic> map) {
+    return GirlFarmer(
+      id: map['id'] as String,
+      name: map['name'] as String,
+      level: map['level'] as int,
+      miningEfficiency: map['miningEfficiency'] as double,
+      rarity: map['rarity'] as String,
+      stars: map['stars'] as int,
+      image: map['image'] as String,
+      imageFace: map['imageFace'] as String,
+      attackPoints: map['attackPoints'] as int,
+      defensePoints: map['defensePoints'] as int,
+      agilityPoints: map['agilityPoints'] as int,
+      hp: map['hp'] as int,
+      mp: map['mp'] as int,
+      sp: map['sp'] as int,
+      maxHp: map['maxHp'] as int,
+      maxMp: map['maxMp'] as int,
+      maxSp: map['maxSp'] as int,
+      abilities: (map['abilities'] as List)
+          .map((a) => AbilitiesModel.fromMap(a as Map<String, dynamic>))
+          .toList(),
+      race: map['race'] as String,
+      type: map['type'] as String,
+      region: map['region'] as String,
+      description: map['description'] as String,
+    )..criticalPoint = map['criticalPoint'] as int;
   }
 }

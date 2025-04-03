@@ -70,8 +70,8 @@ void main() async {
       await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);
 
-  // Clear Hive data (for development only)
-  await clearHiveData();
+  // // Clear Hive data (for development only)
+  // await clearHiveData();
 
   // Register Hive adapters safely (check if already registered)
   if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ResourceAdapter());
@@ -115,7 +115,7 @@ void main() async {
             farmRepository: farmRepository,
             equipmentRepository: equipmentRepository,
             girlRepository: girlRepository,
-          ),
+          )..loadGame(),
         ),
         ChangeNotifierProvider(
           create: (_) =>

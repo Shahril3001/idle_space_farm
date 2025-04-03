@@ -115,4 +115,16 @@ class FarmRepository {
       await updateFarm(farm);
     }
   }
+
+  Future<void> saveAllFarms(List<Farm> farms) async {
+    // Clear existing farms
+    final farmKeys =
+        _box.keys.where((key) => key.toString().startsWith('farm_'));
+    await _box.deleteAll(farmKeys);
+
+    // Save new farms
+    for (final farm in farms) {
+      await addFarm(farm);
+    }
+  }
 }

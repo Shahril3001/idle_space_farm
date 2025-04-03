@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import '../main.dart';
+import '../providers/game_provider.dart';
 import 'battlemap_page.dart';
 import 'codex_page_girl.dart';
 import 'gacha_page.dart';
@@ -46,7 +48,7 @@ class DashboardPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          _buildCodexButton(context),
+          _buildSummonButton(context),
           _buildCenterButton(context),
           _buildRightButton(context),
         ],
@@ -54,7 +56,7 @@ class DashboardPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCodexButton(BuildContext context) {
+  Widget _buildSummonButton(BuildContext context) {
     return _buildIconButton(
       'assets/images/icons/summon.png',
       'Summon',
@@ -189,11 +191,10 @@ class DashboardPage extends StatelessWidget {
               print('Dungeon pressed');
             }),
             _buildIconButton('assets/images/icons/codex.png', 'Codex', () {
-              Navigator.push(context,
-                  MaterialPageRoute(builder: (context) => GirlCodexPage()));
+              _showCodexPopup(context);
             }),
             _buildIconButton('assets/images/icons/settings.png', 'Setting', () {
-              print('Dungeon pressed');
+              _showSettingsPopup(context);
             }),
           ],
         ),
@@ -233,6 +234,404 @@ class DashboardPage extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  // Inside DashboardPage class
+  void _showSettingsPopup(BuildContext context) {
+    final gameProvider = Provider.of<GameProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(10),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title with minimal padding
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Game Settings',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                Divider(color: Colors.grey),
+
+                // Save Management Section
+                _buildSettingsButton(
+                  icon: Icons.save,
+                  label: 'Save Game',
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final success = await gameProvider.saveGame();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(success
+                            ? 'Game saved successfully'
+                            : 'Failed to save game'),
+                        backgroundColor: success ? Colors.green : Colors.red,
+                      ),
+                    );
+                  },
+                ),
+
+                _buildSettingsButton(
+                  icon: Icons.upload,
+                  label: 'Load Game',
+                  onPressed: () async {
+                    Navigator.pop(context);
+                    final success = await gameProvider.loadGame();
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(success
+                            ? 'Game loaded successfully'
+                            : 'No save file found or error loading'),
+                        backgroundColor: success ? Colors.green : Colors.red,
+                      ),
+                    );
+                  },
+                ),
+
+                _buildSettingsButton(
+                  icon: Icons.delete,
+                  label: 'Delete Save',
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showDeleteConfirmation(context);
+                  },
+                ),
+
+                Divider(color: Colors.grey),
+
+                // Resource Management Section
+                _buildSettingsButton(
+                  icon: Icons.restart_alt,
+                  label: 'Reset Resources',
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showResetConfirmation(context, gameProvider);
+                  },
+                ),
+
+                _buildSettingsButton(
+                  icon: Icons.warning,
+                  label: 'Reset All Game Data',
+                  onPressed: () {
+                    Navigator.pop(context);
+                    _showFullResetConfirmation(context, gameProvider);
+                  },
+                ),
+
+                SizedBox(height: 8),
+
+                // Close button
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  child: Text(
+                    'Close',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red.withOpacity(0.7),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  void _showDeleteConfirmation(BuildContext context) {
+    final gameProvider = Provider.of<GameProvider>(context, listen: false);
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          title: Text(
+            'Delete Save File',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'Are you sure you want to delete your save file? This cannot be undone.',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: Colors.white)),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text('Delete', style: TextStyle(color: Colors.red)),
+              onPressed: () async {
+                Navigator.pop(context);
+                final success = await gameProvider.deleteSave();
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(success
+                        ? 'Save file deleted'
+                        : 'Error deleting save file'),
+                    backgroundColor: success ? Colors.green : Colors.red,
+                  ),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSettingsButton({
+    required IconData icon,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return Padding(
+      padding: EdgeInsets.symmetric(vertical: 4),
+      child: ElevatedButton.icon(
+        icon: Icon(icon, color: Colors.white),
+        label: Text(
+          label,
+          style: TextStyle(color: Colors.white),
+        ),
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.black.withOpacity(0.5),
+          padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+          alignment: Alignment.centerLeft,
+        ),
+      ),
+    );
+  }
+
+  void _showResetConfirmation(BuildContext context, GameProvider gameProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          title: Text(
+            'Reset Resources',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'This will set all resources (Energy, Minerals, Credits) to zero. Continue?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: Colors.white)),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text('Reset', style: TextStyle(color: Colors.orange)),
+              onPressed: () {
+                gameProvider.resetResources();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('Resources reset to zero')),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  void _showFullResetConfirmation(
+      BuildContext context, GameProvider gameProvider) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          title: Text(
+            'Reset All Game Data',
+            style: TextStyle(color: Colors.white),
+          ),
+          content: Text(
+            'This will reset ALL game data including resources, girls, and progress. Continue?',
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              child: Text('Cancel', style: TextStyle(color: Colors.white)),
+              onPressed: () => Navigator.pop(context),
+            ),
+            TextButton(
+              child: Text('Reset All', style: TextStyle(color: Colors.red)),
+              onPressed: () {
+                gameProvider.resetAllGameData();
+                Navigator.pop(context);
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(content: Text('All game data has been reset')),
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  // In your DashboardPage class
+  void _showCodexPopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(10),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Codex',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                Divider(color: Colors.grey),
+
+                // Codex Buttons Grid
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 2,
+                  childAspectRatio: 2.5,
+                  mainAxisSpacing: 8,
+                  crossAxisSpacing: 8,
+                  children: [
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.people,
+                      label: 'Girls',
+                      page: GirlCodexPage(), // Your existing page
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.dangerous,
+                      label: 'Enemies',
+                      page: GirlCodexPage(), // You'll need to create this
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.auto_awesome,
+                      label: 'Abilities',
+                      page: GirlCodexPage(),
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.gamepad,
+                      label: 'Gameplay',
+                      page: GirlCodexPage(),
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.shield,
+                      label: 'Equipment',
+                      page: GirlCodexPage(),
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.inventory,
+                      label: 'Items',
+                      page: GirlCodexPage(),
+                    ),
+                    _buildCodexButton(
+                      context,
+                      icon: Icons.currency_exchange,
+                      label: 'Resources',
+                      page: GirlCodexPage(),
+                    ),
+                  ],
+                ),
+
+                SizedBox(height: 16),
+
+                // Close button
+                TextButton(
+                  onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red.withOpacity(0.7),
+                  ),
+                  child: Text(
+                    'Close',
+                    style: TextStyle(color: Colors.white),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+  Widget _buildCodexButton(
+    BuildContext context, {
+    required IconData icon,
+    required String label,
+    required Widget page,
+  }) {
+    return ElevatedButton.icon(
+      icon: Icon(icon, color: Colors.white),
+      label: Text(
+        label,
+        style: TextStyle(color: Colors.white),
+      ),
+      onPressed: () {
+        Navigator.pop(context); // Close codex dialog
+        Navigator.push(
+          context,
+          MaterialPageRoute(builder: (context) => page),
+        );
+      },
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black.withOpacity(0.5),
+        padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+        alignment: Alignment.centerLeft,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+        ),
       ),
     );
   }

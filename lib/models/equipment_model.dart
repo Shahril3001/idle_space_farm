@@ -18,4 +18,20 @@ class Equipment {
     required this.type,
     required this.statBoost,
   });
+
+  Map<String, dynamic> toMap() {
+    return {
+      'name': name,
+      'type': type,
+      'statBoost': statBoost,
+    };
+  }
+
+  factory Equipment.fromMap(Map<String, dynamic> map) {
+    return Equipment(
+      name: map['name'] as String,
+      type: map['type'] as String,
+      statBoost: map['statBoost'] as double,
+    );
+  }
 }

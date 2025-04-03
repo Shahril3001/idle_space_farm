@@ -83,13 +83,14 @@ class __BattleContentState extends State<_BattleContent> {
     _logScrollController = ScrollController();
     WidgetsBinding.instance.addPostFrameCallback((_) {
       final provider = Provider.of<BattleProvider>(context, listen: false);
-      provider.startBattle(
-        widget.heroes,
-        widget.enemies.first.level,
-        widget.difficulty,
-        predefinedEnemies: widget.enemies,
-      );
-
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        provider.startBattle(
+          widget.heroes,
+          widget.enemies.first.level,
+          widget.difficulty,
+          predefinedEnemies: widget.enemies,
+        );
+      });
       // Add this listener
       provider.addListener(() {
         if (provider.isBattleOver && !_showingResultDialog) {

@@ -31,6 +31,7 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       type: fields[11] as String,
       region: fields[12] as String,
       description: fields[13] as String,
+      imageE: fields[25] as String,
       maxHp: fields[14] as int,
       maxMp: fields[15] as int,
       maxSp: fields[16] as int,
@@ -48,7 +49,7 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
   @override
   void write(BinaryWriter writer, Enemy obj) {
     writer
-      ..writeByte(25)
+      ..writeByte(26)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -98,7 +99,9 @@ class EnemyAdapter extends TypeAdapter<Enemy> {
       ..writeByte(23)
       ..write(obj.mindControlled)
       ..writeByte(24)
-      ..write(obj.mindController);
+      ..write(obj.mindController)
+      ..writeByte(25)
+      ..write(obj.imageE);
   }
 
   @override

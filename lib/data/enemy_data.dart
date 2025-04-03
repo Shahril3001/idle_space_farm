@@ -16,6 +16,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 50,
     mp: 20,
     sp: 10,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "ability_001",
@@ -59,6 +60,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 80,
     mp: 30,
     sp: 20,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "ability_003",
@@ -91,6 +93,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 60,
     mp: 50,
     sp: 30,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "ability_004",
@@ -135,6 +138,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 45,
     mp: 15,
     sp: 25,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "ability_006",
@@ -180,6 +184,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 50,
     mp: 0,
     sp: 20,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "undead_001",
@@ -211,6 +216,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 40,
     mp: 10,
     sp: 30,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "undead_002",
@@ -243,6 +249,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 60,
     mp: 30,
     sp: 25,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "undead_003",
@@ -275,6 +282,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 80,
     mp: 15,
     sp: 40,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "undead_004",
@@ -307,6 +315,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 100,
     mp: 40,
     sp: 50,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "undead_005",
@@ -349,6 +358,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 120,
     mp: 30,
     sp: 40,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "void_001",
@@ -380,6 +390,7 @@ final List<Enemy> baseEnemies = [
     maxHp: 300,
     mp: 100,
     sp: 80,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "void_002",
@@ -426,6 +437,7 @@ final List<Enemy> bossEnemies = [
     maxHp: 300,
     mp: 80,
     sp: 50,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "boss_ability_001",
@@ -471,6 +483,7 @@ final List<Enemy> bossEnemies = [
     maxHp: 400,
     mp: 150,
     sp: 80,
+    imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "boss_ability_003",
@@ -537,6 +550,7 @@ List<Enemy> generateEnemies(
     enemies.add(Enemy(
       id: '${baseEnemy.id}-${DateTime.now().millisecondsSinceEpoch}-$i',
       name: "$difficulty ${baseEnemy.name}",
+      imageE: baseEnemy.imageE, //
       level: dungeonLevel,
       attackPoints:
           (baseEnemy.attackPoints * difficultyMultiplier * levelScale).round(),

@@ -1012,6 +1012,100 @@ class GameProvider with ChangeNotifier {
       notifyListeners(); // Notify listeners to update the UI
     }
   }
+// Inside GameProvider class
+
+// Save the current game state
+  Future<bool> saveGame() async {
+    try {
+      // Save resources
+      final resources = _resourceRepository.getAllResources();
+      await _resourceRepository.saveAllResources(resources);
+
+      // Save farms
+      final girls = _girlRepository.getAllGirls();
+      await _girlRepository.saveAllGirls(girls);
+
+      // Save girls
+      final farms = _farmRepository.getAllFarms();
+      await _farmRepository.saveAllFarms(farms);
+
+      // Save equipment
+      final equipment = _equipmentRepository.getAllEquipment();
+      await _equipmentRepository.saveAllEquipment(equipment);
+
+      // Save timestamp
+      await Hive.box('idle_space_farm')
+          .put('lastSaved', DateTime.now().toIso8601String());
+
+      return true;
+    } catch (e) {
+      print('Error saving game: $e');
+      return false;
+    }
+  }
+
+  Future<bool> loadGame() async {
+    try {
+      final box = await Hive.openBox('idle_space_farm');
+
+      // Check if save exists
+      if (!box.containsKey('lastSaved')) {
+        return false;
+      }
+
+      // Load resources
+      final savedResources = (box.get('resources', defaultValue: []) as List)
+          .cast<Map<String, dynamic>>();
+      _resourceRepository.clearAllResources();
+      for (var resourceMap in savedResources) {
+        _resourceRepository.addResource(Resource.fromMap(resourceMap));
+      }
+
+      // Load farms
+      final savedFarms = (box.get('farms', defaultValue: []) as List)
+          .cast<Map<String, dynamic>>();
+      _farmRepository.clearAllFarms();
+      for (var farmMap in savedFarms) {
+        _farmRepository.addFarm(Farm.fromMap(farmMap));
+      }
+
+      // Load girls
+      final savedGirls = (box.get('girls', defaultValue: []) as List)
+          .cast<Map<String, dynamic>>();
+      _girlRepository.clearAllGirls();
+      for (var girlMap in savedGirls) {
+        _girlRepository.addGirl(GirlFarmer.fromMap(girlMap));
+      }
+
+      // Load equipment
+      final savedEquipment = (box.get('equipment', defaultValue: []) as List)
+          .cast<Map<String, dynamic>>();
+      _equipmentRepository.clearAllEquipment();
+      for (var equipmentMap in savedEquipment) {
+        _equipmentRepository.addEquipment(Equipment.fromMap(equipmentMap));
+      }
+
+      _lastUpdateTime = DateTime.parse(box.get('lastSaved') as String);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      print('Error loading game: $e');
+      return false;
+    }
+  }
+
+// Delete the saved game
+  Future<bool> deleteSave() async {
+    try {
+      final box = await Hive.openBox('idle_space_farm');
+      await box.clear();
+      resetAllGameData(); // Reset to default state
+      return true;
+    } catch (e) {
+      print('Error deleting save: $e');
+      return false;
+    }
+  }
 
   // Reset Resources
   void resetResources() {

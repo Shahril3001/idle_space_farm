@@ -33,9 +33,15 @@ class GirlRepository {
 
   // Clear all girls from the box
   Future<void> clearAllGirls() async {
-    final girls = getAllGirls();
-    for (var girl in girls) {
-      await deleteGirl(girl.id);
+    final girlKeys =
+        _box.keys.where((key) => key.toString().startsWith('girl_'));
+    await _box.deleteAll(girlKeys); // More efficient bulk deletion
+  }
+
+  Future<void> saveAllGirls(List<GirlFarmer> girls) async {
+    await clearAllGirls(); // Clear existing first
+    for (final girl in girls) {
+      await addGirl(girl);
     }
   }
 

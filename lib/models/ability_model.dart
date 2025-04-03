@@ -1,7 +1,9 @@
+// ability_model.dart
 import 'package:hive/hive.dart';
 import 'dart:math';
 import 'enemy_model.dart';
 import 'girl_farmer_model.dart';
+import '../data/ability_special_effects.dart';
 
 part 'ability_model.g.dart';
 
@@ -203,7 +205,6 @@ enum ElementType {
   divine,
 }
 
-// Add this right after your ElementType enum definition
 extension ElementTypeExtension on ElementType {
   String get iconAsset {
     switch (this) {
@@ -425,15 +426,111 @@ class AbilitiesModel {
   void applyEffect(dynamic target, {dynamic caster}) {
     if (target == null) return;
 
-    // SPECIAL CASE: Holy Light vs Undead
-    if (abilitiesID == "ability_016" &&
-        target is Enemy &&
-        target.type == "undead") {
-      target.hp = (target.hp - hpBonus).clamp(0, target.maxHp);
-      print("Holy light burns ${target.name} for $hpBonus damage!");
-      return;
+    // SPECIAL CASE HANDLERS
+    switch (abilitiesID) {
+      case "human_004": // Last Stand
+        if (caster != null &&
+            caster is GirlFarmer &&
+            AbilitySpecialEffects.shouldActivateLastStand(caster)) {
+          caster.attackPoints += attackBonus;
+          caster.defensePoints += defenseBonus;
+          print("${caster.name} makes a Last Stand!");
+        }
+        return;
+
+      case "human_005": // Heroic Sacrifice
+        if (caster != null && caster is GirlFarmer && target is Enemy) {
+          AbilitySpecialEffects.handleHeroicSacrifice(this, caster, target);
+        }
+        return;
+
+      case "eldren_005": // World Tree's Gift
+        if (target is GirlFarmer) {
+          AbilitySpecialEffects.applyRevival(this, target);
+        }
+        return;
+
+      case "therian_002": // Claw Swipe
+        AbilitySpecialEffects.applyMultiHit(this, target, 3);
+        return;
+
+      case "therian_005": // Blood Moon Frenzy
+        if (caster != null && caster is GirlFarmer) {
+          AbilitySpecialEffects.handleBloodMoonFrenzy(caster);
+        }
+        return;
+
+      case "ability_014": // Stealth
+        if (caster != null && caster is GirlFarmer) {
+          AbilitySpecialEffects.applyStealth(caster);
+        }
+        return;
+
+      case "paladin_004": // Divine Intervention
+        if (target is GirlFarmer) {
+          AbilitySpecialEffects.applyRevival(this, target);
+          AbilitySpecialEffects.applyInvulnerability(target, 2);
+        }
+        return;
+
+      case "berserker_004": // Ragnarok's Call
+        if (caster != null && caster is GirlFarmer && target is List<Enemy>) {
+          AbilitySpecialEffects.handleRagnaroksCall(caster, target);
+        }
+        return;
+
+      case "elementalist_004": // Elemental Convergence
+        if (target is Enemy) {
+          final weakElement =
+              AbilitySpecialEffects.determineWeaknessElement(target);
+          final damage = (hpBonus *
+                  ElementalSystem.getElementMultiplier(
+                      weakElement, target.elementAffinities))
+              .round();
+          target.hp = (target.hp - damage).clamp(0, target.maxHp);
+          print(
+              "${caster?.name} hits ${target.name}'s weakness for $damage damage!");
+        }
+        return;
+
+      case "therian_003": // Pack Tactics
+        if (caster != null &&
+            caster is GirlFarmer &&
+            target is List<GirlFarmer>) {
+          final bonus =
+              BattleCalculations.calculatePackTacticsBonus(caster, target);
+          caster.attackPoints += (attackBonus * (1 + bonus)).round();
+          print(
+              "${caster.name} gains ${(bonus * 100).round()}% damage from allies!");
+        }
+        return;
+
+      case "warrior_003": // Crimson Slash
+        if (caster != null && caster is GirlFarmer && target is Enemy) {
+          final baseDamage = hpBonus;
+          final bonusDamage =
+              BattleCalculations.shouldExecuteLowHpBonus(caster, 0.5)
+                  ? (baseDamage * 0.5).round()
+                  : 0;
+          final totalDamage = baseDamage + bonusDamage;
+          target.hp = (target.hp - totalDamage).clamp(0, target.maxHp);
+          if (bonusDamage > 0) {
+            print(
+                "${caster.name} strikes fiercely while wounded for $bonusDamage bonus damage!");
+          }
+        }
+        return;
+
+      case "ability_016": // Holy Light vs Undead
+        if (target is Enemy && target.type == "undead") {
+          target.hp = (target.hp - hpBonus).clamp(0, target.maxHp);
+          print("Holy light burns ${target.name} for $hpBonus damage!");
+          return;
+        }
+        break;
     }
 
+    // STANDARD ABILITY PROCESSING
     double elementMultiplier = 1.0;
     if (elementType != ElementType.none && target is Enemy) {
       elementMultiplier = _getElementMultiplier(target);
@@ -613,6 +710,36 @@ class AbilitiesModel {
     return elementType == ElementType.none
         ? ""
         : "(${elementType.name.toUpperCase()})";
+  }
+
+  Map<String, dynamic> toMap() {
+    return {
+      'abilitiesID': abilitiesID,
+      'name': name,
+      'description': description,
+      'hpBonus': hpBonus,
+      'spCost': spCost,
+      'cooldown': cooldown,
+      'type': type.index,
+      'targetType': targetType.index,
+      'affectsEnemies': affectsEnemies,
+      'criticalPoint': criticalPoint,
+    };
+  }
+
+  factory AbilitiesModel.fromMap(Map<String, dynamic> map) {
+    return AbilitiesModel(
+      abilitiesID: map['abilitiesID'] as String,
+      name: map['name'] as String,
+      description: map['description'] as String,
+      hpBonus: map['hpBonus'] as int,
+      spCost: map['spCost'] as int,
+      cooldown: map['cooldown'] as int,
+      type: AbilityType.values[map['type'] as int],
+      targetType: TargetType.values[map['targetType'] as int],
+      affectsEnemies: map['affectsEnemies'] as bool,
+      criticalPoint: map['criticalPoint'] as int,
+    );
   }
 }
 

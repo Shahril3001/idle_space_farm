@@ -50,9 +50,29 @@ class _GachaMainPageState extends State<GachaMainPage> {
                   ],
                 ),
               ),
+              _buildBackButton(context),
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  /// Back button
+  Widget _buildBackButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Colors.redAccent,
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          minimumSize: Size(double.infinity, 50),
+        ),
+        child: Text("Back",
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
       ),
     );
   }

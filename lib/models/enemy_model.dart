@@ -81,6 +81,9 @@ class Enemy {
   @HiveField(24)
   dynamic mindController; // Who controls this enemy
 
+  @HiveField(25) // New field number
+  final String imageE;
+
   Enemy({
     required this.id,
     required this.name,
@@ -96,6 +99,7 @@ class Enemy {
     required this.type,
     required this.region,
     required this.description,
+    required this.imageE,
     this.maxHp = 100,
     this.maxMp = 50,
     this.maxSp = 30,
@@ -125,6 +129,7 @@ class Enemy {
       type: other.type,
       region: other.region,
       description: other.description,
+      imageE: other.imageE,
       maxHp: other.maxHp,
       maxMp: other.maxMp,
       maxSp: other.maxSp,
