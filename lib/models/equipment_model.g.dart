@@ -8,7 +8,7 @@ part of 'equipment_model.dart';
 
 class EquipmentAdapter extends TypeAdapter<Equipment> {
   @override
-  final int typeId = 3;
+  final int typeId = 13;
 
   @override
   Equipment read(BinaryReader reader) {
@@ -17,22 +17,61 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
       for (int i = 0; i < numOfFields; i++) reader.readByte(): reader.read(),
     };
     return Equipment(
-      name: fields[0] as String,
-      type: fields[1] as String,
-      statBoost: fields[2] as double,
+      id: fields[0] as String,
+      name: fields[1] as String,
+      slot: fields[2] as EquipmentSlot,
+      rarity: fields[8] as EquipmentRarity,
+      attackBonus: fields[3] as int,
+      defenseBonus: fields[4] as int,
+      hpBonus: fields[5] as int,
+      agilityBonus: fields[6] as int,
+      enhancementLevel: fields[7] as int,
+      allowedTypes: (fields[9] as List).cast<String>(),
+      allowedRaces: (fields[10] as List).cast<String>(),
+      isTradable: fields[11] as bool,
+      mpBonus: fields[12] as int,
+      spBonus: fields[13] as int,
+      criticalPoint: fields[14] as int,
+      assignedTo: fields[15] as String?,
     );
   }
 
   @override
   void write(BinaryWriter writer, Equipment obj) {
     writer
-      ..writeByte(3)
+      ..writeByte(16)
       ..writeByte(0)
-      ..write(obj.name)
+      ..write(obj.id)
       ..writeByte(1)
-      ..write(obj.type)
+      ..write(obj.name)
       ..writeByte(2)
-      ..write(obj.statBoost);
+      ..write(obj.slot)
+      ..writeByte(3)
+      ..write(obj.attackBonus)
+      ..writeByte(4)
+      ..write(obj.defenseBonus)
+      ..writeByte(5)
+      ..write(obj.hpBonus)
+      ..writeByte(6)
+      ..write(obj.agilityBonus)
+      ..writeByte(7)
+      ..write(obj.enhancementLevel)
+      ..writeByte(8)
+      ..write(obj.rarity)
+      ..writeByte(9)
+      ..write(obj.allowedTypes)
+      ..writeByte(10)
+      ..write(obj.allowedRaces)
+      ..writeByte(11)
+      ..write(obj.isTradable)
+      ..writeByte(12)
+      ..write(obj.mpBonus)
+      ..writeByte(13)
+      ..write(obj.spBonus)
+      ..writeByte(14)
+      ..write(obj.criticalPoint)
+      ..writeByte(15)
+      ..write(obj.assignedTo);
   }
 
   @override
@@ -42,6 +81,109 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is EquipmentAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class EquipmentRarityAdapter extends TypeAdapter<EquipmentRarity> {
+  @override
+  final int typeId = 14;
+
+  @override
+  EquipmentRarity read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return EquipmentRarity.common;
+      case 1:
+        return EquipmentRarity.uncommon;
+      case 2:
+        return EquipmentRarity.rare;
+      case 3:
+        return EquipmentRarity.epic;
+      case 4:
+        return EquipmentRarity.legendary;
+      case 5:
+        return EquipmentRarity.mythic;
+      default:
+        return EquipmentRarity.common;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, EquipmentRarity obj) {
+    switch (obj) {
+      case EquipmentRarity.common:
+        writer.writeByte(0);
+        break;
+      case EquipmentRarity.uncommon:
+        writer.writeByte(1);
+        break;
+      case EquipmentRarity.rare:
+        writer.writeByte(2);
+        break;
+      case EquipmentRarity.epic:
+        writer.writeByte(3);
+        break;
+      case EquipmentRarity.legendary:
+        writer.writeByte(4);
+        break;
+      case EquipmentRarity.mythic:
+        writer.writeByte(5);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EquipmentRarityAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class EquipmentSlotAdapter extends TypeAdapter<EquipmentSlot> {
+  @override
+  final int typeId = 15;
+
+  @override
+  EquipmentSlot read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return EquipmentSlot.weapon;
+      case 1:
+        return EquipmentSlot.armor;
+      case 2:
+        return EquipmentSlot.accessory;
+      default:
+        return EquipmentSlot.weapon;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, EquipmentSlot obj) {
+    switch (obj) {
+      case EquipmentSlot.weapon:
+        writer.writeByte(0);
+        break;
+      case EquipmentSlot.armor:
+        writer.writeByte(1);
+        break;
+      case EquipmentSlot.accessory:
+        writer.writeByte(2);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is EquipmentSlotAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

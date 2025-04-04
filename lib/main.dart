@@ -17,7 +17,7 @@ import 'providers/game_provider.dart';
 import 'providers/battle_provider.dart'; // Import BattleProvider
 import 'repositories/farm_repository.dart';
 import 'repositories/resource_repository.dart';
-import 'repositories/item_repository.dart';
+import 'repositories/equipment_repository.dart';
 import 'repositories/girl_repository.dart'; // Import EnemyRepository
 import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
@@ -95,6 +95,17 @@ void main() async {
   if (!Hive.isAdapterRegistered(12)) {
     Hive.registerAdapter(ElementTypeAdapter());
   }
+  if (!Hive.isAdapterRegistered(13)) {
+    Hive.registerAdapter(EquipmentAdapter());
+  }
+
+  if (!Hive.isAdapterRegistered(14)) {
+    Hive.registerAdapter(EquipmentRarityAdapter());
+  }
+
+  if (!Hive.isAdapterRegistered(15)) {
+    Hive.registerAdapter(EquipmentSlotAdapter());
+  }
 
   // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
@@ -115,6 +126,7 @@ void main() async {
             farmRepository: farmRepository,
             equipmentRepository: equipmentRepository,
             girlRepository: girlRepository,
+            abilityRepository: abilityRepository,
           )..loadGame(),
         ),
         ChangeNotifierProvider(

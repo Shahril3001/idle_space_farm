@@ -1,6 +1,7 @@
 import 'dart:math';
 import 'package:hive/hive.dart';
 import 'ability_model.dart';
+import 'equipment_model.dart';
 
 part 'girl_farmer_model.g.dart';
 
@@ -105,6 +106,9 @@ class GirlFarmer {
   @HiveField(32)
   bool isUntargetable;
 
+  @HiveField(33) // Use next available number
+  List<Equipment> equippedItems = [];
+
   Map<String, int> get currentCooldowns => Map.from(_cooldownsStorage);
 
   GirlFarmer({
@@ -141,6 +145,7 @@ class GirlFarmer {
     this.mindController,
     this.partyMemberIds = const [],
     this.isUntargetable = false,
+    this.equippedItems = const [],
   }) : _cooldownsStorage = Map.from(currentCooldowns);
 
   /// Resolves party members from a list of all available girl farmers
@@ -200,6 +205,7 @@ class GirlFarmer {
       statusEffects: [],
       elementAffinities: List.from(elementAffinities),
       partyMemberIds: List.from(partyMemberIds),
+      equippedItems: List.from(equippedItems),
     );
   }
 
@@ -392,5 +398,71 @@ class GirlFarmer {
       region: map['region'] as String,
       description: map['description'] as String,
     )..criticalPoint = map['criticalPoint'] as int;
+  }
+
+  /// Attempts to equip an item with validation
+  /// Returns [true] if successful
+  bool tryEquip(Equipment item) {
+    if (!_canEquip(item)) return false;
+
+    // Unequip existing slot item if needed
+    final existing = getItemInSlot(item.slot);
+    if (existing != null) unequipItem(existing);
+
+    equipItem(item);
+    return true;
+  }
+
+  /// Core equip logic (assumes validation already passed)
+  void equipItem(Equipment item) {
+    equippedItems.add(item);
+    _applyItemStats(item);
+  }
+
+  /// Unequips an item if equipped
+  void unequipItem(Equipment item) {
+    if (equippedItems.remove(item)) {
+      _removeItemStats(item);
+    }
+  }
+
+  /// Gets item in a specific slot
+  Equipment? getItemInSlot(EquipmentSlot slot) {
+    try {
+      return equippedItems.firstWhere((e) => e.slot == slot);
+    } catch (e) {
+      return null;
+    }
+  }
+
+// Private helpers
+  bool _canEquip(Equipment item) {
+    return item.allowedTypes.isEmpty || item.allowedTypes.contains(type);
+  }
+
+  void _applyItemStats(Equipment item) {
+    maxHp += item.scaledHp;
+    hp += item.scaledHp;
+    attackPoints += item.scaledAttack;
+    defensePoints += item.scaledDefense;
+    agilityPoints += item.scaledAgility;
+  }
+
+  void _removeItemStats(Equipment item) {
+    maxHp -= item.scaledHp;
+    hp = hp.clamp(0, maxHp);
+    attackPoints -= item.scaledAttack;
+    defensePoints -= item.scaledDefense;
+    agilityPoints -= item.scaledAgility;
+  }
+
+// Get total bonuses for display
+  Map<String, int> get equipmentBonuses {
+    return {
+      'attack': equippedItems.fold(0, (sum, item) => sum + item.scaledAttack),
+      'defense': equippedItems.fold(0, (sum, item) => sum + item.scaledDefense),
+      'hp': equippedItems.fold(0, (sum, item) => sum + item.scaledHp),
+      'agility': equippedItems.fold(0, (sum, item) => sum + item.scaledAgility),
+    };
   }
 }

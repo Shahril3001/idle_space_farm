@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
-import 'battledungeon_page.dart';
+import 'battlepreparation_page.dart';
 
 class MapScreen extends StatelessWidget {
   // Sample dungeon data
@@ -81,7 +81,7 @@ class MapScreen extends StatelessWidget {
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              // Main Content (Girls and Floors in a Row)
+              // Main Content (Dungeon Cards)
               Expanded(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
@@ -115,36 +115,7 @@ class MapScreen extends StatelessWidget {
       elevation: 4,
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
-        onTap: () {
-          final region = dungeon['region'] as String? ?? 'DefaultRegion';
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: Duration(milliseconds: 500),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  DungeonScreen(
-                dungeonName: dungeon['name'],
-                difficulty: dungeon['difficulty'],
-                minLevel: int.parse(dungeon['level'].split('-')[0]),
-                maxLevel: int.parse(dungeon['level'].split('-')[1]),
-                region: region,
-              ),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: Offset(0, 0.5),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
-        },
+        onTap: () => _showDungeonDialog(context, dungeon),
         child: Container(
           height: 180, // Fixed height for list items
           decoration: BoxDecoration(
@@ -253,13 +224,197 @@ class MapScreen extends StatelessWidget {
     );
   }
 
+  void _showDungeonDialog(BuildContext context, Map<String, dynamic> dungeon) {
+    final region = dungeon['region'] as String? ?? 'DefaultRegion';
+    final minLevel = int.parse(dungeon['level'].split('-')[0]);
+    final maxLevel = int.parse(dungeon['level'].split('-')[1]);
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Container(
+        height: MediaQuery.of(context).size.height * 0.75,
+        decoration: BoxDecoration(
+          color: Colors.black.withOpacity(0.8),
+          borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+          border: Border.all(
+            color: dungeon['color'].withOpacity(0.5),
+            width: 2,
+          ),
+        ),
+        padding: EdgeInsets.all(16),
+        child: Column(
+          children: [
+            // Dungeon name and close button
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  dungeon['name'],
+                  style: TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white,
+                  ),
+                ),
+                IconButton(
+                  icon: Icon(Icons.close, color: Colors.white),
+                  onPressed: () => Navigator.pop(context),
+                ),
+              ],
+            ),
+
+            Divider(color: Colors.white54),
+
+            // Dungeon info section
+            Expanded(
+              child: SingleChildScrollView(
+                child: Column(
+                  children: [
+                    _buildInfoRow(Icons.location_on, "Region: $region"),
+                    _buildInfoRow(Icons.stairs, "Levels: ${dungeon['level']}"),
+                    _buildInfoRow(Icons.star,
+                        "Base Difficulty: ${dungeon['difficulty']}"),
+                    _buildInfoRow(Icons.category,
+                        "Monster Type: ${dungeon['monstertype']}"),
+
+                    SizedBox(height: 20),
+                    Text(
+                      "Explore this dungeon and face challenging enemies! Rewards increase with difficulty level.",
+                      style: TextStyle(color: Colors.white, fontSize: 16),
+                      textAlign: TextAlign.center,
+                    ),
+
+                    SizedBox(height: 30),
+                    Text(
+                      "SELECT DIFFICULTY",
+                      style: TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    Divider(color: Colors.white54),
+                    SizedBox(height: 15),
+
+                    // Difficulty buttons
+                    _buildDifficultyButton(
+                        context, "Easy", dungeon['color'], minLevel, region),
+                    SizedBox(height: 10),
+                    _buildDifficultyButton(context, "Medium", dungeon['color'],
+                        minLevel + 2, region),
+                    SizedBox(height: 10),
+                    _buildDifficultyButton(context, "Hard", dungeon['color'],
+                        minLevel + 5, region),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildInfoRow(IconData icon, String text) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 8.0),
+      child: Row(
+        children: [
+          Icon(icon, color: Colors.deepPurple.shade200),
+          SizedBox(width: 10),
+          Text(
+            text,
+            style: TextStyle(color: Colors.white, fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDifficultyButton(BuildContext context, String difficulty,
+      Color color, int level, String region) {
+    return ElevatedButton(
+      style: ElevatedButton.styleFrom(
+        backgroundColor: color.withOpacity(0.7),
+        foregroundColor: Colors.white,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+        ),
+        padding: EdgeInsets.symmetric(vertical: 15),
+      ),
+      onPressed: () {
+        Navigator.pop(context); // Close the dialog
+        Navigator.push(
+          context,
+          PageRouteBuilder(
+            transitionDuration: Duration(milliseconds: 500),
+            pageBuilder: (context, animation, secondaryAnimation) =>
+                PreparationScreen(
+              difficulty: difficulty,
+              dungeonLevel: level,
+              region: region,
+            ),
+            transitionsBuilder:
+                (context, animation, secondaryAnimation, child) {
+              return FadeTransition(
+                opacity: animation,
+                child: SlideTransition(
+                  position: Tween<Offset>(
+                    begin: Offset(0, 0.5),
+                    end: Offset.zero,
+                  ).animate(animation),
+                  child: child,
+                ),
+              );
+            },
+          ),
+        );
+      },
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image.asset(
+            _getDifficultyImagePath(difficulty),
+            width: 30,
+            height: 30,
+          ),
+          SizedBox(width: 10),
+          Text(
+            difficulty.toUpperCase(),
+            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          SizedBox(width: 10),
+          Text(
+            "Lv. $level",
+            style: TextStyle(fontSize: 16),
+          ),
+        ],
+      ),
+    );
+  }
+
+  String _getDifficultyImagePath(String difficulty) {
+    switch (difficulty) {
+      case "Easy":
+        return "assets/images/icons/easy.png";
+      case "Medium":
+        return "assets/images/icons/medium.png";
+      case "Hard":
+        return "assets/images/icons/hard.png";
+      default:
+        return "assets/images/icons/easy.png";
+    }
+  }
+
   Widget _buildBackButton(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
-        // ignore: sort_child_properties_last
         child: Text("Back",
             style: TextStyle(
                 color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),

@@ -18,7 +18,6 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
     List<GirlFarmer> girlFarmers = gameProvider.girlFarmers;
-
     if (_filterQuery.isNotEmpty) {
       girlFarmers = girlFarmers
           .where((girl) =>

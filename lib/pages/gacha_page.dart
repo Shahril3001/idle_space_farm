@@ -33,9 +33,7 @@ class _GachaMainPageState extends State<GachaMainPage> {
           ),
           child: Column(
             children: [
-              // Custom Navigation Widget (Separate from AppBar)
               _buildCustomNavigationBar(),
-              // PageView for Swiping Between Pages
               Expanded(
                 child: PageView(
                   controller: _pageController,
@@ -58,7 +56,6 @@ class _GachaMainPageState extends State<GachaMainPage> {
     );
   }
 
-  /// Back button
   Widget _buildBackButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
@@ -77,10 +74,9 @@ class _GachaMainPageState extends State<GachaMainPage> {
     );
   }
 
-  // Custom Navigation Widget
   Widget _buildCustomNavigationBar() {
     return Container(
-      height: 48, // Height of the navigation bar
+      height: 48,
       color: Colors.black.withOpacity(0.9),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
@@ -93,7 +89,6 @@ class _GachaMainPageState extends State<GachaMainPage> {
     );
   }
 
-  // Navigation Button
   Widget _buildNavButton(String label, int index) {
     return TextButton(
       onPressed: () {
@@ -129,9 +124,9 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   const CustomAppBar({
     Key? key,
     required this.title,
-    this.height = 56.0, // Default height similar to AppBar
-    this.padding = EdgeInsets.zero, // Custom padding
-    this.margin = EdgeInsets.zero, // Custom margin
+    this.height = 56.0,
+    this.padding = EdgeInsets.zero,
+    this.margin = EdgeInsets.zero,
   }) : super(key: key);
 
   @override
@@ -141,8 +136,8 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   Widget build(BuildContext context) {
     return Container(
       height: preferredSize.height,
-      padding: padding, // Apply custom padding
-      margin: margin, // Apply custom margin
+      padding: padding,
+      margin: margin,
       decoration: BoxDecoration(
         image: DecorationImage(
           image: AssetImage("assets/images/ui/wood-ui.png"),
@@ -164,16 +159,14 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   }
 }
 
-// Rest of the code remains the same...
 class GachaGirlPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
-
     return _buildGachaSection(
       context: context,
       image: Image.asset(
-        "assets/images/icons/summon-girl.png", // Equipment Gacha Image
+        "assets/images/icons/summon-girl.png",
         width: 150,
         height: 150,
         fit: BoxFit.cover,
@@ -192,17 +185,16 @@ class GachaItemPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
-
     return _buildGachaSection(
       context: context,
       image: Image.asset(
-        "assets/images/icons/summon-item.png", // Equipment Gacha Image
+        "assets/images/icons/summon-item.png",
         width: 150,
         height: 150,
         fit: BoxFit.cover,
       ),
       title: 'Summon Equipment',
-      subtitle: '🎒 Get new weapons & armor!',
+      subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
       button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
           Icons.shield, Color(0xFFCAA04D), false),
       button2: _buildGachaButton(context, gameProvider, '10x Pulls', 10,
@@ -211,7 +203,6 @@ class GachaItemPage extends StatelessWidget {
   }
 }
 
-// ✅ **UI now follows your image layout**
 Widget _buildGachaSection({
   required BuildContext context,
   Widget? image,
@@ -231,7 +222,6 @@ Widget _buildGachaSection({
   );
 }
 
-// 🔹 **Improved Glass UI with Margin**
 Widget _buildGlassCard({
   Widget? image,
   required String title,
@@ -240,7 +230,7 @@ Widget _buildGlassCard({
   required Widget button2,
 }) {
   return Container(
-    margin: EdgeInsets.all(20), // Add margin around the card
+    margin: EdgeInsets.all(20),
     child: Card(
       elevation: 10,
       shape: RoundedRectangleBorder(
@@ -289,7 +279,6 @@ Widget _buildGlassCard({
   );
 }
 
-// ✅ **Fixed: Gacha Button Click Works**
 Widget _buildGachaButton(
     BuildContext context,
     GameProvider gameProvider,
@@ -300,8 +289,7 @@ Widget _buildGachaButton(
     bool isCharacterGacha) {
   return ElevatedButton.icon(
     style: ElevatedButton.styleFrom(
-      padding: EdgeInsets.symmetric(
-          vertical: 5, horizontal: 15), // Added horizontal padding
+      padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
       backgroundColor: color,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(15),
@@ -313,20 +301,14 @@ Widget _buildGachaButton(
       if (isCharacterGacha) {
         final girls = gameProvider.performGachaGirl(pulls: pulls);
         if (girls.isNotEmpty) {
-          for (var girl in girls) {
-            gameProvider.addGirl(girl);
-          }
-          _showGachaResultsDialog(context, girls);
+          _showGachaResultsDialog(context, girls, true);
         } else {
           _showErrorSnackbar(context, '❌ Not enough Credits!');
         }
       } else {
         final items = gameProvider.performEquipmentGacha(pulls: pulls);
         if (items.isNotEmpty) {
-          for (var item in items) {
-            gameProvider.addEquipment(item);
-          }
-          _showSuccessSnackbar(context, '✨ You got ${items.length} item(s)!');
+          _showGachaResultsDialog(context, items, false);
         } else {
           _showErrorSnackbar(context, '❌ Not enough Credits!');
         }
@@ -344,8 +326,8 @@ Widget _buildGachaButton(
   );
 }
 
-// 🎰 **Show Gacha Results in Dialog**
-void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
+void _showGachaResultsDialog(
+    BuildContext context, List<dynamic> results, bool isCharacter) {
   showDialog(
     context: context,
     builder: (context) {
@@ -360,53 +342,25 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
           ),
         ),
         content: SingleChildScrollView(
-          scrollDirection: Axis.horizontal, // Enable horizontal scrolling
+          scrollDirection: Axis.horizontal,
           child: Row(
             children: [
               SizedBox(
-                width: girls.length > 4
-                    ? 320
-                    : girls.length * 20, // Adjust width dynamically
+                width: results.length > 4 ? 360 : results.length * 80,
                 child: GridView.builder(
-                  shrinkWrap: true, // Prevent infinite height issues
-                  physics:
-                      NeverScrollableScrollPhysics(), // Disable internal scroll
+                  shrinkWrap: true,
+                  physics: NeverScrollableScrollPhysics(),
                   gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3, // 4 columns
-                    crossAxisSpacing: 1,
-                    mainAxisSpacing: 1,
-                    childAspectRatio: 1, // Adjust aspect ratio if needed
+                    crossAxisCount: 3,
+                    crossAxisSpacing: 8,
+                    mainAxisSpacing: 8,
+                    childAspectRatio: 1,
                   ),
-                  itemCount: girls.length,
+                  itemCount: results.length,
                   itemBuilder: (context, index) {
-                    final girl = girls[index];
-                    return Column(
-                      children: [
-                        ClipRRect(
-                          borderRadius: BorderRadius.circular(8),
-                          child: Image.asset(
-                            girl.imageFace,
-                            width: 60, // Adjust size as needed
-                            height: 60,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Icon(
-                              Icons.person,
-                              size: 60,
-                              color: Colors.white,
-                            ),
-                          ),
-                        ),
-                        SizedBox(height: 4),
-                        Text(
-                          girl.name,
-                          textAlign: TextAlign.center,
-                          style: TextStyle(
-                              fontFamily: 'GameFont',
-                              color: Colors.white,
-                              fontSize: 12),
-                        ),
-                      ],
-                    );
+                    return isCharacter
+                        ? _buildGirlCard(results[index] as GirlFarmer)
+                        : _buildEquipmentCard(results[index] as Equipment);
                   },
                 ),
               ),
@@ -427,7 +381,95 @@ void _showGachaResultsDialog(BuildContext context, List<GirlFarmer> girls) {
   );
 }
 
-// ✅ **Fixed Snackbar for Success/Error Messages**
+Widget _buildGirlCard(GirlFarmer girl) {
+  return Column(
+    children: [
+      ClipRRect(
+        borderRadius: BorderRadius.circular(8),
+        child: Image.asset(
+          girl.imageFace,
+          width: 90,
+          height: 90,
+          fit: BoxFit.cover,
+          errorBuilder: (_, __, ___) => Icon(
+            Icons.person,
+            size: 60,
+            color: Colors.white,
+          ),
+        ),
+      ),
+      SizedBox(height: 4),
+      Text(
+        girl.name,
+        textAlign: TextAlign.center,
+        style: TextStyle(
+            fontFamily: 'GameFont', color: Colors.white, fontSize: 12),
+      ),
+    ],
+  );
+}
+
+Widget _buildEquipmentCard(Equipment equipment) {
+  return Column(
+    children: [
+      Container(
+        width: 90,
+        height: 90,
+        padding: EdgeInsets.all(8),
+        decoration: BoxDecoration(
+          color: _getRarityColor(equipment.rarity).withOpacity(0.2),
+          borderRadius: BorderRadius.circular(8),
+          border: Border.all(
+            color: _getRarityColor(equipment.rarity),
+            width: 2,
+          ),
+        ),
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(
+              _getEquipmentIcon(equipment.slot),
+              size: 30,
+              color: _getRarityColor(equipment.rarity),
+            ),
+            SizedBox(height: 4),
+            Text(
+              equipment.name,
+              textAlign: TextAlign.center,
+              style: TextStyle(
+                fontFamily: 'GameFont',
+                fontSize: 10,
+                color: Colors.white,
+              ),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ],
+        ),
+      ),
+    ],
+  );
+}
+
+IconData _getEquipmentIcon(EquipmentSlot slot) {
+  return switch (slot) {
+    EquipmentSlot.weapon => Icons.bolt,
+    EquipmentSlot.armor => Icons.security,
+    EquipmentSlot.accessory => Icons.workspace_premium,
+  };
+}
+
+Color _getRarityColor(EquipmentRarity rarity) {
+  return switch (rarity) {
+    EquipmentRarity.common => Colors.grey,
+    EquipmentRarity.uncommon => Colors.green,
+    EquipmentRarity.rare => Colors.blue,
+    EquipmentRarity.epic => Colors.purple,
+    EquipmentRarity.legendary => Colors.orange,
+    EquipmentRarity.mythic => Colors.red,
+  };
+}
+
 void _showSuccessSnackbar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

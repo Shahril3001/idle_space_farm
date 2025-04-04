@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:idle_space_farm/pages/equipment_list_page.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../providers/game_provider.dart';
@@ -96,7 +97,7 @@ class DashboardPage extends StatelessWidget {
           PageRouteBuilder(
             transitionDuration: Duration(milliseconds: 500),
             pageBuilder: (context, animation, secondaryAnimation) =>
-                MapScreen(),
+                EquipmentListPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return FadeTransition(
@@ -122,27 +123,7 @@ class DashboardPage extends StatelessWidget {
       height: 80, // Same height as others
       child: ElevatedButton(
         onPressed: () {
-          Navigator.push(
-            context,
-            PageRouteBuilder(
-              transitionDuration: Duration(milliseconds: 500),
-              pageBuilder: (context, animation, secondaryAnimation) =>
-                  MapScreen(),
-              transitionsBuilder:
-                  (context, animation, secondaryAnimation, child) {
-                return FadeTransition(
-                  opacity: animation,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: Offset(0, 0.5),
-                      end: Offset.zero,
-                    ).animate(animation),
-                    child: child,
-                  ),
-                );
-              },
-            ),
-          );
+          _showAdventurePopup(context);
         },
         style: ElevatedButton.styleFrom(
           backgroundColor: Colors.black.withOpacity(0.8),
@@ -345,12 +326,12 @@ class DashboardPage extends StatelessWidget {
                 // Close button
                 TextButton(
                   onPressed: () => Navigator.pop(context),
+                  style: TextButton.styleFrom(
+                    backgroundColor: Colors.red.withOpacity(0.7),
+                  ),
                   child: Text(
                     'Close',
                     style: TextStyle(color: Colors.white),
-                  ),
-                  style: TextButton.styleFrom(
-                    backgroundColor: Colors.red.withOpacity(0.7),
                   ),
                 ),
               ],
@@ -632,6 +613,115 @@ class DashboardPage extends StatelessWidget {
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(8),
         ),
+      ),
+    );
+  }
+
+  void _showAdventurePopup(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return Dialog(
+          backgroundColor: Colors.transparent,
+          insetPadding: EdgeInsets.all(10),
+          child: Container(
+            padding: EdgeInsets.all(16),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(10),
+              border: Border.all(color: Colors.grey),
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                // Title
+                Padding(
+                  padding: EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    'Battle',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 20,
+                      fontWeight: FontWeight.bold,
+                    ),
+                    textAlign: TextAlign.center,
+                  ),
+                ),
+
+                Divider(color: Colors.grey),
+                GridView.count(
+                  shrinkWrap: true,
+                  crossAxisCount: 1, // Single column
+                  childAspectRatio: 4, // Wider buttons
+                  mainAxisSpacing: 8,
+                  children: [
+                    _buildAdventureButtonRow(
+                      iconPath: 'assets/images/icons/dungeon.png',
+                      label: 'Dungeon',
+                      onPressed: () => _navigateTo(context, MapScreen()),
+                    ),
+                    _buildAdventureButtonRow(
+                      iconPath: 'assets/images/icons/dungeon.png',
+                      label: 'PvE Arena',
+                      onPressed: () => _navigateTo(context, MapScreen()),
+                    ),
+                    _buildAdventureButtonRow(
+                      iconPath: 'assets/images/icons/dungeon.png',
+                      label: 'Challenges',
+                      onPressed: () => _navigateTo(context, MapScreen()),
+                    ),
+                  ],
+                )
+              ],
+            ),
+          ),
+        );
+      },
+    );
+  }
+
+// Helper method for navigation
+  void _navigateTo(BuildContext context, Widget page) {
+    Navigator.pop(context);
+    Navigator.push(context, MaterialPageRoute(builder: (_) => page));
+  }
+
+// Modified button builder with icon and text in a row
+  Widget _buildAdventureButtonRow({
+    required String iconPath,
+    required String label,
+    required VoidCallback onPressed,
+  }) {
+    return ElevatedButton(
+      onPressed: onPressed,
+      style: ElevatedButton.styleFrom(
+        backgroundColor: Colors.black.withOpacity(0.5),
+        padding: EdgeInsets.symmetric(vertical: 16, horizontal: 8),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
+          side: BorderSide(color: Colors.grey.withOpacity(0.5)),
+        ),
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Image(
+            image: ImageCacheManager.getImage(iconPath),
+            width: 36,
+            height: 36,
+            color: Colors.white,
+          ),
+          SizedBox(width: 12), // Space between icon and text
+          Text(
+            label,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 20,
+              fontWeight: FontWeight.w500,
+            ),
+          ),
+        ],
       ),
     );
   }
