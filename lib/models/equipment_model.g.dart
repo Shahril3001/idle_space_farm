@@ -21,6 +21,9 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
       name: fields[1] as String,
       slot: fields[2] as EquipmentSlot,
       rarity: fields[8] as EquipmentRarity,
+      weaponType: fields[16] as WeaponType?,
+      armorType: fields[17] as ArmorType?,
+      accessoryType: fields[18] as AccessoryType?,
       attackBonus: fields[3] as int,
       defenseBonus: fields[4] as int,
       hpBonus: fields[5] as int,
@@ -39,7 +42,7 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
   @override
   void write(BinaryWriter writer, Equipment obj) {
     writer
-      ..writeByte(16)
+      ..writeByte(19)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -71,7 +74,13 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
       ..writeByte(14)
       ..write(obj.criticalPoint)
       ..writeByte(15)
-      ..write(obj.assignedTo);
+      ..write(obj.assignedTo)
+      ..writeByte(16)
+      ..write(obj.weaponType)
+      ..writeByte(17)
+      ..write(obj.armorType)
+      ..writeByte(18)
+      ..write(obj.accessoryType);
   }
 
   @override
@@ -184,6 +193,138 @@ class EquipmentSlotAdapter extends TypeAdapter<EquipmentSlot> {
   bool operator ==(Object other) =>
       identical(this, other) ||
       other is EquipmentSlotAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class WeaponTypeAdapter extends TypeAdapter<WeaponType> {
+  @override
+  final int typeId = 16;
+
+  @override
+  WeaponType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return WeaponType.oneHandedWeapon;
+      case 1:
+        return WeaponType.oneHandedShield;
+      case 2:
+        return WeaponType.twoHandedWeapon;
+      default:
+        return WeaponType.oneHandedWeapon;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, WeaponType obj) {
+    switch (obj) {
+      case WeaponType.oneHandedWeapon:
+        writer.writeByte(0);
+        break;
+      case WeaponType.oneHandedShield:
+        writer.writeByte(1);
+        break;
+      case WeaponType.twoHandedWeapon:
+        writer.writeByte(2);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is WeaponTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class ArmorTypeAdapter extends TypeAdapter<ArmorType> {
+  @override
+  final int typeId = 17;
+
+  @override
+  ArmorType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return ArmorType.helmet;
+      case 1:
+        return ArmorType.chainmail;
+      default:
+        return ArmorType.helmet;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, ArmorType obj) {
+    switch (obj) {
+      case ArmorType.helmet:
+        writer.writeByte(0);
+        break;
+      case ArmorType.chainmail:
+        writer.writeByte(1);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is ArmorTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class AccessoryTypeAdapter extends TypeAdapter<AccessoryType> {
+  @override
+  final int typeId = 18;
+
+  @override
+  AccessoryType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return AccessoryType.amulet;
+      case 1:
+        return AccessoryType.charm;
+      case 2:
+        return AccessoryType.glove;
+      case 3:
+        return AccessoryType.shoes;
+      default:
+        return AccessoryType.amulet;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, AccessoryType obj) {
+    switch (obj) {
+      case AccessoryType.amulet:
+        writer.writeByte(0);
+        break;
+      case AccessoryType.charm:
+        writer.writeByte(1);
+        break;
+      case AccessoryType.glove:
+        writer.writeByte(2);
+        break;
+      case AccessoryType.shoes:
+        writer.writeByte(3);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is AccessoryTypeAdapter &&
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }

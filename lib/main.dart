@@ -6,22 +6,27 @@ import 'package:hive/hive.dart';
 import 'package:idle_space_farm/repositories/ability_repository.dart';
 import 'package:path_provider/path_provider.dart' as path_provider;
 import 'package:provider/provider.dart';
+import 'models/ability_scroll_model.dart';
 import 'models/floor_model.dart';
+import 'models/potion_model.dart';
 import 'models/resource_model.dart';
 import 'models/farm_model.dart';
 import 'models/ability_model.dart';
 import 'models/girl_farmer_model.dart';
 import 'models/equipment_model.dart';
 import 'models/enemy_model.dart'; // Import Enemy model
+import 'models/shop_model.dart';
 import 'providers/game_provider.dart';
 import 'providers/battle_provider.dart'; // Import BattleProvider
 import 'repositories/farm_repository.dart';
+import 'repositories/potion_model.dart';
 import 'repositories/resource_repository.dart';
 import 'repositories/equipment_repository.dart';
 import 'repositories/girl_repository.dart'; // Import EnemyRepository
 import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
+import 'repositories/shop_repository.dart';
 
 class ImageCacheManager {
   static final Map<String, ImageProvider> _cache = {};
@@ -106,6 +111,39 @@ void main() async {
   if (!Hive.isAdapterRegistered(15)) {
     Hive.registerAdapter(EquipmentSlotAdapter());
   }
+  if (!Hive.isAdapterRegistered(16)) {
+    Hive.registerAdapter(WeaponTypeAdapter());
+  }
+  if (!Hive.isAdapterRegistered(17)) {
+    Hive.registerAdapter(ArmorTypeAdapter());
+  }
+  if (!Hive.isAdapterRegistered(18)) {
+    Hive.registerAdapter(AccessoryTypeAdapter());
+  }
+  if (!Hive.isAdapterRegistered(19)) {
+    Hive.registerAdapter(AbilityScrollAdapter());
+  }
+  if (!Hive.isAdapterRegistered(20)) {
+    Hive.registerAdapter(ScrollRarityAdapter());
+  }
+  if (!Hive.isAdapterRegistered(21)) {
+    Hive.registerAdapter(PotionAdapter());
+  }
+  if (!Hive.isAdapterRegistered(22)) {
+    Hive.registerAdapter(PotionRarityAdapter());
+  }
+  if (!Hive.isAdapterRegistered(23)) {
+    Hive.registerAdapter(ShopModelAdapter());
+  }
+  if (!Hive.isAdapterRegistered(24)) {
+    Hive.registerAdapter(ShopCategoryAdapter());
+  }
+  if (!Hive.isAdapterRegistered(25)) {
+    Hive.registerAdapter(ShopItemAdapter());
+  }
+  if (!Hive.isAdapterRegistered(26)) {
+    Hive.registerAdapter(ShopItemTypeAdapter());
+  }
 
   // Open the main Hive boxes
   final box = await Hive.openBox('idle_space_farm');
@@ -116,6 +154,8 @@ void main() async {
   final equipmentRepository = EquipmentRepository(box);
   final girlRepository = GirlRepository(box); // Initialize EnemyRepository
   final abilityRepository = AbilityRepository(box);
+  final shopRepository = ShopRepository(box);
+  final potionRepository = PotionRepository(box);
 
   runApp(
     MultiProvider(
@@ -127,6 +167,8 @@ void main() async {
             equipmentRepository: equipmentRepository,
             girlRepository: girlRepository,
             abilityRepository: abilityRepository,
+            shopRepository: shopRepository,
+            potionRepository: potionRepository,
           )..loadGame(),
         ),
         ChangeNotifierProvider(

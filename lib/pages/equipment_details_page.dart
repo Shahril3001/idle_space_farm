@@ -35,6 +35,78 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
     }
   }
 
+  bool _canEquipToGirl(GirlFarmer girl, GameProvider gameProvider) {
+    // Check type and race restrictions
+    if (_equipment.allowedTypes.isNotEmpty &&
+        !_equipment.allowedTypes.contains(girl.type)) {
+      return false;
+    }
+    if (_equipment.allowedRaces.isNotEmpty &&
+        !_equipment.allowedRaces.contains(girl.race)) {
+      return false;
+    }
+
+    // Get currently equipped items for this girl
+    final equippedItems =
+        gameProvider.equipment.where((eq) => eq.assignedTo == girl.id).toList();
+
+    // Check slot limitations
+    switch (_equipment.slot) {
+      case EquipmentSlot.weapon:
+        final weapons = equippedItems
+            .where((eq) => eq.slot == EquipmentSlot.weapon)
+            .toList();
+
+        if (weapons.length >= 2) return false;
+
+        if (weapons.length == 1) {
+          final existingWeapon = weapons.first;
+          // Can't have two two-handed weapons
+          if (existingWeapon.weaponType == WeaponType.twoHandedWeapon ||
+              _equipment.weaponType == WeaponType.twoHandedWeapon) {
+            return false;
+          }
+          // Can't have two shields
+          if (existingWeapon.weaponType == WeaponType.oneHandedShield &&
+              _equipment.weaponType == WeaponType.oneHandedShield) {
+            return false;
+          }
+        }
+        break;
+
+      case EquipmentSlot.armor:
+        final armors = equippedItems
+            .where((eq) => eq.slot == EquipmentSlot.armor)
+            .toList();
+
+        if (armors.length >= 2) return false;
+
+        if (armors.length == 1) {
+          // Can't have two of the same armor type
+          if (armors.first.armorType == _equipment.armorType) {
+            return false;
+          }
+        }
+        break;
+
+      case EquipmentSlot.accessory:
+        final accessories = equippedItems
+            .where((eq) => eq.slot == EquipmentSlot.accessory)
+            .toList();
+
+        if (accessories.length >= 3) return false;
+
+        // Can't have more than one of the same accessory type
+        if (accessories
+            .any((a) => a.accessoryType == _equipment.accessoryType)) {
+          return false;
+        }
+        break;
+    }
+
+    return true;
+  }
+
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
@@ -334,12 +406,17 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
 
   void _showEquipDialog(GameProvider gameProvider) {
     final availableGirls = gameProvider.girlFarmers.where((girl) {
-      final typeMatch = _equipment.allowedTypes.isEmpty ||
-          _equipment.allowedTypes.contains(girl.type);
-      final raceMatch = _equipment.allowedTypes.isEmpty ||
-          _equipment.allowedRaces.contains(girl.race);
-      return typeMatch && raceMatch;
+      return _canEquipToGirl(girl, gameProvider);
     }).toList();
+
+    if (availableGirls.isEmpty) {
+      _showResultDialog(
+        'No Valid Girls',
+        'No girls can equip this item due to type/race restrictions or slot limitations',
+        isError: true,
+      );
+      return;
+    }
 
     showDialog(
       context: context,
@@ -373,13 +450,58 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
   }
 
   void _equipItem(GameProvider gameProvider, GirlFarmer girl) {
-    final equippedItems = gameProvider.equipment
-        .where((eq) => eq.assignedTo == girl.id && eq.slot == _equipment.slot)
-        .toList();
+    // First unequip any items in the same slot that would conflict
+    final equippedItems =
+        gameProvider.equipment.where((eq) => eq.assignedTo == girl.id).toList();
 
-    for (var item in equippedItems) {
-      item.assignedTo = null;
-      gameProvider.updateEquipment(item);
+    // Handle weapon slot limitations
+    if (_equipment.slot == EquipmentSlot.weapon) {
+      final weapons =
+          equippedItems.where((eq) => eq.slot == EquipmentSlot.weapon).toList();
+
+      // If equipping a two-handed weapon, unequip all other weapons
+      if (_equipment.weaponType == WeaponType.twoHandedWeapon) {
+        for (var weapon in weapons) {
+          weapon.assignedTo = null;
+          gameProvider.updateEquipment(weapon);
+        }
+      }
+      // If equipping a shield, unequip any other shield
+      else if (_equipment.weaponType == WeaponType.oneHandedShield) {
+        final shields = weapons
+            .where((w) => w.weaponType == WeaponType.oneHandedShield)
+            .toList();
+        for (var shield in shields) {
+          shield.assignedTo = null;
+          gameProvider.updateEquipment(shield);
+        }
+      }
+    }
+
+    // Handle armor slot limitations
+    if (_equipment.slot == EquipmentSlot.armor) {
+      final sameTypeArmor = equippedItems
+          .where((eq) =>
+              eq.slot == EquipmentSlot.armor &&
+              eq.armorType == _equipment.armorType)
+          .toList();
+      for (var armor in sameTypeArmor) {
+        armor.assignedTo = null;
+        gameProvider.updateEquipment(armor);
+      }
+    }
+
+    // Handle accessory slot limitations
+    if (_equipment.slot == EquipmentSlot.accessory) {
+      final sameTypeAccessories = equippedItems
+          .where((eq) =>
+              eq.slot == EquipmentSlot.accessory &&
+              eq.accessoryType == _equipment.accessoryType)
+          .toList();
+      for (var accessory in sameTypeAccessories) {
+        accessory.assignedTo = null;
+        gameProvider.updateEquipment(accessory);
+      }
     }
 
     setState(() {

@@ -1,13 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import '../data/ability_data.dart';
+import '../data/potion_data.dart';
 import '../models/ability_model.dart';
 import '../models/floor_model.dart';
+import '../models/potion_model.dart';
 import '../models/resource_model.dart';
 import '../models/farm_model.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/equipment_model.dart';
+import '../models/shop_model.dart';
 import '../repositories/ability_repository.dart';
 import '../repositories/farm_repository.dart';
+import '../repositories/potion_model.dart';
 import '../repositories/resource_repository.dart';
 import '../repositories/equipment_repository.dart';
 import '../repositories/girl_repository.dart';
@@ -15,6 +20,7 @@ import 'dart:async';
 import 'dart:math';
 import '../data/girl_data.dart'; // Import the girlsData list
 import '../data/equipment_data.dart';
+import '../repositories/shop_repository.dart';
 
 class GameProvider with ChangeNotifier {
   final ResourceRepository _resourceRepository;
@@ -22,12 +28,17 @@ class GameProvider with ChangeNotifier {
   final EquipmentRepository _equipmentRepository;
   final GirlRepository _girlRepository;
   final AbilityRepository _abilityRepository;
+  final ShopRepository _shopRepository;
+  final PotionRepository _potionRepository;
 
   bool _isInitialized = false;
   DateTime? _lastUpdateTime;
   Timer? _resourceTimer;
+  ShopModel? _shop;
+  bool _isShopLoading = false;
 
   bool get isInitialized => _isInitialized;
+  ShopModel? get shop => _shop;
 
   GameProvider({
     required ResourceRepository resourceRepository,
@@ -35,13 +46,231 @@ class GameProvider with ChangeNotifier {
     required EquipmentRepository equipmentRepository,
     required GirlRepository girlRepository,
     required AbilityRepository abilityRepository,
+    required ShopRepository shopRepository,
+    required PotionRepository potionRepository,
   })  : _resourceRepository = resourceRepository,
         _farmRepository = farmRepository,
         _equipmentRepository = equipmentRepository,
         _girlRepository = girlRepository,
-        _abilityRepository = abilityRepository {
+        _abilityRepository = abilityRepository,
+        _shopRepository = shopRepository,
+        _potionRepository = potionRepository {
+    _initializeGame();
     onAppStart();
   }
+
+  Future<void> _initializeGame() async {
+    _isInitialized = true;
+    notifyListeners();
+  }
+
+  bool get isShopLoading => _isShopLoading;
+  List<ShopCategory> get shopCategories => _shop?.categories ?? [];
+
+  Future<void> initializeShop() async {
+    if (_isShopLoading) return;
+
+    _isShopLoading = true;
+    notifyListeners();
+
+    try {
+      await _shopRepository.initializeDefaultShop();
+      _shop = _shopRepository.getShop();
+
+      // Ensure we have a valid shop
+      if (_shop == null) {
+        _shop = ShopModel(categories: createDefaultShopCategories());
+        await _shopRepository.saveShop(_shop!);
+      }
+    } catch (e) {
+      debugPrint('Error initializing shop: $e');
+      // Fallback to default shop if loading fails
+      _shop = ShopModel(categories: createDefaultShopCategories());
+    } finally {
+      _isShopLoading = false;
+      notifyListeners();
+    }
+  }
+
+  bool isItemPurchased(String itemId) {
+    return _shop?.purchasedItemIds.contains(itemId) ?? false;
+  }
+
+  bool canAffordItem(ShopItem item) {
+    return canAfford(item.prices);
+  }
+
+  Future<bool> purchaseItem(ShopItem item) async {
+    if (_shop == null || !canAfford(item.prices)) return false;
+
+    try {
+      // Deduct resources
+      deductResources(item.prices);
+
+      // Handle the specific item type
+      switch (item.type) {
+        case ShopItemType.girl:
+          await _handleGirlPurchase(item);
+          break;
+        case ShopItemType.equipment:
+          await _handleEquipmentPurchase(item);
+          break;
+        case ShopItemType.potion:
+          await _handlePotionPurchase(item);
+          break;
+        case ShopItemType.abilityScroll:
+          await _handleAbilityScrollPurchase(item);
+          break;
+      }
+
+      // Record purchase
+      _shop!.purchasedItemIds.add(item.id);
+      await _shopRepository.saveShop(_shop!);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Purchase failed: $e');
+      // Refund on error
+      item.prices.forEach((currency, amount) {
+        final resource = _resourceRepository.getResourceByName(currency);
+        if (resource != null) {
+          resource.amount += amount;
+          _resourceRepository.updateResource(resource);
+        }
+      });
+      return false;
+    }
+  }
+
+  Future<void> _handleGirlPurchase(ShopItem item) async {
+    GirlFarmer? girlTemplate;
+    try {
+      girlTemplate = girlsData.firstWhere((g) => g.id == item.itemId);
+    } catch (e) {
+      girlTemplate = null;
+    }
+    if (girlTemplate == null) return;
+
+    final newGirl = GirlFarmer(
+      id: 'girl_${DateTime.now().millisecondsSinceEpoch}',
+      name: girlTemplate.name,
+      level: girlTemplate.level,
+      miningEfficiency: girlTemplate.miningEfficiency,
+      rarity: girlTemplate.rarity,
+      stars: girlTemplate.stars,
+      image: girlTemplate.image,
+      imageFace: girlTemplate.imageFace,
+      attackPoints: girlTemplate.attackPoints,
+      defensePoints: girlTemplate.defensePoints,
+      agilityPoints: girlTemplate.agilityPoints,
+      hp: girlTemplate.hp,
+      mp: girlTemplate.mp,
+      sp: girlTemplate.sp,
+      abilities: girlTemplate.abilities.map((a) => a.freshCopy()).toList(),
+      race: girlTemplate.race,
+      type: girlTemplate.type,
+      region: girlTemplate.region,
+      description: girlTemplate.description,
+      maxHp: girlTemplate.maxHp,
+      maxMp: girlTemplate.maxMp,
+      maxSp: girlTemplate.maxSp,
+      criticalPoint: girlTemplate.criticalPoint,
+    );
+    await _girlRepository.addGirl(newGirl);
+  }
+
+  Future<void> _handleEquipmentPurchase(ShopItem item) async {
+    Equipment? equipTemplate;
+    try {
+      equipTemplate = equipmentList.firstWhere((e) => e.id == item.itemId);
+    } catch (e) {
+      equipTemplate = null;
+    }
+    if (equipTemplate == null) return;
+
+    final newEquipment = Equipment(
+      id: 'equip_${DateTime.now().millisecondsSinceEpoch}',
+      name: equipTemplate.name,
+      slot: equipTemplate.slot,
+      rarity: equipTemplate.rarity,
+      weaponType: equipTemplate.weaponType,
+      armorType: equipTemplate.armorType,
+      accessoryType: equipTemplate.accessoryType,
+      attackBonus: equipTemplate.attackBonus,
+      defenseBonus: equipTemplate.defenseBonus,
+      hpBonus: equipTemplate.hpBonus,
+      agilityBonus: equipTemplate.agilityBonus,
+      enhancementLevel: 0,
+      allowedTypes: List.from(equipTemplate.allowedTypes),
+      allowedRaces: List.from(equipTemplate.allowedRaces),
+      isTradable: equipTemplate.isTradable,
+      mpBonus: equipTemplate.mpBonus,
+      spBonus: equipTemplate.spBonus,
+      criticalPoint: equipTemplate.criticalPoint,
+    );
+    await _equipmentRepository.addEquipment(newEquipment);
+  }
+
+  Future<void> _handlePotionPurchase(ShopItem item) async {
+    Potion? potion;
+    try {
+      potion = PotionDatabase.allPotions.firstWhere((p) => p.id == item.itemId);
+    } catch (e) {
+      potion = null;
+    }
+    if (potion == null) return;
+
+    // Add to inventory or apply immediately
+    final resource = _resourceRepository.getResourceByName('Energy');
+    if (resource != null) {
+      resource.amount += 100;
+      await _resourceRepository.updateResource(resource);
+    }
+  }
+
+  Future<void> _handleAbilityScrollPurchase(ShopItem item) async {
+    AbilitiesModel? abilityTemplate;
+    try {
+      abilityTemplate =
+          abilitiesList.firstWhere((a) => a.abilitiesID == item.itemId);
+    } catch (e) {
+      abilityTemplate = null;
+    }
+    if (abilityTemplate == null) return;
+
+    final newAbility = AbilitiesModel(
+      abilitiesID: 'ability_${DateTime.now().millisecondsSinceEpoch}',
+      name: abilityTemplate.name,
+      description: abilityTemplate.description,
+      hpBonus: abilityTemplate.hpBonus,
+      mpCost: abilityTemplate.mpCost,
+      type: abilityTemplate.type,
+      targetType: abilityTemplate.targetType,
+      affectsEnemies: abilityTemplate.affectsEnemies,
+      criticalPoint: abilityTemplate.criticalPoint,
+    );
+    await _abilityRepository.addAbility(newAbility);
+  }
+
+  bool canAfford(Map<String, int> prices) {
+    return prices.entries.every((price) {
+      final resource = _resourceRepository.getResourceByName(price.key);
+      return resource != null && resource.amount >= price.value;
+    });
+  }
+
+  void deductResources(Map<String, int> prices) {
+    prices.forEach((currency, amount) {
+      final resource = _resourceRepository.getResourceByName(currency);
+      if (resource != null) {
+        resource.amount -= amount;
+        _resourceRepository.updateResource(resource);
+      }
+    });
+    notifyListeners();
+  }
+
+  // Resource System ==========================================
 
   double getCredits() =>
       _resourceRepository.getResourceByName('Credits')?.amount ?? 0.0;
@@ -195,30 +424,186 @@ class GameProvider with ChangeNotifier {
   }
 
   /// Equip an item to a girl (automatically unequips any conflicting slot items)
-  void equipToGirl(String equipmentId, String girlId) {
-    final equipment = _equipmentRepository.getEquipmentById(equipmentId);
-    if (equipment == null) return;
+  /// Check if an item can be equipped considering slot limitations
+  bool canEquipItem(Equipment equipment, List<Equipment> currentlyEquipped) {
+    // Check slot limitations
+    switch (equipment.slot) {
+      case EquipmentSlot.weapon:
+        final weapons = currentlyEquipped
+            .where((e) => e.slot == EquipmentSlot.weapon)
+            .toList();
 
-    // First unequip any items in the same slot
-    final currentEquipment = _equipmentRepository
-        .getEquipmentByAssignedGirl(girlId)
-        .where((e) => e.slot == equipment.slot);
+        if (weapons.length >= 2) return false;
 
-    for (final item in currentEquipment) {
-      item.assignedTo = null;
-      _equipmentRepository.updateEquipment(item);
+        if (weapons.length == 1) {
+          final existingWeapon = weapons.first;
+          // Can't have two two-handed weapons
+          if (existingWeapon.weaponType == WeaponType.twoHandedWeapon ||
+              equipment.weaponType == WeaponType.twoHandedWeapon) {
+            return false;
+          }
+          // Can't have two shields
+          if (existingWeapon.weaponType == WeaponType.oneHandedShield &&
+              equipment.weaponType == WeaponType.oneHandedShield) {
+            return false;
+          }
+        }
+        break;
+
+      case EquipmentSlot.armor:
+        final armors = currentlyEquipped
+            .where((e) => e.slot == EquipmentSlot.armor)
+            .toList();
+
+        if (armors.length >= 2) return false;
+
+        if (armors.length == 1) {
+          // Can't have two of the same armor type
+          if (armors.first.armorType == equipment.armorType) {
+            return false;
+          }
+        }
+        break;
+
+      case EquipmentSlot.accessory:
+        final accessories = currentlyEquipped
+            .where((e) => e.slot == EquipmentSlot.accessory)
+            .toList();
+
+        if (accessories.length >= 3) return false;
+
+        // Can't have more than one of the same accessory type
+        if (accessories
+            .any((a) => a.accessoryType == equipment.accessoryType)) {
+          return false;
+        }
+        break;
     }
 
-    // Equip the new item
+    return true;
+  }
+
+  /// Equip an item to a girl with slot limitation checks
+  void equipToGirl(String equipmentId, String girlId) {
+    final equipment = _equipmentRepository.getEquipmentById(equipmentId);
+    final girl = _girlRepository.getGirlById(girlId);
+    if (equipment == null) return;
+
+    // Get all currently equipped items for this girl
+    final currentEquipment =
+        _equipmentRepository.getEquipmentByAssignedGirl(girlId);
+
+    // Check if we can equip this item considering slot limitations
+    if (!canEquipItem(equipment, currentEquipment)) {
+      throw Exception('Cannot equip - slot limitations would be violated');
+    }
+
+    // Handle weapon slot limitations
+    if (equipment.slot == EquipmentSlot.weapon) {
+      final weapons = currentEquipment
+          .where((e) => e.slot == EquipmentSlot.weapon)
+          .toList();
+
+      // If equipping a two-handed weapon, unequip all other weapons
+      if (equipment.weaponType == WeaponType.twoHandedWeapon) {
+        for (var weapon in weapons) {
+          weapon.assignedTo = null;
+          _equipmentRepository.updateEquipment(weapon);
+        }
+      }
+      // If equipping a shield, unequip any other shield
+      else if (equipment.weaponType == WeaponType.oneHandedShield) {
+        final shields = weapons
+            .where((w) => w.weaponType == WeaponType.oneHandedShield)
+            .toList();
+        for (var shield in shields) {
+          shield.assignedTo = null;
+          _equipmentRepository.updateEquipment(shield);
+        }
+      }
+    }
+
+    // Handle armor slot limitations
+    if (equipment.slot == EquipmentSlot.armor) {
+      final sameTypeArmor = currentEquipment
+          .where((e) =>
+              e.slot == EquipmentSlot.armor &&
+              e.armorType == equipment.armorType)
+          .toList();
+      for (var armor in sameTypeArmor) {
+        armor.assignedTo = null;
+        _equipmentRepository.updateEquipment(armor);
+      }
+    }
+
+    // Handle accessory slot limitations
+    if (equipment.slot == EquipmentSlot.accessory) {
+      final sameTypeAccessories = currentEquipment
+          .where((e) =>
+              e.slot == EquipmentSlot.accessory &&
+              e.accessoryType == equipment.accessoryType)
+          .toList();
+      for (var accessory in sameTypeAccessories) {
+        accessory.assignedTo = null;
+        _equipmentRepository.updateEquipment(accessory);
+      }
+    }
+
     equipment.assignedTo = girlId;
     _equipmentRepository.updateEquipment(equipment);
+
+    // Add this to update the girl's stats:
+    girl?.equipItem(equipment);
+    _girlRepository.updateGirl(girl!);
+
     notifyListeners();
+  }
+
+  void _updateGirlStats(String girlId) {
+    final girl = _girlRepository.getGirlById(girlId);
+    if (girl != null) {
+      _girlRepository.updateGirl(girl);
+      notifyListeners();
+    }
+  }
+
+  /// Get equipment that can be equipped by a specific girl
+  List<Equipment> getEquippableItemsForGirl(String girlId,
+      {Equipment? currentItem}) {
+    final girl = _girlRepository.getGirlById(girlId);
+    if (girl == null) return [];
+
+    final allEquipment = _equipmentRepository.getAllEquipment();
+    final equippedItems = _equipmentRepository
+        .getEquipmentByAssignedGirl(girlId)
+        .where((e) => currentItem == null || e.id != currentItem.id)
+        .toList();
+
+    return allEquipment.where((equipment) {
+      // Check type and race restrictions
+      if (equipment.allowedTypes.isNotEmpty &&
+          !equipment.allowedTypes.contains(girl.type)) {
+        return false;
+      }
+      if (equipment.allowedRaces.isNotEmpty &&
+          !equipment.allowedRaces.contains(girl.race)) {
+        return false;
+      }
+
+      // Check slot limitations
+      return canEquipItem(equipment, equippedItems);
+    }).toList();
   }
 
   /// Unequip an item from any girl
   void unequipItem(String equipmentId) {
     final equipment = _equipmentRepository.getEquipmentById(equipmentId);
     if (equipment != null && equipment.assignedTo != null) {
+      final girl = _girlRepository.getGirlById(equipment.assignedTo!);
+      if (girl != null) {
+        girl.unequipItem(equipment);
+        _girlRepository.updateGirl(girl);
+      }
       equipment.assignedTo = null;
       _equipmentRepository.updateEquipment(equipment);
       notifyListeners();
@@ -353,6 +738,9 @@ class GameProvider with ChangeNotifier {
           name: equipment.name,
           slot: equipment.slot,
           rarity: equipment.rarity,
+          weaponType: equipment.weaponType,
+          armorType: equipment.armorType,
+          accessoryType: equipment.accessoryType,
           attackBonus: equipment.attackBonus,
           defenseBonus: equipment.defenseBonus,
           hpBonus: equipment.hpBonus,
@@ -373,6 +761,117 @@ class GameProvider with ChangeNotifier {
 
     notifyListeners();
     return items;
+  }
+
+// Helper method to create random equipment with proper types
+  Equipment? _createEquipment(
+      EquipmentRarity rarity, EquipmentSlot slot, Random random) {
+    try {
+      final baseValue = switch (rarity) {
+        EquipmentRarity.common => 5,
+        EquipmentRarity.uncommon => 10,
+        EquipmentRarity.rare => 20,
+        EquipmentRarity.epic => 35,
+        EquipmentRarity.legendary => 50,
+        EquipmentRarity.mythic => 75,
+      };
+
+      final now = DateTime.now().millisecondsSinceEpoch;
+      final capitalizedRarity = _capitalize(rarity.name);
+
+      return switch (slot) {
+        EquipmentSlot.weapon => Equipment(
+            id: '${rarity.name}_weapon_$now',
+            name: '$capitalizedRarity ${_getRandomWeaponName(random)}',
+            slot: slot,
+            rarity: rarity,
+            weaponType: _getRandomWeaponType(random),
+            attackBonus: baseValue,
+            defenseBonus: baseValue ~/ 4,
+            hpBonus: 0,
+            agilityBonus: 0,
+            enhancementLevel: 0,
+            allowedTypes: [],
+            allowedRaces: [],
+            isTradable: true,
+            mpBonus: 0,
+            spBonus: 0,
+            criticalPoint: 0,
+          ),
+        EquipmentSlot.armor => Equipment(
+            id: '${rarity.name}_armor_$now',
+            name: '$capitalizedRarity ${_getRandomArmorName(random)}',
+            slot: slot,
+            rarity: rarity,
+            armorType: _getRandomArmorType(random),
+            defenseBonus: baseValue,
+            hpBonus: baseValue ~/ 2,
+            attackBonus: 0,
+            agilityBonus: 0,
+            enhancementLevel: 0,
+            allowedTypes: [],
+            allowedRaces: [],
+            isTradable: true,
+            mpBonus: 0,
+            spBonus: 0,
+            criticalPoint: 0,
+          ),
+        EquipmentSlot.accessory => Equipment(
+            id: '${rarity.name}_accessory_$now',
+            name: '$capitalizedRarity ${_getRandomAccessoryName(random)}',
+            slot: slot,
+            rarity: rarity,
+            accessoryType: _getRandomAccessoryType(random),
+            agilityBonus: baseValue,
+            hpBonus: baseValue ~/ 3,
+            attackBonus: 0,
+            defenseBonus: 0,
+            enhancementLevel: 0,
+            allowedTypes: [],
+            allowedRaces: [],
+            isTradable: true,
+            mpBonus: 0,
+            spBonus: 0,
+            criticalPoint: 0,
+          ),
+      };
+    } catch (e) {
+      print('Error creating equipment: $e');
+      return null;
+    }
+  }
+
+// Helper methods for random generation
+  String _getRandomWeaponName(Random random) {
+    final types = ['Sword', 'Axe', 'Mace', 'Dagger', 'Bow', 'Staff'];
+    return types[random.nextInt(types.length)];
+  }
+
+  WeaponType _getRandomWeaponType(Random random) {
+    return WeaponType.values[random.nextInt(WeaponType.values.length)];
+  }
+
+  String _getRandomArmorName(Random random) {
+    final types = ['Plate', 'Mail', 'Leather', 'Robe', 'Cloak'];
+    return types[random.nextInt(types.length)];
+  }
+
+  ArmorType _getRandomArmorType(Random random) {
+    return ArmorType.values[random.nextInt(ArmorType.values.length)];
+  }
+
+  String _getRandomAccessoryName(Random random) {
+    final types = ['Amulet', 'Ring', 'Bracelet', 'Talisman', 'Charm'];
+    return types[random.nextInt(types.length)];
+  }
+
+  AccessoryType _getRandomAccessoryType(Random random) {
+    return AccessoryType.values[random.nextInt(AccessoryType.values.length)];
+  }
+
+  String _capitalize(String input) {
+    if (input.isEmpty) return input;
+    return input[0].toUpperCase() + input.substring(1).toLowerCase();
   }
 
   EquipmentRarity _determineRarity(double roll) {
@@ -397,108 +896,12 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  String _capitalize(String input) {
-    if (input.isEmpty) return input;
-    return input[0].toUpperCase() + input.substring(1).toLowerCase();
-  }
-
   String _getSlotName(EquipmentSlot slot) {
     return switch (slot) {
       EquipmentSlot.weapon => 'Weapon',
       EquipmentSlot.armor => 'Armor',
       EquipmentSlot.accessory => 'Accessory',
     };
-  }
-
-  Equipment? _createEquipment(
-      EquipmentRarity rarity, EquipmentSlot slot, Random random) {
-    try {
-      final baseValue = switch (rarity) {
-        EquipmentRarity.common => 5,
-        EquipmentRarity.uncommon => 10,
-        EquipmentRarity.rare => 20,
-        EquipmentRarity.epic => 35,
-        EquipmentRarity.legendary => 50,
-        EquipmentRarity.mythic => 75,
-      };
-
-      // Common equipment types for variety
-      final weaponTypes = ['Sword', 'Axe', 'Mace', 'Dagger', 'Bow'];
-      final armorTypes = ['Plate', 'Mail', 'Leather', 'Robe', 'Cloak'];
-      final accessoryTypes = [
-        'Amulet',
-        'Ring',
-        'Bracelet',
-        'Talisman',
-        'Charm'
-      ];
-
-      final now = DateTime.now().millisecondsSinceEpoch;
-      final capitalizedRarity = _capitalize(rarity.name);
-
-      return switch (slot) {
-        EquipmentSlot.weapon => Equipment(
-            id: '${rarity.name}_weapon_$now',
-            name:
-                '$capitalizedRarity ${weaponTypes[random.nextInt(weaponTypes.length)]}',
-            slot: slot,
-            rarity: rarity,
-            attackBonus: baseValue,
-            defenseBonus: baseValue ~/ 4,
-            // Ensure all required fields are included
-            hpBonus: 0,
-            agilityBonus: 0,
-            enhancementLevel: 0,
-            allowedTypes: [],
-            allowedRaces: [],
-            isTradable: true,
-            mpBonus: 0,
-            spBonus: 0,
-            criticalPoint: 0,
-          ),
-        EquipmentSlot.armor => Equipment(
-            id: '${rarity.name}_armor_$now',
-            name:
-                '$capitalizedRarity ${armorTypes[random.nextInt(armorTypes.length)]}',
-            slot: slot,
-            rarity: rarity,
-            defenseBonus: baseValue,
-            hpBonus: baseValue ~/ 2,
-            // Ensure all required fields are included
-            attackBonus: 0,
-            agilityBonus: 0,
-            enhancementLevel: 0,
-            allowedTypes: [],
-            allowedRaces: [],
-            isTradable: true,
-            mpBonus: 0,
-            spBonus: 0,
-            criticalPoint: 0,
-          ),
-        EquipmentSlot.accessory => Equipment(
-            id: '${rarity.name}_accessory_$now',
-            name:
-                '$capitalizedRarity ${accessoryTypes[random.nextInt(accessoryTypes.length)]}',
-            slot: slot,
-            rarity: rarity,
-            agilityBonus: baseValue,
-            hpBonus: baseValue ~/ 3,
-            // Ensure all required fields are included
-            attackBonus: 0,
-            defenseBonus: 0,
-            enhancementLevel: 0,
-            allowedTypes: [],
-            allowedRaces: [],
-            isTradable: true,
-            mpBonus: 0,
-            spBonus: 0,
-            criticalPoint: 0,
-          ),
-      };
-    } catch (e) {
-      print('Error creating equipment: $e');
-      return null;
-    }
   }
 
   /// Helper to get random equipment slot (used by your existing performEquipmentGacha)

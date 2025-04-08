@@ -75,132 +75,149 @@ class _EquipmentListPageState extends State<EquipmentListPage> {
               fit: BoxFit.cover,
             ),
           ),
-          child: SafeArea(
-            child: Padding(
-              padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-              child: Column(
-                children: [
-                  _buildFilterControls(),
-                  Expanded(
-                    child: equipmentList.isEmpty
-                        ? Container(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: 16, vertical: 8),
-                            decoration: BoxDecoration(
-                              color: Colors.black.withOpacity(0.8),
-                              borderRadius: BorderRadius.circular(8),
+          child: Padding(
+            padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            child: Column(
+              children: [
+                _buildFilterControls(),
+                Expanded(
+                  child: equipmentList.isEmpty
+                      ? Container(
+                          padding:
+                              EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          decoration: BoxDecoration(
+                            color: Colors.black.withOpacity(0.8),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Center(
+                            child: Text(
+                              'No equipment available.',
+                              style:
+                                  TextStyle(color: Colors.white, fontSize: 13),
                             ),
-                            child: Center(
-                              child: Text(
-                                'No equipment available.',
-                                style: TextStyle(
-                                    color: Colors.white, fontSize: 13),
-                              ),
-                            ),
-                          )
-                        : GridView.builder(
-                            physics: BouncingScrollPhysics(),
-                            gridDelegate:
-                                SliverGridDelegateWithFixedCrossAxisCount(
-                              crossAxisCount: 3,
-                              crossAxisSpacing: 8,
-                              mainAxisSpacing: 8,
-                              childAspectRatio: 0.7,
-                            ),
-                            itemCount: equipmentList.length,
-                            itemBuilder: (context, index) {
-                              final equipment = equipmentList[index];
-                              return GestureDetector(
-                                onTap: () => Navigator.push(
-                                  context,
-                                  MaterialPageRoute(
-                                    builder: (context) => EquipmentDetailsPage(
-                                        equipment: equipment),
-                                  ),
+                          ),
+                        )
+                      : GridView.builder(
+                          physics: BouncingScrollPhysics(),
+                          gridDelegate:
+                              SliverGridDelegateWithFixedCrossAxisCount(
+                            crossAxisCount: 3,
+                            crossAxisSpacing: 8,
+                            mainAxisSpacing: 8,
+                            childAspectRatio: 0.7,
+                          ),
+                          itemCount: equipmentList.length,
+                          itemBuilder: (context, index) {
+                            final equipment = equipmentList[index];
+                            return GestureDetector(
+                              onTap: () => Navigator.push(
+                                context,
+                                MaterialPageRoute(
+                                  builder: (context) => EquipmentDetailsPage(
+                                      equipment: equipment),
                                 ),
-                                child: Card(
-                                  color: Colors.black.withOpacity(0.8),
-                                  elevation: 2,
-                                  shape: RoundedRectangleBorder(
-                                    borderRadius: BorderRadius.circular(8),
-                                  ),
-                                  child: Padding(
-                                    padding: EdgeInsets.all(8),
-                                    child: Column(
-                                      crossAxisAlignment:
-                                          CrossAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                          width: 60,
-                                          height: 60,
-                                          decoration: BoxDecoration(
-                                            color: _getRarityColor(
-                                                    equipment.rarity)
-                                                .withOpacity(0.3),
-                                            borderRadius:
-                                                BorderRadius.circular(30),
-                                            border: Border.all(
-                                              color: _getRarityColor(
-                                                  equipment.rarity),
-                                              width: 2,
-                                            ),
-                                          ),
-                                          child: Center(
-                                            child: Icon(
-                                              _getSlotIcon(equipment.slot),
-                                              color: _getRarityColor(
-                                                  equipment.rarity),
-                                              size: 30,
-                                            ),
-                                          ),
-                                        ),
-                                        SizedBox(height: 8),
-                                        Text(
-                                          equipment.name,
-                                          style: TextStyle(
-                                            fontWeight: FontWeight.bold,
+                              ),
+                              child: Card(
+                                color: Colors.black.withOpacity(0.8),
+                                elevation: 2,
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(8),
+                                ),
+                                child: Padding(
+                                  padding: EdgeInsets.all(8),
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.center,
+                                    children: [
+                                      Container(
+                                        width: 60,
+                                        height: 60,
+                                        decoration: BoxDecoration(
+                                          color:
+                                              _getRarityColor(equipment.rarity)
+                                                  .withOpacity(0.3),
+                                          borderRadius:
+                                              BorderRadius.circular(30),
+                                          border: Border.all(
                                             color: _getRarityColor(
                                                 equipment.rarity),
-                                            fontSize: 12,
+                                            width: 2,
                                           ),
-                                          textAlign: TextAlign.center,
-                                          maxLines: 2,
-                                          overflow: TextOverflow.ellipsis,
                                         ),
+                                        child: Center(
+                                          child: Icon(
+                                            _getSlotIcon(equipment.slot),
+                                            color: _getRarityColor(
+                                                equipment.rarity),
+                                            size: 30,
+                                          ),
+                                        ),
+                                      ),
+                                      SizedBox(height: 8),
+                                      Text(
+                                        equipment.name,
+                                        style: TextStyle(
+                                          fontWeight: FontWeight.bold,
+                                          color:
+                                              _getRarityColor(equipment.rarity),
+                                          fontSize: 12,
+                                        ),
+                                        textAlign: TextAlign.center,
+                                        maxLines: 2,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                      Text(
+                                        _getSlotName(equipment.slot),
+                                        style: TextStyle(
+                                          fontSize: 10,
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                      if (equipment.enhancementLevel > 0)
                                         Text(
-                                          _getSlotName(equipment.slot),
+                                          '+${equipment.enhancementLevel}',
                                           style: TextStyle(
-                                            fontSize: 10,
-                                            color: Colors.white70,
+                                            fontSize: 12,
+                                            color: Colors.amber,
                                           ),
                                         ),
-                                        if (equipment.enhancementLevel > 0)
-                                          Text(
-                                            '+${equipment.enhancementLevel}',
-                                            style: TextStyle(
-                                              fontSize: 12,
-                                              color: Colors.amber,
-                                            ),
-                                          ),
-                                        if (equipment.assignedTo != null)
-                                          Icon(
-                                            Icons.check_circle,
-                                            color: Colors.green,
-                                            size: 16,
-                                          ),
-                                      ],
-                                    ),
+                                      if (equipment.assignedTo != null)
+                                        Icon(
+                                          Icons.check_circle,
+                                          color: Colors.green,
+                                          size: 16,
+                                        ),
+                                    ],
                                   ),
                                 ),
-                              );
-                            },
-                          ),
-                  ),
-                ],
-              ),
+                              ),
+                            );
+                          },
+                        ),
+                ),
+                _buildBackButton(context),
+              ],
             ),
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFCAA04D),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          minimumSize: Size(double.infinity, 50),
+        ),
+        child: Text("Back",
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
       ),
     );
   }

@@ -12,6 +12,7 @@ final List<AbilitiesModel> abilitiesList = [
     cooldown: 4,
     type: AbilityType.heal,
     targetType: TargetType.single,
+    elementType: ElementType.none,
     affectsEnemies: false,
     healsCaster: true, // Explicitly mark as self-heal
   ),

@@ -4,7 +4,8 @@ import 'package:provider/provider.dart';
 import '../providers/game_provider.dart';
 import 'exchange_page.dart';
 import 'girl_list_page.dart';
-import 'dashboard_page.dart'; // Import the DashboardPage
+import 'dashboard_page.dart';
+import 'shop_page.dart'; // Import the DashboardPage
 
 class HomePage extends StatefulWidget {
   @override
@@ -19,7 +20,7 @@ class _HomePageState extends State<HomePage> {
     ManageGirlListPage(),
     DashboardPage(),
     MapPage(),
-    TransactionExchangePage(),
+    ShopScreen(),
   ];
 
   @override
