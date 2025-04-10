@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:idle_space_farm/pages/equipment_list_page.dart';
+import 'inventory_page.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
 import '../providers/game_provider.dart';
@@ -97,7 +97,7 @@ class DashboardPage extends StatelessWidget {
           PageRouteBuilder(
             transitionDuration: Duration(milliseconds: 500),
             pageBuilder: (context, animation, secondaryAnimation) =>
-                EquipmentListPage(),
+                InventoryPage(),
             transitionsBuilder:
                 (context, animation, secondaryAnimation, child) {
               return FadeTransition(

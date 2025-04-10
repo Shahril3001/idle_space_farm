@@ -48,6 +48,104 @@ class _ShopScreenState extends State<ShopScreen> {
       appBar: AppBar(
         title: const Text('Shop'),
         centerTitle: true,
+        actions: [
+          IconButton(
+            icon: Icon(Icons.refresh),
+            tooltip:
+                'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
+            onPressed: () {
+              final refreshesLeft =
+                  3 - (gameProvider.shop?.refreshCountToday ?? 0);
+
+              if (refreshesLeft <= 0) {
+                showDialog(
+                  context: context,
+                  builder: (context) => Dialog(
+                    backgroundColor: Colors.transparent,
+                    child: Container(
+                      padding: EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.grey[900],
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.redAccent, width: 2),
+                      ),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Text(
+                            "No Refreshes Left",
+                            style: TextStyle(fontSize: 20, color: Colors.white),
+                          ),
+                          SizedBox(height: 10),
+                          Text(
+                            "You've used all 3 refreshes for today.",
+                            style: TextStyle(color: Colors.white70),
+                          ),
+                          SizedBox(height: 20),
+                          TextButton(
+                            onPressed: () => Navigator.pop(context),
+                            child: Text("OK",
+                                style: TextStyle(color: Colors.redAccent)),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                );
+                return;
+              }
+
+              showDialog(
+                context: context,
+                builder: (context) => Dialog(
+                  backgroundColor: Colors.transparent,
+                  child: Container(
+                    padding: EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[850],
+                      borderRadius: BorderRadius.circular(20),
+                      border: Border.all(color: Colors.blueAccent, width: 2),
+                    ),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Text(
+                          "Refresh Shop?",
+                          style: TextStyle(fontSize: 20, color: Colors.white),
+                        ),
+                        SizedBox(height: 10),
+                        Text(
+                          "You have $refreshesLeft refresh${refreshesLeft == 1 ? '' : 'es'} left today.",
+                          style: TextStyle(color: Colors.white70),
+                        ),
+                        SizedBox(height: 20),
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.end,
+                          children: [
+                            TextButton(
+                              onPressed: () => Navigator.pop(context),
+                              child: Text("Cancel",
+                                  style: TextStyle(color: Colors.white70)),
+                            ),
+                            TextButton(
+                              onPressed: () {
+                                Navigator.pop(context);
+                                gameProvider.manualRefreshShop();
+                              },
+                              child: Text("Refresh",
+                                  style:
+                                      TextStyle(color: Colors.lightBlueAccent)),
+                            ),
+                          ],
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: Column(
         children: [
@@ -75,7 +173,6 @@ class _ShopScreenState extends State<ShopScreen> {
           ),
 
           // Resource Bar
-          _buildResourceBar(context),
         ],
       ),
     );
@@ -252,27 +349,6 @@ class _ShopScreenState extends State<ShopScreen> {
       default:
         return Colors.grey[200]!;
     }
-  }
-
-  Widget _buildResourceBar(BuildContext context) {
-    final gameProvider = Provider.of<GameProvider>(context);
-    final resources = gameProvider.resources;
-
-    return Container(
-      padding: const EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surfaceVariant,
-        borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildResourceChip(context, 'Energy', Icons.bolt),
-          _buildResourceChip(context, 'Minerals', Icons.terrain),
-          _buildResourceChip(context, 'Credits', Icons.monetization_on),
-        ],
-      ),
-    );
   }
 
   Widget _buildResourceChip(

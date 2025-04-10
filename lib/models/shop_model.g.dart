@@ -20,13 +20,16 @@ class ShopModelAdapter extends TypeAdapter<ShopModel> {
       categories: (fields[0] as List).cast<ShopCategory>(),
       currencyValues: (fields[1] as Map?)?.cast<String, double>(),
       purchasedItemIds: (fields[3] as List).cast<String>().toSet(),
-    ).._lastRefreshTime = fields[2] as DateTime;
+    )
+      .._lastRefreshTime = fields[2] as DateTime
+      .._refreshCountToday = fields[4] as int
+      .._lastDailyReset = fields[5] as DateTime;
   }
 
   @override
   void write(BinaryWriter writer, ShopModel obj) {
     writer
-      ..writeByte(4)
+      ..writeByte(6)
       ..writeByte(0)
       ..write(obj.categories)
       ..writeByte(1)
@@ -34,7 +37,11 @@ class ShopModelAdapter extends TypeAdapter<ShopModel> {
       ..writeByte(2)
       ..write(obj._lastRefreshTime)
       ..writeByte(3)
-      ..write(obj.purchasedItemIds.toList());
+      ..write(obj.purchasedItemIds.toList())
+      ..writeByte(4)
+      ..write(obj._refreshCountToday)
+      ..writeByte(5)
+      ..write(obj._lastDailyReset);
   }
 
   @override

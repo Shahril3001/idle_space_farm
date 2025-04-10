@@ -9,6 +9,7 @@ import 'ability_model.dart';
 import 'equipment_model.dart';
 import 'girl_farmer_model.dart';
 import 'potion_model.dart';
+import 'dart:math';
 
 part 'shop_model.g.dart';
 
@@ -26,13 +27,23 @@ class ShopModel {
   @HiveField(3)
   final Set<String> purchasedItemIds;
 
+  @HiveField(4) // New field for refresh tracking
+  int _refreshCountToday = 0;
+
+  @HiveField(5) // New field for daily reset
+  DateTime _lastDailyReset;
+
   DateTime get lastRefreshTime => _lastRefreshTime;
+  int get refreshCountToday => _refreshCountToday;
+  DateTime get lastDailyReset => _lastDailyReset;
 
   ShopModel({
     required this.categories,
     Map<String, double>? currencyValues,
     DateTime? lastRefreshTime,
     Set<String>? purchasedItemIds,
+    int? refreshCountToday,
+    DateTime? lastDailyReset,
   })  : currencyValues = currencyValues ??
             {
               'Energy': 1.0,
@@ -40,19 +51,50 @@ class ShopModel {
               'Credits': 1.2,
             },
         _lastRefreshTime = lastRefreshTime ?? DateTime.now(),
-        purchasedItemIds = purchasedItemIds ?? {};
+        purchasedItemIds = purchasedItemIds ?? {},
+        _refreshCountToday = refreshCountToday ?? 0,
+        _lastDailyReset = lastDailyReset ?? DateTime.now();
 
   List<ShopItem> get allItems => categories.expand((c) => c.items).toList();
+  bool get canRefresh {
+    final now = DateTime.now();
+    // Reset counter if it's a new day
+    if (!isSameDay(now, _lastDailyReset)) {
+      _refreshCountToday = 0;
+      _lastDailyReset = now;
+      return true;
+    }
+    // Check if we haven't exceeded 3 refreshes today
+    return _refreshCountToday < 3;
+  }
+
+  bool isSameDay(DateTime a, DateTime b) {
+    return a.year == b.year && a.month == b.month && a.day == b.day;
+  }
+
+  void refreshShop(List<ShopCategory> newCategories) {
+    if (!canRefresh) return;
+
+    _refreshCountToday++;
+    _lastRefreshTime = DateTime.now();
+    categories
+      ..clear()
+      ..addAll(newCategories);
+  }
 
   ShopModel copyWith({
     List<ShopCategory>? categories,
     DateTime? lastRefreshTime,
     Set<String>? purchasedItemIds,
+    int? refreshCountToday,
+    DateTime? lastDailyReset,
   }) {
     return ShopModel(
       categories: categories ?? this.categories,
-      lastRefreshTime: lastRefreshTime ?? this.lastRefreshTime,
+      lastRefreshTime: lastRefreshTime ?? this._lastRefreshTime,
       purchasedItemIds: purchasedItemIds ?? this.purchasedItemIds,
+      refreshCountToday: refreshCountToday ?? this._refreshCountToday,
+      lastDailyReset: lastDailyReset ?? this._lastDailyReset,
     );
   }
 
@@ -246,6 +288,7 @@ int _calculateEquipmentPrice(Equipment equip) {
   };
 }
 
+final Random random = Random();
 // Default shop creation
 List<ShopCategory> createDefaultShopCategories() {
   return [
@@ -253,7 +296,7 @@ List<ShopCategory> createDefaultShopCategories() {
       id: 'girls',
       name: 'Girls',
       iconPath: 'assets/icons/shop_girls.png',
-      items: girlsData
+      items: (List.of(girlsData)..shuffle(random))
           .take(5)
           .map((girl) => createShopItemFromGirl(girl))
           .toList(),
@@ -262,7 +305,7 @@ List<ShopCategory> createDefaultShopCategories() {
       id: 'equipment',
       name: 'Equipment',
       iconPath: 'assets/icons/shop_equipment.png',
-      items: equipmentList
+      items: (List.of(equipmentList)..shuffle(random))
           .take(5)
           .map((equip) => createShopItemFromEquipment(equip))
           .toList(),
@@ -271,7 +314,7 @@ List<ShopCategory> createDefaultShopCategories() {
       id: 'potions',
       name: 'Potions',
       iconPath: 'assets/icons/shop_potions.png',
-      items: PotionDatabase.allPotions
+      items: (List.of(PotionDatabase.allPotions)..shuffle(random))
           .take(3)
           .map((potion) => createShopItemFromPotion(potion))
           .toList(),
@@ -280,7 +323,7 @@ List<ShopCategory> createDefaultShopCategories() {
       id: 'abilities',
       name: 'Ability Scrolls',
       iconPath: 'assets/icons/shop_scrolls.png',
-      items: abilitiesList
+      items: (List.of(abilitiesList)..shuffle(random))
           .take(3)
           .map((ability) => createShopItemFromAbility(ability))
           .toList(),

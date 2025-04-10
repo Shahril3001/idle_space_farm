@@ -34,6 +34,9 @@ class GameProvider with ChangeNotifier {
   bool _isInitialized = false;
   DateTime? _lastUpdateTime;
   Timer? _resourceTimer;
+
+  Timer? _dailyCheckTimer;
+
   ShopModel? _shop;
   bool _isShopLoading = false;
 
@@ -68,28 +71,71 @@ class GameProvider with ChangeNotifier {
   List<ShopCategory> get shopCategories => _shop?.categories ?? [];
 
   Future<void> initializeShop() async {
-    if (_isShopLoading) return;
+    startDailyRefreshCheck();
+    if (_isShopLoading) {
+      debugPrint('Shop initialization already in progress - aborting');
+      return;
+    }
 
     _isShopLoading = true;
     notifyListeners();
+    debugPrint('Starting shop initialization...');
 
     try {
+      debugPrint('Loading shop from repository...');
       await _shopRepository.initializeDefaultShop();
       _shop = _shopRepository.getShop();
 
-      // Ensure we have a valid shop
       if (_shop == null) {
+        debugPrint('No shop found in repository, creating default shop...');
         _shop = ShopModel(categories: createDefaultShopCategories());
         await _shopRepository.saveShop(_shop!);
+        debugPrint('Default shop created and saved');
+      } else {
+        debugPrint('Shop loaded from repository successfully');
+        debugPrint('Shop contains ${_shop!.categories.length} categories');
+        _shop!.categories.forEach((category) {
+          debugPrint(
+              'Category "${category.name}" has ${category.items.length} items');
+        });
       }
-    } catch (e) {
+    } catch (e, stackTrace) {
       debugPrint('Error initializing shop: $e');
-      // Fallback to default shop if loading fails
+      debugPrint('Stack trace: $stackTrace');
+      debugPrint('Falling back to default shop');
       _shop = ShopModel(categories: createDefaultShopCategories());
     } finally {
       _isShopLoading = false;
       notifyListeners();
+      debugPrint('Shop initialization complete');
     }
+  }
+
+  void startDailyRefreshCheck() {
+    _dailyCheckTimer?.cancel();
+    // Check every hour for daily reset
+    _dailyCheckTimer = Timer.periodic(Duration(hours: 1), (_) {
+      checkDailyReset();
+    });
+  }
+
+  void checkDailyReset() {
+    if (_shop == null) return;
+
+    final now = DateTime.now();
+    if (!_shop!.isSameDay(now, _shop!.lastDailyReset)) {
+      _shop!.refreshShop(createDefaultShopCategories());
+      _shopRepository.saveShop(_shop!);
+      notifyListeners();
+    }
+  }
+
+  Future<void> manualRefreshShop() async {
+    if (_shop == null || !_shop!.canRefresh) return;
+
+    _shop!.refreshShop(createDefaultShopCategories());
+    await _shopRepository.saveShop(_shop!);
+    notifyListeners();
   }
 
   bool isItemPurchased(String itemId) {
@@ -379,6 +425,139 @@ class GameProvider with ChangeNotifier {
   List<Farm> get farms => _farmRepository.getAllFarms();
   List<GirlFarmer> get girlFarmers => _girlRepository.getAllGirls();
   List<Equipment> get equipment => _equipmentRepository.getAllEquipment();
+  List<Potion> get potions => _potionRepository.getAllPotions();
+
+  // ======================
+  // Potion Management
+  // ======================
+  List<Potion> getFilteredPotions({
+    PotionRarity? rarity,
+    String? searchQuery,
+  }) {
+    return _potionRepository.getAllPotions().where((potion) {
+      final matchesRarity = rarity == null || potion.rarity == rarity;
+      final matchesSearch = searchQuery == null ||
+          searchQuery.isEmpty ||
+          potion.name.toLowerCase().contains(searchQuery.toLowerCase()) ||
+          potion.description.toLowerCase().contains(searchQuery.toLowerCase());
+      return matchesRarity && matchesSearch;
+    }).toList();
+  }
+
+  /// Uses a potion on a girl
+  Future<bool> usePotion({
+    required String potionId,
+    required String girlId,
+  }) async {
+    try {
+      final potion = _potionRepository.getPotionById(potionId);
+      final girl = _girlRepository.getGirlById(girlId);
+
+      if (potion == null || girl == null) {
+        throw Exception('Potion or girl not found');
+      }
+
+      if (!potion.canBeUsedBy(girl)) {
+        throw Exception('${girl.name} cannot use this potion');
+      }
+
+      // Apply effects
+      potion.applyPermanentEffects(girl);
+
+      // Save changes
+      await _girlRepository.updateGirl(girl);
+      await _potionRepository.deletePotion(potionId);
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Error using potion: $e');
+      return false;
+    }
+  }
+
+  /// Sells a potion for credits
+  Future<bool> sellPotion(String potionId) async {
+    try {
+      final potion = _potionRepository.getPotionById(potionId);
+      if (potion == null) return false;
+
+      final credits = _resourceRepository.getResourceByName('Credits');
+      if (credits == null) return false;
+
+      final sellPrice = calculatePotionSellPrice(potion);
+
+      // Add credits and remove potion
+      credits.amount += sellPrice;
+      await _resourceRepository.updateResource(credits);
+      await _potionRepository.deletePotion(potionId);
+
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Error selling potion: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a potion from inventory
+  Future<bool> deletePotion(String potionId) async {
+    try {
+      await _potionRepository.deletePotion(potionId);
+      notifyListeners();
+      return true;
+    } catch (e) {
+      debugPrint('Error deleting potion: $e');
+      return false;
+    }
+  }
+
+  /// Adds a potion to inventory
+  Future<void> addPotion(Potion potion) async {
+    await _potionRepository.addPotion(potion);
+    notifyListeners();
+  }
+
+  /// Adds multiple potions to inventory
+  Future<void> addPotions(List<Potion> potions) async {
+    await _potionRepository.addPotionsToInventory(potions);
+    notifyListeners();
+  }
+
+  /// Gets all girls that can use a specific potion
+  List<GirlFarmer> getEligibleGirlsForPotion(Potion potion) {
+    return _girlRepository
+        .getAllGirls()
+        .where((girl) => potion.canBeUsedBy(girl))
+        .toList();
+  }
+
+  /// Calculates sell price based on potion rarity
+  double calculatePotionSellPrice(Potion potion) {
+    return switch (potion.rarity) {
+      PotionRarity.common => 10,
+      PotionRarity.uncommon => 25,
+      PotionRarity.rare => 60,
+      PotionRarity.epic => 150,
+      PotionRarity.legendary => 400,
+    };
+  }
+
+  /// Gets a potion by ID
+  Potion? getPotionById(String id) {
+    return _potionRepository.getPotionById(id);
+  }
+
+  /// Clears all potions from inventory (debug/reset)
+  Future<void> clearAllPotions() async {
+    await _potionRepository.clearAllPotions();
+    notifyListeners();
+  }
+
+  /// Debug method to print all potions
+  void debugPrintPotions() {
+    _potionRepository.debugPrintPotions();
+  }
 
   // Add equipment to the repository
   void addEquipment(Equipment equipment) {
