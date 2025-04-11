@@ -41,9 +41,9 @@ enum WeaponType {
 @HiveType(typeId: 17) // New typeId for armor type
 enum ArmorType {
   @HiveField(0)
-  helmet,
+  head,
   @HiveField(1)
-  chainmail,
+  body,
 }
 
 @HiveType(typeId: 18) // New typeId for accessory type
@@ -56,6 +56,8 @@ enum AccessoryType {
   glove,
   @HiveField(3)
   shoes,
+  @HiveField(5)
+  pendant,
 }
 
 @HiveType(typeId: 13)

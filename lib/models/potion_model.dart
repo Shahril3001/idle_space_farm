@@ -48,6 +48,9 @@ class Potion {
   @HiveField(13)
   final List<String> allowedTypes; // Which character types can use this
 
+  @HiveField(14) // Next available field number
+  int quantity;
+
   Potion({
     required this.id,
     required this.name,
@@ -62,7 +65,8 @@ class Potion {
     this.agilityIncrease = 0,
     this.criticalPointIncrease = 0,
     this.rarity = PotionRarity.common,
-    this.allowedTypes = const [], // Empty means all can use
+    this.allowedTypes = const [],
+    this.quantity = 1, // Default quantity is 1
   });
 
   Potion copyWith({
@@ -80,6 +84,7 @@ class Potion {
     int? criticalPointIncrease,
     PotionRarity? rarity,
     List<String>? allowedTypes,
+    int? quantity,
   }) {
     return Potion(
       id: id ?? this.id,
@@ -97,6 +102,7 @@ class Potion {
           criticalPointIncrease ?? this.criticalPointIncrease,
       rarity: rarity ?? this.rarity,
       allowedTypes: allowedTypes ?? this.allowedTypes,
+      quantity: quantity ?? this.quantity,
     );
   }
 
@@ -133,6 +139,7 @@ class Potion {
       'criticalPointIncrease': criticalPointIncrease,
       'rarity': rarity.index,
       'allowedTypes': allowedTypes,
+      'quantity': quantity,
     };
   }
 
@@ -152,6 +159,7 @@ class Potion {
       criticalPointIncrease: map['criticalPointIncrease'],
       rarity: PotionRarity.values[map['rarity']],
       allowedTypes: List<String>.from(map['allowedTypes']),
+      quantity: map['quantity'] ?? 1,
     );
   }
 }

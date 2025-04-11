@@ -146,7 +146,7 @@ void main() async {
   }
 
   // Open the main Hive boxes
-  final box = await Hive.openBox('idle_space_farm');
+  final box = await Hive.openBox('eldoria_chronicles');
 
   // Initialize repositories
   final resourceRepository = ResourceRepository(box);

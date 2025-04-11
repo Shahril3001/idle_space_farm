@@ -31,13 +31,14 @@ class PotionAdapter extends TypeAdapter<Potion> {
       criticalPointIncrease: fields[11] as int,
       rarity: fields[12] as PotionRarity,
       allowedTypes: (fields[13] as List).cast<String>(),
+      quantity: fields[14] as int,
     );
   }
 
   @override
   void write(BinaryWriter writer, Potion obj) {
     writer
-      ..writeByte(14)
+      ..writeByte(15)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -65,7 +66,9 @@ class PotionAdapter extends TypeAdapter<Potion> {
       ..writeByte(12)
       ..write(obj.rarity)
       ..writeByte(13)
-      ..write(obj.allowedTypes);
+      ..write(obj.allowedTypes)
+      ..writeByte(14)
+      ..write(obj.quantity);
   }
 
   @override

@@ -44,6 +44,7 @@ dependencies:
   hive_generator: ^2.0.1
   build_runner: ^2.4.14
   external_path: ^2.0.1
+  flutter_native_splash: ^2.4.4
 
 dev_dependencies:
   flutter_test:
@@ -69,7 +70,11 @@ flutter:
     - assets/images/icons/
     - assets/images/dungeons/
     - assets/images/enemies/
-
+    - assets/images/equipments/
+    - assets/images/potions/
+    - assets/images/abilities/
+    - assets/images/locations/
+    
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
   # the material Icons class.

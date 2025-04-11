@@ -39,9 +39,9 @@ class GameProvider with ChangeNotifier {
 
   ShopModel? _shop;
   bool _isShopLoading = false;
-
   bool get isInitialized => _isInitialized;
   ShopModel? get shop => _shop;
+  OverlayEntry? _currentOverlay;
 
   GameProvider({
     required ResourceRepository resourceRepository,
@@ -130,6 +130,17 @@ class GameProvider with ChangeNotifier {
     }
   }
 
+  void setCurrentOverlay(OverlayEntry overlay) {
+    // Remove any existing overlay before setting a new one
+    _currentOverlay?.remove();
+    _currentOverlay = overlay;
+  }
+
+  void removeCurrentOverlay() {
+    _currentOverlay?.remove();
+    _currentOverlay = null;
+  }
+
   Future<void> manualRefreshShop() async {
     if (_shop == null || !_shop!.canRefresh) return;
 
@@ -146,38 +157,97 @@ class GameProvider with ChangeNotifier {
     return canAfford(item.prices);
   }
 
-  Future<bool> purchaseItem(ShopItem item) async {
-    if (_shop == null || !canAfford(item.prices)) return false;
+  int getMaxAffordableQuantity(ShopItem item) {
+    if (_shop == null) return 0;
+
+    // Calculate the maximum quantity based on each required resource
+    int maxQuantity = -1;
+
+    item.prices.forEach((currency, pricePerUnit) {
+      final resource = _resourceRepository.getResourceByName(currency);
+      if (resource == null) {
+        maxQuantity = 0;
+        return;
+      }
+
+      // For each resource, calculate how many we can buy
+      final possibleQuantity = (resource.amount / pricePerUnit).floor();
+
+      // Take the minimum across all resources
+      if (maxQuantity == -1 || possibleQuantity < maxQuantity) {
+        maxQuantity = possibleQuantity;
+      }
+    });
+
+    // Consider stock limitations if they exist
+    if (item.stock != null && item.stock! < maxQuantity) {
+      maxQuantity = item.stock!;
+    }
+
+    // Ensure we don't return negative values
+    return maxQuantity.clamp(0, 99); // Assuming 99 is max stack size
+  }
+
+  Future<bool> purchaseItem(ShopItem item, {int quantity = 1}) async {
+    if (_shop == null || quantity <= 0) return false;
+
+    // Calculate total cost
+    final totalCost = <String, int>{};
+    item.prices.forEach((currency, amount) {
+      totalCost[currency] = amount * quantity;
+    });
+
+    // Check affordability
+    if (!canAfford(totalCost)) return false;
 
     try {
       // Deduct resources
-      deductResources(item.prices);
+      deductResources(totalCost);
 
       // Handle the specific item type
       switch (item.type) {
         case ShopItemType.girl:
+          if (quantity > 1) {
+            throw Exception("Cannot purchase multiple girls at once");
+          }
           await _handleGirlPurchase(item);
           break;
         case ShopItemType.equipment:
+          if (quantity > 1) {
+            throw Exception("Cannot purchase multiple equipment at once");
+          }
           await _handleEquipmentPurchase(item);
           break;
         case ShopItemType.potion:
-          await _handlePotionPurchase(item);
+          await _handlePotionPurchase(item, quantity: quantity);
           break;
         case ShopItemType.abilityScroll:
+          if (quantity > 1) {
+            throw Exception("Cannot purchase multiple ability scrolls at once");
+          }
           await _handleAbilityScrollPurchase(item);
           break;
       }
 
-      // Record purchase
-      _shop!.purchasedItemIds.add(item.id);
+      // Update stock if applicable
+      if (item.stock != null) {
+        final newStock = item.stock! - quantity;
+        final updatedItem = item.copyWith(stock: newStock);
+        if (newStock <= 0) {
+          _shop!.purchasedItemIds.add(updatedItem.id);
+        }
+        // Optionally update item in your shop list or Hive box here
+      } else {
+        _shop!.purchasedItemIds.add(item.id);
+      }
+
       await _shopRepository.saveShop(_shop!);
       notifyListeners();
       return true;
     } catch (e) {
       debugPrint('Purchase failed: $e');
       // Refund on error
-      item.prices.forEach((currency, amount) {
+      totalCost.forEach((currency, amount) {
         final resource = _resourceRepository.getResourceByName(currency);
         if (resource != null) {
           resource.amount += amount;
@@ -185,6 +255,29 @@ class GameProvider with ChangeNotifier {
         }
       });
       return false;
+    }
+  }
+
+  Future<void> _handlePotionPurchase(ShopItem item, {int quantity = 1}) async {
+    try {
+      // Find the potion template from your database using item.itemId
+      final potionTemplate = PotionDatabase.allPotions.firstWhere(
+        (p) => p.id == item.itemId,
+        orElse: () => throw Exception("Potion not found in database"),
+      );
+
+      // Create a new potion instance with the desired quantity
+      final newPotion = potionTemplate.copyWith(
+        quantity: quantity,
+      );
+
+      // Wrap the newPotion in a list, since the repository expects List<Potion>
+      await _potionRepository.addPotionsToInventory([newPotion]);
+
+      notifyListeners();
+    } catch (e) {
+      debugPrint('Error handling potion purchase: $e');
+      rethrow;
     }
   }
 
@@ -198,7 +291,7 @@ class GameProvider with ChangeNotifier {
     if (girlTemplate == null) return;
 
     final newGirl = GirlFarmer(
-      id: 'girl_${DateTime.now().millisecondsSinceEpoch}',
+      id: generateUniqueId(),
       name: girlTemplate.name,
       level: girlTemplate.level,
       miningEfficiency: girlTemplate.miningEfficiency,
@@ -212,15 +305,21 @@ class GameProvider with ChangeNotifier {
       hp: girlTemplate.hp,
       mp: girlTemplate.mp,
       sp: girlTemplate.sp,
-      abilities: girlTemplate.abilities.map((a) => a.freshCopy()).toList(),
+      maxHp: girlTemplate.hp,
+      maxMp: girlTemplate.mp,
+      maxSp: girlTemplate.sp,
+      abilities:
+          _initializeAbilities(girlTemplate.race, girlTemplate.abilities),
       race: girlTemplate.race,
       type: girlTemplate.type,
       region: girlTemplate.region,
       description: girlTemplate.description,
-      maxHp: girlTemplate.maxHp,
-      maxMp: girlTemplate.maxMp,
-      maxSp: girlTemplate.maxSp,
       criticalPoint: girlTemplate.criticalPoint,
+      currentCooldowns: {},
+      elementAffinities: girlTemplate.elementAffinities,
+      statusEffects: [],
+      partyMemberIds: [],
+      equippedItems: [],
     );
     await _girlRepository.addGirl(newGirl);
   }
@@ -255,23 +354,6 @@ class GameProvider with ChangeNotifier {
       criticalPoint: equipTemplate.criticalPoint,
     );
     await _equipmentRepository.addEquipment(newEquipment);
-  }
-
-  Future<void> _handlePotionPurchase(ShopItem item) async {
-    Potion? potion;
-    try {
-      potion = PotionDatabase.allPotions.firstWhere((p) => p.id == item.itemId);
-    } catch (e) {
-      potion = null;
-    }
-    if (potion == null) return;
-
-    // Add to inventory or apply immediately
-    final resource = _resourceRepository.getResourceByName('Energy');
-    if (resource != null) {
-      resource.amount += 100;
-      await _resourceRepository.updateResource(resource);
-    }
   }
 
   Future<void> _handleAbilityScrollPurchase(ShopItem item) async {
@@ -444,10 +526,11 @@ class GameProvider with ChangeNotifier {
     }).toList();
   }
 
-  /// Uses a potion on a girl
+  /// Uses a potion on a girl (with quantity support)
   Future<bool> usePotion({
     required String potionId,
     required String girlId,
+    int quantity = 1,
   }) async {
     try {
       final potion = _potionRepository.getPotionById(potionId);
@@ -461,12 +544,28 @@ class GameProvider with ChangeNotifier {
         throw Exception('${girl.name} cannot use this potion');
       }
 
-      // Apply effects
-      potion.applyPermanentEffects(girl);
+      if (potion.quantity < quantity) {
+        throw Exception(
+            'Not enough ${potion.name} (${potion.quantity}/$quantity)');
+      }
 
-      // Save changes
+      // Apply effects for each potion used
+      for (int i = 0; i < quantity; i++) {
+        potion.applyPermanentEffects(girl);
+      }
+
+      // Update or remove potion based on remaining quantity
+      if (potion.quantity > quantity) {
+        final updatedPotion = potion.copyWith(
+          quantity: potion.quantity - quantity,
+        );
+        await _potionRepository.updatePotion(updatedPotion);
+      } else {
+        await _potionRepository.deletePotion(potionId);
+      }
+
+      // Save changes to girl
       await _girlRepository.updateGirl(girl);
-      await _potionRepository.deletePotion(potionId);
 
       notifyListeners();
       return true;
@@ -476,8 +575,11 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  /// Sells a potion for credits
-  Future<bool> sellPotion(String potionId) async {
+  /// Sells a potion for credits (with partial quantity support)
+  Future<bool> sellPotion({
+    required String potionId,
+    int quantity = 1,
+  }) async {
     try {
       final potion = _potionRepository.getPotionById(potionId);
       if (potion == null) return false;
@@ -485,12 +587,26 @@ class GameProvider with ChangeNotifier {
       final credits = _resourceRepository.getResourceByName('Credits');
       if (credits == null) return false;
 
-      final sellPrice = calculatePotionSellPrice(potion);
+      if (potion.quantity < quantity) {
+        throw Exception(
+            'Not enough ${potion.name} to sell (${potion.quantity}/$quantity)');
+      }
 
-      // Add credits and remove potion
+      final sellPrice = calculatePotionSellPrice(potion) * quantity;
+
+      // Add credits
       credits.amount += sellPrice;
       await _resourceRepository.updateResource(credits);
-      await _potionRepository.deletePotion(potionId);
+
+      // Update or remove potion
+      if (potion.quantity > quantity) {
+        final updatedPotion = potion.copyWith(
+          quantity: potion.quantity - quantity,
+        );
+        await _potionRepository.updatePotion(updatedPotion);
+      } else {
+        await _potionRepository.deletePotion(potionId);
+      }
 
       notifyListeners();
       return true;
@@ -500,10 +616,30 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  /// Deletes a potion from inventory
-  Future<bool> deletePotion(String potionId) async {
+  /// Deletes a potion from inventory (with partial quantity support)
+  Future<bool> deletePotion({
+    required String potionId,
+    required int quantity,
+  }) async {
     try {
-      await _potionRepository.deletePotion(potionId);
+      final potion = _potionRepository.getPotionById(potionId);
+      if (potion == null) return false;
+
+      if (quantity <= 0) {
+        throw Exception('Quantity must be greater than 0');
+      }
+
+      if (quantity >= potion.quantity) {
+        // Delete entire stack if quantity >= current
+        await _potionRepository.deletePotion(potionId);
+      } else {
+        // Reduce quantity if partial deletion
+        final updatedPotion = potion.copyWith(
+          quantity: potion.quantity - quantity,
+        );
+        await _potionRepository.updatePotion(updatedPotion);
+      }
+
       notifyListeners();
       return true;
     } catch (e) {
@@ -512,15 +648,29 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-  /// Adds a potion to inventory
+  /// Adds a potion to inventory (with stacking support)
   Future<void> addPotion(Potion potion) async {
-    await _potionRepository.addPotion(potion);
+    final existingPotion = _potionRepository.getPotionById(potion.id);
+
+    if (existingPotion != null) {
+      // Stack with existing potion
+      final newQuantity = existingPotion.quantity + potion.quantity;
+      final updatedPotion = existingPotion.copyWith(
+        quantity: newQuantity.clamp(1, existingPotion.maxStack),
+      );
+      await _potionRepository.updatePotion(updatedPotion);
+    } else {
+      // Add new potion
+      await _potionRepository.addPotion(potion);
+    }
     notifyListeners();
   }
 
-  /// Adds multiple potions to inventory
+  /// Adds multiple potions to inventory (with stacking support)
   Future<void> addPotions(List<Potion> potions) async {
-    await _potionRepository.addPotionsToInventory(potions);
+    for (final potion in potions) {
+      await addPotion(potion);
+    }
     notifyListeners();
   }
 

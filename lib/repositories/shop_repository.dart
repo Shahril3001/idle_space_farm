@@ -28,10 +28,10 @@ class ShopRepository {
     await _box.delete(_shopKey);
   }
 
-  Future<void> addPurchasedItem(String itemId) async {
+  Future<void> addPurchasedItem(String item) async {
     final shop = getShop();
     if (shop != null) {
-      shop.recordPurchase(itemId);
+      shop.recordPurchase(item as ShopItem);
       await saveShop(shop);
     }
   }

@@ -25,12 +25,12 @@ class ShopModel {
   DateTime _lastRefreshTime;
 
   @HiveField(3)
-  final Set<String> purchasedItemIds;
+  final Set<String> purchasedItemIds; // Only tracks girls and equipment
 
-  @HiveField(4) // New field for refresh tracking
+  @HiveField(4)
   int _refreshCountToday = 0;
 
-  @HiveField(5) // New field for daily reset
+  @HiveField(5)
   DateTime _lastDailyReset;
 
   DateTime get lastRefreshTime => _lastRefreshTime;
@@ -56,15 +56,14 @@ class ShopModel {
         _lastDailyReset = lastDailyReset ?? DateTime.now();
 
   List<ShopItem> get allItems => categories.expand((c) => c.items).toList();
+
   bool get canRefresh {
     final now = DateTime.now();
-    // Reset counter if it's a new day
     if (!isSameDay(now, _lastDailyReset)) {
       _refreshCountToday = 0;
       _lastDailyReset = now;
       return true;
     }
-    // Check if we haven't exceeded 3 refreshes today
     return _refreshCountToday < 3;
   }
 
@@ -75,11 +74,43 @@ class ShopModel {
   void refreshShop(List<ShopCategory> newCategories) {
     if (!canRefresh) return;
 
+    // Only keep tracking of purchased girls and equipment
+    final purchasedIds = purchasedItemIds.where((id) {
+      final item = allItems.firstWhereOrNull((item) => item.id == id);
+      return item != null &&
+          item.type != ShopItemType.potion &&
+          item.type != ShopItemType.abilityScroll;
+    }).toSet();
+
+    // Clear all purchased items
+    purchasedItemIds.clear();
+
+    // Re-add only the girls and equipment that were purchased
+    purchasedItemIds.addAll(purchasedIds);
+
     _refreshCountToday++;
     _lastRefreshTime = DateTime.now();
     categories
       ..clear()
       ..addAll(newCategories);
+  }
+
+  bool canPurchase(ShopItem item) {
+    // Potions and abilities can always be purchased
+    if (item.type == ShopItemType.potion ||
+        item.type == ShopItemType.abilityScroll) {
+      return true;
+    }
+    // For other items, check if not already purchased
+    return !purchasedItemIds.contains(item.id);
+  }
+
+  void recordPurchase(ShopItem item) {
+    // Only record purchases for girls and equipment
+    if (item.type != ShopItemType.potion &&
+        item.type != ShopItemType.abilityScroll) {
+      purchasedItemIds.add(item.id);
+    }
   }
 
   ShopModel copyWith({
@@ -96,10 +127,6 @@ class ShopModel {
       refreshCountToday: refreshCountToday ?? this._refreshCountToday,
       lastDailyReset: lastDailyReset ?? this._lastDailyReset,
     );
-  }
-
-  void recordPurchase(String itemId) {
-    purchasedItemIds.add(itemId);
   }
 
   double convertCurrency(double amount, String from, String to) {
@@ -157,7 +184,7 @@ class ShopItem {
   final ShopItemType type;
 
   @HiveField(3)
-  final String itemId; // ID of the actual item (girl, equipment, etc.)
+  final String itemId;
 
   @HiveField(4)
   final Map<String, int> prices;
@@ -254,7 +281,6 @@ ShopItem createShopItemFromPotion(Potion potion) => ShopItem(
       name: potion.name,
       description: potion.description,
       prices: {'Credits': potion.rarity == PotionRarity.common ? 100 : 250},
-      stock: 5,
       type: ShopItemType.potion,
     );
 
@@ -289,44 +315,52 @@ int _calculateEquipmentPrice(Equipment equip) {
 }
 
 final Random random = Random();
-// Default shop creation
+
 List<ShopCategory> createDefaultShopCategories() {
+  final girlItems = (List.of(girlsData)..shuffle(random))
+      .take(9)
+      .map((girl) => createShopItemFromGirl(girl))
+      .toList();
+
+  final equipmentItems = (List.of(equipmentList)..shuffle(random))
+      .take(9)
+      .map((equip) => createShopItemFromEquipment(equip))
+      .toList();
+
+  final potionItems = (List.of(PotionDatabase.allPotions)..shuffle(random))
+      .take(9)
+      .map((potion) => createShopItemFromPotion(potion))
+      .toList();
+
+  final abilityItems = (List.of(abilitiesList)..shuffle(random))
+      .take(9)
+      .map((ability) => createShopItemFromAbility(ability))
+      .toList();
+
   return [
     ShopCategory(
       id: 'girls',
       name: 'Girls',
       iconPath: 'assets/icons/shop_girls.png',
-      items: (List.of(girlsData)..shuffle(random))
-          .take(5)
-          .map((girl) => createShopItemFromGirl(girl))
-          .toList(),
+      items: girlItems,
     ),
     ShopCategory(
       id: 'equipment',
       name: 'Equipment',
       iconPath: 'assets/icons/shop_equipment.png',
-      items: (List.of(equipmentList)..shuffle(random))
-          .take(5)
-          .map((equip) => createShopItemFromEquipment(equip))
-          .toList(),
+      items: equipmentItems,
     ),
     ShopCategory(
       id: 'potions',
       name: 'Potions',
       iconPath: 'assets/icons/shop_potions.png',
-      items: (List.of(PotionDatabase.allPotions)..shuffle(random))
-          .take(3)
-          .map((potion) => createShopItemFromPotion(potion))
-          .toList(),
+      items: potionItems,
     ),
     ShopCategory(
       id: 'abilities',
       name: 'Ability Scrolls',
       iconPath: 'assets/icons/shop_scrolls.png',
-      items: (List.of(abilitiesList)..shuffle(random))
-          .take(3)
-          .map((ability) => createShopItemFromAbility(ability))
-          .toList(),
+      items: abilityItems,
     ),
   ];
 }

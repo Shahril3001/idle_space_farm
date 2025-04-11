@@ -32,7 +32,8 @@ class _PreparationScreenState extends State<PreparationScreen> {
   @override
   void initState() {
     super.initState();
-    availableHeroes = GirlRepository(Hive.box('idle_space_farm')).getAllGirls();
+    availableHeroes =
+        GirlRepository(Hive.box('eldoria_chronicles')).getAllGirls();
     previewEnemies = generateEnemies(
       widget.dungeonLevel,
       widget.difficulty,

@@ -249,21 +249,21 @@ class ArmorTypeAdapter extends TypeAdapter<ArmorType> {
   ArmorType read(BinaryReader reader) {
     switch (reader.readByte()) {
       case 0:
-        return ArmorType.helmet;
+        return ArmorType.head;
       case 1:
-        return ArmorType.chainmail;
+        return ArmorType.body;
       default:
-        return ArmorType.helmet;
+        return ArmorType.head;
     }
   }
 
   @override
   void write(BinaryWriter writer, ArmorType obj) {
     switch (obj) {
-      case ArmorType.helmet:
+      case ArmorType.head:
         writer.writeByte(0);
         break;
-      case ArmorType.chainmail:
+      case ArmorType.body:
         writer.writeByte(1);
         break;
     }
@@ -295,6 +295,8 @@ class AccessoryTypeAdapter extends TypeAdapter<AccessoryType> {
         return AccessoryType.glove;
       case 3:
         return AccessoryType.shoes;
+      case 5:
+        return AccessoryType.pendant;
       default:
         return AccessoryType.amulet;
     }
@@ -314,6 +316,9 @@ class AccessoryTypeAdapter extends TypeAdapter<AccessoryType> {
         break;
       case AccessoryType.shoes:
         writer.writeByte(3);
+        break;
+      case AccessoryType.pendant:
+        writer.writeByte(5);
         break;
     }
   }
