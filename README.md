@@ -1,98 +1,133 @@
-Introduction (Experimental Project):
-This project is a personal experimental endeavor aimed at evaluating the capabilities of the Flutter framework as a game development platform. The objective is to determine whether Flutter can provide the necessary tools, libraries, and performance optimization features required for developers to build the foundational elements of an idle game. The focus is on assessing how well Flutter can replicate the core mechanics, such as automated resource generation, progression systems, and interactive UI elements, which are commonly found in idle games available on the Google Play Store. 
+---
 
-Since most idle games are traditionally developed using game engines like Unity due to their powerful rendering capabilities and built-in physics systems, this project seeks to explore whether Flutter can serve as a viable alternative. The experiment will involve developing a prototype that mimics key gameplay elements, testing performance across different devices, and evaluating how well Flutter handles animations, state management, and background processes in comparison to Unity-based implementations. Ultimately, the findings will provide insights into the feasibility of using Flutter for idle game development and its potential advantages or limitations as a cross-platform game development framework.
+# Eldoria Chronicles: Idle RPG  
+*A Flutter Game Development Experiment*
 
+---
 
-Inspirations:
-1. RPG Maker Game MV & ACE
-2. King God Castle: Pixel TD RPG
-3. Idle Space Farmer - Tycoon
+## 🧪 Introduction (Experimental Project)
 
+**Eldoria Chronicles: Idle RPG** is a personal experimental project aimed at evaluating the capabilities of the **Flutter framework** as a potential game development platform, specifically for building idle and RPG-style games. The objective is to explore whether Flutter offers the necessary tools, libraries, and performance optimization features required to replicate the core mechanics found in idle games commonly published on the **Google Play Store**.
 
-AI Tools:
-1. https://chat.deepseek.com/ – Coding assistance, system structure, and game mechanics
-2. https://chatgpt.com/ – Icon and asset generation
-3. https://pixai.art/ – Image and background asset generation
-4. https://stablediffusionweb.com/ – Background asset generation
+Unlike traditional game engines such as **Unity**, which are renowned for their rendering power and physics capabilities, Flutter is typically used for UI-focused apps. This experiment seeks to determine whether Flutter can serve as a **viable alternative** by developing a functional prototype that includes:
 
+- Automated resource generation  
+- Progression systems  
+- Interactive UI elements  
+- Cross-platform support  
+- Performance testing across devices
 
-Game's Name: Eldoria Chronicles: Idle RPG
+Ultimately, this project aims to uncover the **strengths and limitations** of using Flutter for idle game development.
 
+---
 
-Core Game Systems:
-Resource Management:
-- Three main resources: Energy, Minerals, and Credits
-- Resource generation through farms with assigned characters
-- Resource exchange system
+## 🎮 Game Inspiration
 
-Base Building:
-- Farm system with upgradable floors (up to 25 floors per farm)
-- Different farm types (Aetheris for Energy, Eldoria for Minerals)
-- Floor unlocking and upgrading mechanics
+This project draws inspiration from the following titles and engines:
 
-Character System:
-- "Girl" characters with RPG stats (HP, MP, SP, attack, defense, agility)
-- Different rarities (Common, Rare, Unique)
-- Leveling system with stat growth
-- Race system (Human, Eldren, Therian, Dracovar, Daemon)
-- Class system (Divine Cleric, Phantom Reaver, etc.)
-- Ability system with cooldowns and resource costs
+- **RPG Maker MV & ACE** – For its straightforward class/stat system and turn-based combat  
+- **King God Castle** – For its pixel-art aesthetic and unit-based idle mechanics  
+- **Idle Space Farmer** – For farm/resource-based progression systems
 
+---
 
-Equipment System:
-- Weapons, armor, and accessories
-- Rarity tiers (Common to Mythic)
-- Enhancement system
-- Slot limitations (e.g., can't equip two two-handed weapons)
-- Type and race restrictions
-- Stat bonuses (attack, defense, HP, etc.)
+## 🧠 AI Tools Used
 
+| Tool | Purpose |
+|------|---------|
+| [DeepSeek Chat](https://chat.deepseek.com/) | Code structure, game logic, and mechanics |
+| [ChatGPT](https://chat.openai.com/) | Icon and UI asset generation |
+| [PixAI](https://pixai.art/) | Character and background asset generation |
+| [Stable Diffusion Web](https://stablediffusionweb.com/) | Background and environmental design |
 
-Shop System:
-- Daily refresh mechanic
-- Multiple categories (girls, equipment, potions, ability scrolls)
-- Purchasable items with various currencies
-- Manual refresh option(daily 3x)
+---
 
+## 🧩 Core Game Systems
 
-Potion System:
-- Different rarities (Common to Legendary)
+### 🔧 Resource Management
+- Primary resources: **Energy**, **Minerals**, and **Credits**
+- Resources generated via character-assigned farms
+- Resource conversion/exchange system
+
+### 🏗️ Base Building
+- Farms with up to **25 upgradeable floors**
+- Types: `Aetheris` (Energy), `Eldoria` (Minerals)
+- Floor unlocking and tier upgrades
+
+### 👩 Character System
+- Playable "Girls" with RPG stats: `HP`, `MP`, `SP`, `Attack`, `Defense`, `Agility`
+- Rarity tiers: **Common**, **Rare**, **Unique**
+- Systems:  
+  - **Race**: Human, Eldren, Therian, Dracovar, Daemon  
+  - **Class**: Divine Cleric, Phantom Reaver, etc.  
+  - **Abilities** with resource costs and cooldowns  
+  - **Leveling** with stat growth
+
+### 🛡️ Equipment System
+- Slots: **Weapon**, **Armor**, **Accessory**
+- Rarity: **Common → Mythic**
+- Features:
+  - Enhancement system
+  - Restrictions: Slot, type, race
+  - Stat bonuses (Attack, Defense, HP, etc.)
+
+### 🛒 Shop System
+- Daily item refresh system
+- Categories: **Girls**, **Equipment**, **Potions**, **Abilities**
+- Uses various in-game currencies
+- Manual refresh (3x per day)
+
+### 🧪 Potion System
+- Rarities: **Common → Legendary**
 - Permanent stat boosts
-- Usage restrictions
-- Selling and inventory management
+- Usage limitations
+- Inventory and sales system
 
+### ⚔️ Battle System
+- Turn-based combat
+- Initiative based on **Agility**
+- Elements:  
+  - Ability usage with **MP/SP costs**  
+  - Buffs/debuffs and elemental affinity  
+  - **Auto-battle** and critical hit system  
+  - Win/loss conditions
 
-Battle System:
-- Turn-based combat with initiative based on agility
-- Ability usage with MP/SP costs
-- Status effects (buffs/debuffs)
-- Elemental affinities
-- Critical hits
-- Auto-battle option
-- Victory/defeat conditions
+### 🎲 Gacha Mechanics
+- Summon systems:
+  - **Character Gacha**
+  - **Equipment Gacha**
+- Rarity rates:
+  - **Mythic – 1%**
+  - **Legendary – 5%**
+  - Others vary
 
+### 📈 Progression Systems
+- Character leveling (up to **Level 100**)
+- Equipment enhancement & tier progression
+- Farm/floor upgrades
+- Ability unlock milestones
 
-Gacha Mechanics:
-- Character summoning
-- Equipment summoning
-- Rarity probabilities (1% Mythic, 5% Legendary, etc.)
+---
 
+## 🧑‍💻 Technical Features
 
-Progression Systems:
-- Character leveling (up to level 100)
-- Farm upgrades increasing resource generation
-- Floor unlocking and upgrading
-- Equipment enhancement
-- Ability unlocks at certain levels
+- Persistent game state (save/load)
+- **Offline progression** via timer-based calculations
+- **Background timers** for resource generation
+- **Daily reset logic** for shops, quests, and cooldowns
 
+---
 
-Technical Features:
-- Game state persistence (save/load system)
-- Offline progress calculation
-- Timer-based resource generation
-- Daily reset mechanics
+## ⚠️ Disclaimer
 
+This repository is a **non-commercial, experimental prototype** created for personal learning and exploratory research on using **Flutter** for game development. It is not intended for public release or monetization.
 
-Disclaimer:
-This project is a non-commercial, experimental prototype developed for personal learning and research purposes. It is not intended for public distribution, commercial release, or monetization. All game mechanics, systems, and referenced content are inspired by existing idle and RPG games purely for educational analysis and conceptual exploration within the Flutter framework. Any third-party assets, frameworks, or AI tools used (such as DeepSeek, ChatGPT, PixAI, and Stable Diffusion) are utilized in accordance with their respective terms of service. All visual, audio, or gameplay elements generated or derived from these tools remain subject to their respective copyright holders. This project does not claim ownership over any inspired works and does not seek to replicate or compete with the original titles referenced. The inclusion of such references is solely to explore technical feasibility and design paradigms in the context of Flutter-based development.
+All third-party inspirations and tools referenced (e.g., **RPG Maker**, **King God Castle**, **AI tools**) are used for **educational and developmental purposes only**, in accordance with their respective **terms of service**. This project does **not claim ownership** over any visual, gameplay, or conceptual elements inspired by existing games or platforms.
+
+Furthermore:
+
+- All AI-generated assets and logic implementations are strictly for prototype usage.
+- Any borrowed concepts or gameplay systems are **heavily modified or reinterpreted** for Flutter feasibility testing.
+- This experiment serves only to assess **Flutter's viability as a cross-platform game engine**, and **no infringement or competition with original IPs is intended**.
+
+---
