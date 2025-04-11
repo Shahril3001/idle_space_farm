@@ -1,7 +1,7 @@
 ---
 
 # Eldoria Chronicles: Idle RPG  
-*A Flutter Game Development Experiment*
+A Flutter Game Development Experiment*
 
 ---
 
