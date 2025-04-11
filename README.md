@@ -4,8 +4,8 @@ This project is a personal experimental endeavor aimed at evaluating the capabil
 Since most idle games are traditionally developed using game engines like Unity due to their powerful rendering capabilities and built-in physics systems, this project seeks to explore whether Flutter can serve as a viable alternative. The experiment will involve developing a prototype that mimics key gameplay elements, testing performance across different devices, and evaluating how well Flutter handles animations, state management, and background processes in comparison to Unity-based implementations. Ultimately, the findings will provide insights into the feasibility of using Flutter for idle game development and its potential advantages or limitations as a cross-platform game development framework.
 
 
-Inspiration:
-1. RPG Maker
+Inspirations:
+1. RPG Maker Game MV & ACE
 2. King God Castle: Pixel TD RPG
 3. Idle Space Farmer - Tycoon
 
@@ -15,6 +15,10 @@ AI Tools:
 2. https://chatgpt.com/ – Icon and asset generation
 3. https://pixai.art/ – Image and background asset generation
 4. https://stablediffusionweb.com/ – Background asset generation
+
+
+Game's Name: Eldoria Chronicles: Idle RPG
+
 
 Core Game Systems:
 Resource Management:
@@ -35,6 +39,7 @@ Character System:
 - Class system (Divine Cleric, Phantom Reaver, etc.)
 - Ability system with cooldowns and resource costs
 
+
 Equipment System:
 - Weapons, armor, and accessories
 - Rarity tiers (Common to Mythic)
@@ -43,17 +48,20 @@ Equipment System:
 - Type and race restrictions
 - Stat bonuses (attack, defense, HP, etc.)
 
+
 Shop System:
 - Daily refresh mechanic
 - Multiple categories (girls, equipment, potions, ability scrolls)
 - Purchasable items with various currencies
 - Manual refresh option(daily 3x)
 
+
 Potion System:
 - Different rarities (Common to Legendary)
 - Permanent stat boosts
 - Usage restrictions
 - Selling and inventory management
+
 
 Battle System:
 - Turn-based combat with initiative based on agility
@@ -64,10 +72,12 @@ Battle System:
 - Auto-battle option
 - Victory/defeat conditions
 
+
 Gacha Mechanics:
 - Character summoning
 - Equipment summoning
 - Rarity probabilities (1% Mythic, 5% Legendary, etc.)
+
 
 Progression Systems:
 - Character leveling (up to level 100)
@@ -76,8 +86,13 @@ Progression Systems:
 - Equipment enhancement
 - Ability unlocks at certain levels
 
+
 Technical Features:
 - Game state persistence (save/load system)
 - Offline progress calculation
 - Timer-based resource generation
 - Daily reset mechanics
+
+
+Disclaimer:
+This project is a non-commercial, experimental prototype developed for personal learning and research purposes. It is not intended for public distribution, commercial release, or monetization. All game mechanics, systems, and referenced content are inspired by existing idle and RPG games purely for educational analysis and conceptual exploration within the Flutter framework. Any third-party assets, frameworks, or AI tools used (such as DeepSeek, ChatGPT, PixAI, and Stable Diffusion) are utilized in accordance with their respective terms of service. All visual, audio, or gameplay elements generated or derived from these tools remain subject to their respective copyright holders. This project does not claim ownership over any inspired works and does not seek to replicate or compete with the original titles referenced. The inclusion of such references is solely to explore technical feasibility and design paradigms in the context of Flutter-based development.
