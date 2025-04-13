@@ -1,6 +1,7 @@
 ---
 
-# Eldoria Chronicles: Idle RPG  
+# Eldoria Chronicles: Idle RPG
+![Screenshot](assets/images/icons/eldoria_chronicles.png)
 A Flutter Game Development Experiment*
 
 ---
