@@ -14,8 +14,8 @@ class _MapPageState extends State<MapPage> {
   late TransformationController _controller;
   bool _initialized = false;
 
-  final double mapWidth = 1500;
-  final double mapHeight = 1500;
+  final double mapWidth = 850;
+  final double mapHeight = 850;
 
   @override
   void initState() {

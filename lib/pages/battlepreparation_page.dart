@@ -4,10 +4,8 @@ import '../main.dart';
 import '../models/enemy_model.dart';
 import 'battle_screen.dart';
 import '../models/girl_farmer_model.dart';
-import '../data/girl_data.dart';
 import '../data/enemy_data.dart';
 import '../repositories/girl_repository.dart';
-import '../repositories/enemy_repository.dart';
 
 class PreparationScreen extends StatefulWidget {
   final String difficulty;

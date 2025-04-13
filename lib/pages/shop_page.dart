@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../data/girl_data.dart';
 import '../models/girl_farmer_model.dart';
-import '../models/resource_model.dart';
 import '../models/shop_model.dart';
 import '../providers/game_provider.dart';
+import '../main.dart';
 
 class ShopScreen extends StatefulWidget {
   const ShopScreen({super.key});
@@ -16,17 +16,11 @@ class ShopScreen extends StatefulWidget {
 class _ShopScreenState extends State<ShopScreen> {
   int _selectedCategoryIndex = 0;
   final Map<String, int> _purchaseQuantities = {};
+
   @override
   void initState() {
     super.initState();
     _initializeShop();
-  }
-
-  @override
-  void dispose() {
-    // Clean up any existing overlay when the screen is disposed
-    _removeNotification(context);
-    super.dispose();
   }
 
   Future<void> _initializeShop() async {
@@ -40,7 +34,6 @@ class _ShopScreenState extends State<ShopScreen> {
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
 
-    // Show loading indicator while shop is initializing
     if (gameProvider.isShopLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -54,135 +47,86 @@ class _ShopScreenState extends State<ShopScreen> {
     final currentItems = currentCategory.items;
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('Shop'),
-        centerTitle: true,
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip:
-                'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
-            onPressed: () {
-              final refreshesLeft =
-                  3 - (gameProvider.shop?.refreshCountToday ?? 0);
-
-              if (refreshesLeft <= 0) {
-                showDialog(
-                  context: context,
-                  builder: (context) => Dialog(
-                    backgroundColor: Colors.transparent,
-                    child: Container(
-                      padding: const EdgeInsets.all(20),
-                      decoration: BoxDecoration(
-                        color: Colors.grey[900],
-                        borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: Colors.redAccent, width: 2),
-                      ),
-                      child: Column(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Text(
-                            "No Refreshes Left",
-                            style: TextStyle(fontSize: 20, color: Colors.white),
-                          ),
-                          const SizedBox(height: 10),
-                          Text(
-                            "You've used all 3 refreshes for today.",
-                            style: TextStyle(color: Colors.white70),
-                          ),
-                          const SizedBox(height: 20),
-                          TextButton(
-                            onPressed: () => Navigator.pop(context),
-                            child: const Text("OK",
-                                style: TextStyle(color: Colors.redAccent)),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ),
-                );
-                return;
-              }
-
-              showDialog(
-                context: context,
-                builder: (context) => Dialog(
-                  backgroundColor: Colors.transparent,
-                  child: Container(
-                    padding: const EdgeInsets.all(20),
-                    decoration: BoxDecoration(
-                      color: Colors.grey[850],
-                      borderRadius: BorderRadius.circular(20),
-                      border: Border.all(color: Colors.blueAccent, width: 2),
-                    ),
-                    child: Column(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          "Refresh Shop?",
-                          style: TextStyle(fontSize: 20, color: Colors.white),
-                        ),
-                        const SizedBox(height: 10),
-                        Text(
-                          "You have $refreshesLeft refresh${refreshesLeft == 1 ? '' : 'es'} left today.",
-                          style: TextStyle(color: Colors.white70),
-                        ),
-                        const SizedBox(height: 20),
-                        Row(
-                          mainAxisAlignment: MainAxisAlignment.end,
-                          children: [
-                            TextButton(
-                              onPressed: () => Navigator.pop(context),
-                              child: const Text("Cancel",
-                                  style: TextStyle(color: Colors.white70)),
-                            ),
-                            TextButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                                gameProvider.manualRefreshShop();
-                              },
-                              child: const Text("Refresh",
-                                  style:
-                                      TextStyle(color: Colors.lightBlueAccent)),
-                            ),
-                          ],
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-              );
-            },
-          ),
-        ],
-      ),
-      body: Column(
-        children: [
-          // Category Tabs
-          _buildCategoryTabs(shopCategories),
-
-          // Items Grid
-          Expanded(
-            child: Padding(
-              padding: const EdgeInsets.all(8.0),
-              child: GridView.builder(
-                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                  crossAxisCount: 2,
-                  childAspectRatio: 0.8,
-                  crossAxisSpacing: 10,
-                  mainAxisSpacing: 10,
-                ),
-                itemCount: currentItems.length,
-                itemBuilder: (context, index) {
-                  return _buildShopItemCard(
-                      context, currentItems[index], gameProvider);
-                },
-              ),
+        appBar: AppBar(
+          title: const Text('Shop'),
+          centerTitle: true,
+          actions: [
+            IconButton(
+              icon: const Icon(Icons.refresh),
+              tooltip:
+                  'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
+              onPressed: () => _showRefreshDialog(context, gameProvider),
+            ),
+          ],
+        ),
+        body: Container(
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+              fit: BoxFit.cover,
             ),
           ),
-        ],
+          child: Column(
+            children: [
+              _buildCategoryTabs(shopCategories),
+              Expanded(
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: GridView.builder(
+                    gridDelegate:
+                        const SliverGridDelegateWithFixedCrossAxisCount(
+                      crossAxisCount: 3,
+                      crossAxisSpacing: 8,
+                      mainAxisSpacing: 8,
+                      childAspectRatio: 0.6,
+                    ),
+                    itemCount: currentItems.length,
+                    itemBuilder: (context, index) {
+                      return _buildShopItemCard(
+                          context, currentItems[index], gameProvider);
+                    },
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ));
+  }
+
+  // New method for refresh dialog
+  Future<void> _showRefreshDialog(
+      BuildContext context, GameProvider gameProvider) async {
+    final refreshesLeft = 3 - (gameProvider.shop?.refreshCountToday ?? 0);
+
+    if (refreshesLeft <= 0) {
+      await showDialog(
+        context: context,
+        builder: (context) => _buildBasicDialog(
+          title: "No Refreshes Left",
+          content: "You've used all 3 refreshes for today.",
+          backgroundColor: Colors.grey[900]!,
+          borderColor: Colors.redAccent,
+        ),
+      );
+      return;
+    }
+
+    final shouldRefresh = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildBasicDialog(
+        title: "Refresh Shop?",
+        content:
+            "You have $refreshesLeft refresh${refreshesLeft == 1 ? '' : 'es'} left today.",
+        backgroundColor: Colors.grey[850]!,
+        borderColor: Colors.blueAccent,
+        showActions: true,
+        confirmText: "Refresh",
       ),
     );
+
+    if (shouldRefresh == true) {
+      gameProvider.manualRefreshShop();
+    }
   }
 
   Widget _buildCategoryTabs(List<ShopCategory> categories) {
@@ -198,11 +142,8 @@ class _ShopScreenState extends State<ShopScreen> {
             child: ChoiceChip(
               label: Text(category.name),
               selected: _selectedCategoryIndex == index,
-              onSelected: (selected) {
-                setState(() {
-                  _selectedCategoryIndex = index;
-                });
-              },
+              onSelected: (selected) =>
+                  setState(() => _selectedCategoryIndex = index),
               avatar: Icon(_getCategoryIcon(category.id)),
               selectedColor: Colors.blue[200],
               labelStyle: TextStyle(
@@ -213,21 +154,6 @@ class _ShopScreenState extends State<ShopScreen> {
         },
       ),
     );
-  }
-
-  IconData _getCategoryIcon(String categoryId) {
-    switch (categoryId) {
-      case 'girls':
-        return Icons.person;
-      case 'equipment':
-        return Icons.shield;
-      case 'potions':
-        return Icons.local_drink;
-      case 'abilities':
-        return Icons.menu_book;
-      default:
-        return Icons.shopping_cart;
-    }
   }
 
   Widget _buildShopItemCard(
@@ -249,16 +175,14 @@ class _ShopScreenState extends State<ShopScreen> {
 
     return Card(
       elevation: 3,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-      ),
+      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
         borderRadius: BorderRadius.circular(12),
         onTap: isPurchased || !canAfford || !hasStock
             ? null
             : () => isPotion
                 ? _showPurchaseQuantityDialog(context, item, gameProvider)
-                : _attemptPurchase(context, item, gameProvider),
+                : _showPurchaseConfirmationDialog(context, item, gameProvider),
         child: Stack(
           children: [
             Column(
@@ -303,24 +227,20 @@ class _ShopScreenState extends State<ShopScreen> {
                       const SizedBox(height: 4),
                       _buildPriceTags(item.prices),
                       if (item.stock != null)
-                        Text(
-                          'Stock: ${item.stock}',
-                          style: const TextStyle(fontSize: 12),
-                        ),
+                        Text('Stock: ${item.stock}',
+                            style: const TextStyle(fontSize: 12)),
                       if (isPotion && _purchaseQuantities[item.id] != null)
                         Text(
                           'Qty: ${_purchaseQuantities[item.id]}',
                           style: const TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.bold,
-                          ),
+                              fontSize: 12, fontWeight: FontWeight.bold),
                         ),
                     ],
                   ),
                 ),
               ],
             ),
-            if (isPurchased) _buildStatusBadge('Purchased', Colors.green),
+            if (isPurchased) _buildStatusBadge('P', Colors.green),
             if (!canAfford && !isPurchased)
               _buildStatusBadge('Can\'t Afford', Colors.red),
             if (!hasStock && !isPurchased)
@@ -340,7 +260,7 @@ class _ShopScreenState extends State<ShopScreen> {
                     girl.rarity,
                     style: const TextStyle(
                       color: Colors.white,
-                      fontSize: 10,
+                      fontSize: 9,
                       fontWeight: FontWeight.bold,
                     ),
                   ),
@@ -352,6 +272,178 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
+  // New method for purchase confirmation dialog
+  Future<void> _showPurchaseConfirmationDialog(
+      BuildContext context, ShopItem item, GameProvider gameProvider) async {
+    final shouldPurchase = await showDialog<bool>(
+      context: context,
+      builder: (context) => _buildBasicDialog(
+        title: "Confirm Purchase",
+        content:
+            "Are you sure you want to buy ${item.name} for ${_formatPrices(item.prices)}?",
+        backgroundColor: Colors.grey[850]!,
+        borderColor: Colors.blueAccent,
+        showActions: true,
+        confirmText: "Buy",
+      ),
+    );
+
+    if (shouldPurchase == true) {
+      await _attemptPurchase(context, item, gameProvider);
+    }
+  }
+
+  Future<void> _showPurchaseQuantityDialog(
+      BuildContext context, ShopItem item, GameProvider gameProvider) async {
+    final maxAffordable = gameProvider.getMaxAffordableQuantity(item);
+    final maxStock = item.stock ?? 99;
+    final maxQuantity =
+        [maxAffordable, maxStock, 99].reduce((a, b) => a < b ? a : b);
+
+    int quantity = _purchaseQuantities[item.id] ?? 1;
+
+    final shouldPurchase = await showDialog<bool>(
+      context: context,
+      builder: (context) => StatefulBuilder(
+        builder: (context, setState) {
+          return _buildBasicDialog(
+            title: "Purchase ${item.name}",
+            content: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text("How many would you like to purchase?"),
+                const SizedBox(height: 16),
+                Row(
+                  children: [
+                    IconButton(
+                      icon: const Icon(Icons.remove),
+                      onPressed: quantity > 1
+                          ? () => setState(() => quantity--)
+                          : null,
+                    ),
+                    Expanded(
+                      child: Slider(
+                        value: quantity.toDouble(),
+                        min: 1,
+                        max: maxQuantity.toDouble(),
+                        divisions: maxQuantity - 1,
+                        label: quantity.toString(),
+                        onChanged: (value) =>
+                            setState(() => quantity = value.toInt()),
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.add),
+                      onPressed: quantity < maxQuantity
+                          ? () => setState(() => quantity++)
+                          : null,
+                    ),
+                  ],
+                ),
+                Text('$quantity', style: const TextStyle(fontSize: 24)),
+                const SizedBox(height: 8),
+                Text('Total Cost:'),
+                _buildPriceTags(item.prices
+                    .map((key, value) => MapEntry(key, value * quantity))),
+              ],
+            ),
+            backgroundColor: Colors.grey[850]!,
+            borderColor: Colors.blueAccent,
+            showActions: true,
+            confirmText: "Purchase",
+          );
+        },
+      ),
+    );
+
+    if (shouldPurchase == true) {
+      _purchaseQuantities[item.id] = quantity;
+      await _attemptPurchase(context, item, gameProvider, quantity: quantity);
+    }
+  }
+
+  Future<void> _attemptPurchase(
+      BuildContext context, ShopItem item, GameProvider gameProvider,
+      {int quantity = 1}) async {
+    final success = await gameProvider.purchaseItem(item, quantity: quantity);
+    if (!context.mounted) return;
+
+    await showDialog(
+      context: context,
+      builder: (context) => _buildBasicDialog(
+        title: success ? "Success!" : "Failed",
+        content: success
+            ? 'Purchased ${quantity > 1 ? '$quantity ' : ''}${item.name}${quantity > 1 ? 's' : ''}'
+            : 'Failed to purchase ${item.name}',
+        backgroundColor: success ? Colors.green[800]! : Colors.red[800]!,
+        borderColor: success ? Colors.greenAccent : Colors.redAccent,
+      ),
+    );
+  }
+
+  // Reusable dialog builder
+  Widget _buildBasicDialog({
+    required String title,
+    required dynamic content,
+    required Color backgroundColor,
+    Color borderColor = Colors.transparent,
+    bool showActions = false,
+    String confirmText = "OK",
+  }) {
+    return Dialog(
+      backgroundColor: Colors.transparent,
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: backgroundColor,
+          borderRadius: BorderRadius.circular(20),
+          border: Border.all(color: borderColor, width: 2),
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(title,
+                style: const TextStyle(fontSize: 20, color: Colors.white)),
+            const SizedBox(height: 10),
+            if (content is String)
+              Text(content, style: const TextStyle(color: Colors.white70))
+            else if (content is Widget)
+              content,
+            const SizedBox(height: 20),
+            if (showActions)
+              Row(
+                mainAxisAlignment: MainAxisAlignment.end,
+                children: [
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, false),
+                    child: const Text("Cancel",
+                        style: TextStyle(color: Colors.white70)),
+                  ),
+                  TextButton(
+                    onPressed: () => Navigator.pop(context, true),
+                    child: Text(confirmText,
+                        style: const TextStyle(color: Colors.lightBlueAccent)),
+                  ),
+                ],
+              )
+            else
+              TextButton(
+                onPressed: () => Navigator.pop(context),
+                child:
+                    const Text("OK", style: TextStyle(color: Colors.white70)),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  // Helper method to format prices for display
+  String _formatPrices(Map<String, int> prices) {
+    return prices.entries.map((e) => '${e.value} ${e.key}').join(', ');
+  }
+
+  // ... (keep all other existing methods the same)
   Color _getRarityColor(String rarity) {
     return switch (rarity) {
       'Common' => Colors.grey,
@@ -434,154 +526,18 @@ class _ShopScreenState extends State<ShopScreen> {
     }
   }
 
-  Future<void> _showPurchaseQuantityDialog(
-      BuildContext context, ShopItem item, GameProvider gameProvider) async {
-    final maxAffordable = gameProvider.getMaxAffordableQuantity(item);
-    final maxStock = item.stock ?? 99;
-    final maxQuantity =
-        [maxAffordable, maxStock, 99].reduce((a, b) => a < b ? a : b);
-
-    int quantity = _purchaseQuantities[item.id] ?? 1;
-
-    await showDialog(
-      context: context,
-      builder: (context) => StatefulBuilder(
-        builder: (context, setState) {
-          return AlertDialog(
-            title: Text('Purchase ${item.name}'),
-            content: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Text('How many would you like to purchase?'),
-                SizedBox(height: 16),
-                Row(
-                  children: [
-                    IconButton(
-                      icon: Icon(Icons.remove),
-                      onPressed: quantity > 1
-                          ? () => setState(() => quantity--)
-                          : null,
-                    ),
-                    Expanded(
-                      child: Slider(
-                        value: quantity.toDouble(),
-                        min: 1,
-                        max: maxQuantity.toDouble(),
-                        divisions: maxQuantity - 1,
-                        label: quantity.toString(),
-                        onChanged: (value) {
-                          setState(() => quantity = value.toInt());
-                        },
-                      ),
-                    ),
-                    IconButton(
-                      icon: Icon(Icons.add),
-                      onPressed: quantity < maxQuantity
-                          ? () => setState(() => quantity++)
-                          : null,
-                    ),
-                  ],
-                ),
-                Text('$quantity', style: TextStyle(fontSize: 24)),
-                SizedBox(height: 8),
-                Text('Total Cost:'),
-                _buildPriceTags(
-                  item.prices
-                      .map((key, value) => MapEntry(key, value * quantity)),
-                ),
-              ],
-            ),
-            actions: [
-              TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel'),
-              ),
-              ElevatedButton(
-                onPressed: () {
-                  setState(() => _purchaseQuantities[item.id] = quantity);
-                  Navigator.pop(context);
-                  _attemptPurchase(context, item, gameProvider,
-                      quantity: quantity);
-                },
-                child: const Text('Purchase'),
-              ),
-            ],
-          );
-        },
-      ),
-    );
-  }
-
-  Future<void> _attemptPurchase(
-      BuildContext context, ShopItem item, GameProvider gameProvider,
-      {int quantity = 1}) async {
-    final success = await gameProvider.purchaseItem(item, quantity: quantity);
-    if (!context.mounted) return;
-
-    _removeNotification(context);
-
-    OverlayEntry? overlayEntry;
-    overlayEntry = OverlayEntry(
-      builder: (context) => Positioned(
-        top: MediaQuery.of(context).padding.top + 10,
-        left: 20,
-        right: 20,
-        child: Material(
-          color: Colors.transparent,
-          child: Container(
-            padding: const EdgeInsets.all(16),
-            decoration: BoxDecoration(
-              color: success ? Colors.green[800] : Colors.red[800],
-              borderRadius: BorderRadius.circular(12),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.3),
-                  blurRadius: 10,
-                  offset: const Offset(0, 5),
-                ),
-              ],
-            ),
-            child: Row(
-              children: [
-                Icon(
-                  success ? Icons.check_circle : Icons.error,
-                  color: Colors.white,
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    success
-                        ? 'Purchased ${quantity > 1 ? '$quantity ' : ''}${item.name}${quantity > 1 ? 's' : ''}'
-                        : 'Failed to purchase ${item.name}',
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                    ),
-                  ),
-                ),
-                IconButton(
-                  icon: const Icon(Icons.close, color: Colors.white),
-                  onPressed: () => overlayEntry?.remove(),
-                ),
-              ],
-            ),
-          ),
-        ),
-      ),
-    );
-
-    gameProvider.setCurrentOverlay(overlayEntry);
-    Overlay.of(context).insert(overlayEntry);
-
-    Future.delayed(const Duration(seconds: 3), () {
-      if (overlayEntry?.mounted ?? false) {
-        overlayEntry?.remove();
-      }
-    });
-  }
-
-  void _removeNotification(BuildContext context) {
-    final gameProvider = Provider.of<GameProvider>(context, listen: false);
-    gameProvider.removeCurrentOverlay();
+  IconData _getCategoryIcon(String categoryId) {
+    switch (categoryId) {
+      case 'girls':
+        return Icons.person;
+      case 'equipment':
+        return Icons.shield;
+      case 'potions':
+        return Icons.local_drink;
+      case 'abilities':
+        return Icons.menu_book;
+      default:
+        return Icons.shopping_cart;
+    }
   }
 }

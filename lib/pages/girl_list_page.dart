@@ -102,46 +102,46 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
                                 ),
-                                child: Padding(
-                                  padding: EdgeInsets.all(8),
-                                  child: Column(
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
-                                    children: [
-                                      CircleAvatar(
-                                        backgroundImage:
-                                            AssetImage(girl.imageFace),
-                                        radius:
-                                            50, // Larger avatar for grid view
-                                      ),
-                                      SizedBox(height: 8),
-                                      Text(
-                                        girl.name,
-                                        style: TextStyle(
-                                          fontWeight: FontWeight.bold,
-                                          color: Colors.white,
-                                          fontSize: 14,
-                                        ),
-                                        textAlign: TextAlign.center,
-                                        overflow: TextOverflow.ellipsis,
-                                      ),
-                                      Text(
-                                        'Level: ${girl.level}',
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white70,
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.center,
+                                  children: [
+                                    Center(
+                                      child: ClipRRect(
+                                        child: Image.asset(
+                                          girl.imageFace,
+                                          width: double.infinity, // Fixed width
+                                          height: 110, // Fixed height
+                                          fit: BoxFit.cover,
                                         ),
                                       ),
-                                      Text(
-                                        girl.race,
-                                        style: TextStyle(
-                                          fontSize: 12,
-                                          color: Colors.white70,
-                                        ),
+                                    ),
+                                    SizedBox(height: 8),
+                                    Text(
+                                      girl.name,
+                                      style: TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                        fontSize: 14,
                                       ),
-                                      Spacer(),
-                                    ],
-                                  ),
+                                      textAlign: TextAlign.center,
+                                      overflow: TextOverflow.ellipsis,
+                                    ),
+                                    Text(
+                                      'Level: ${girl.level}',
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    Text(
+                                      girl.race,
+                                      style: TextStyle(
+                                        fontSize: 12,
+                                        color: Colors.white70,
+                                      ),
+                                    ),
+                                    Spacer(),
+                                  ],
                                 ),
                               ),
                             );

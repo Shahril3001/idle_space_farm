@@ -14,7 +14,6 @@ import 'models/farm_model.dart';
 import 'models/ability_model.dart';
 import 'models/girl_farmer_model.dart';
 import 'models/equipment_model.dart';
-import 'models/enemy_model.dart'; // Import Enemy model
 import 'models/shop_model.dart';
 import 'providers/game_provider.dart';
 import 'providers/battle_provider.dart'; // Import BattleProvider
@@ -42,6 +41,7 @@ class ImageCacheManager {
       'assets/images/icons/farm.png',
       'assets/images/ui/app-bg.png',
       'assets/images/ui/mine.png',
+      'assets/images/ui/shop.png',
       'assets/images/map/eldoria_map.png',
     ];
     for (var img in images) {
@@ -75,8 +75,8 @@ void main() async {
       await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);
 
-  // Clear Hive data (for development only)
-  await clearHiveData();
+  // // Clear Hive data (for development only)
+  // await clearHiveData();
 
   // Register Hive adapters safely (check if already registered)
   if (!Hive.isAdapterRegistered(0)) Hive.registerAdapter(ResourceAdapter());
@@ -183,8 +183,7 @@ void main() async {
 }
 
 Future<void> clearHiveData() async {
-  await Hive.deleteBoxFromDisk(
-      'idle_space_farm'); // Clear enemy box if it exists
+  await Hive.deleteBoxFromDisk('eldoria_chronicles');
 }
 
 class MyApp extends StatelessWidget {

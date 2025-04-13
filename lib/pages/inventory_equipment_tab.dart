@@ -365,6 +365,7 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
     if (_equipment.assignedTo != null) {
       _currentlyAssignedGirl = gameProvider.girlFarmers.firstWhere(
         (girl) => girl.id == _equipment.assignedTo,
+        // ignore: cast_from_null_always_fails
         orElse: () => null as GirlFarmer,
       );
     }

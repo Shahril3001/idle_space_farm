@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../main.dart';
 import '../models/ability_model.dart';
 import '../models/girl_farmer_model.dart';
 import '../data/girl_data.dart';
@@ -18,8 +19,11 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
     return SafeArea(
       child: Scaffold(
         body: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF35271A),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+              fit: BoxFit.cover,
+            ),
           ),
           child: SafeArea(
             child:
@@ -79,8 +83,11 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
           margin: EdgeInsets.zero,
         ),
         body: Container(
-          decoration: const BoxDecoration(
-            color: Color(0xFF35271A),
+          decoration: BoxDecoration(
+            image: DecorationImage(
+              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+              fit: BoxFit.cover,
+            ),
           ),
           child: Column(
             children: [
@@ -576,9 +583,15 @@ class _GirlCard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            CircleAvatar(
-              radius: 50,
-              backgroundImage: AssetImage(girl.imageFace),
+            Center(
+              child: ClipRRect(
+                child: Image.asset(
+                  girl.imageFace,
+                  width: double.infinity, // Fixed width
+                  height: 110, // Fixed height
+                  fit: BoxFit.cover,
+                ),
+              ),
             ),
             const SizedBox(height: 8),
             Text(

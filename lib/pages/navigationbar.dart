@@ -7,6 +7,7 @@ import 'girl_list_page.dart';
 import 'dashboard_page.dart';
 import 'shop_page.dart'; // Import the DashboardPage
 import 'dart:async'; // Add this for Timer
+import 'package:flutter/services.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -102,7 +103,8 @@ class _HomePageState extends State<HomePage> {
             TextButton(
               onPressed: () {
                 _dialogTimer?.cancel();
-                Navigator.of(context).pop(true);
+                Navigator.of(context).pop();
+                SystemNavigator.pop(); // Force exit the app
               },
               child: Text("EXIT", style: TextStyle(color: Colors.amberAccent)),
             ),
@@ -120,6 +122,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    // ignore: deprecated_member_use
     return WillPopScope(
         onWillPop: _onWillPop,
         child: SafeArea(
@@ -130,15 +133,13 @@ class _HomePageState extends State<HomePage> {
                 return Center(child: CircularProgressIndicator());
               }
 
-              return Container(
-                child: Column(
-                  children: [
-                    _buildResourceDisplay(gameProvider),
-                    Expanded(
-                      child: _pages[_selectedIndex],
-                    ),
-                  ],
-                ),
+              return Column(
+                children: [
+                  _buildResourceDisplay(gameProvider),
+                  Expanded(
+                    child: _pages[_selectedIndex],
+                  ),
+                ],
               );
             },
           ),

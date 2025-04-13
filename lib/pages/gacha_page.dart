@@ -470,16 +470,6 @@ Color _getRarityColor(EquipmentRarity rarity) {
   };
 }
 
-void _showSuccessSnackbar(BuildContext context, String message) {
-  ScaffoldMessenger.of(context).showSnackBar(
-    SnackBar(
-      content: Text(message),
-      behavior: SnackBarBehavior.floating,
-      backgroundColor: Colors.green,
-    ),
-  );
-}
-
 void _showErrorSnackbar(BuildContext context, String message) {
   ScaffoldMessenger.of(context).showSnackBar(
     SnackBar(

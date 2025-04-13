@@ -888,14 +888,6 @@ class GameProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  void _updateGirlStats(String girlId) {
-    final girl = _girlRepository.getGirlById(girlId);
-    if (girl != null) {
-      _girlRepository.updateGirl(girl);
-      notifyListeners();
-    }
-  }
-
   /// Get equipment that can be equipped by a specific girl
   List<Equipment> getEquippableItemsForGirl(String girlId,
       {Equipment? currentItem}) {
@@ -1223,14 +1215,6 @@ class GameProvider with ChangeNotifier {
       print('Error determining slot: $e');
       return EquipmentSlot.weapon; // Default fallback
     }
-  }
-
-  String _getSlotName(EquipmentSlot slot) {
-    return switch (slot) {
-      EquipmentSlot.weapon => 'Weapon',
-      EquipmentSlot.armor => 'Armor',
-      EquipmentSlot.accessory => 'Accessory',
-    };
   }
 
   /// Helper to get random equipment slot (used by your existing performEquipmentGacha)
@@ -2097,7 +2081,7 @@ class GameProvider with ChangeNotifier {
       await _equipmentRepository.saveAllEquipment(equipment);
 
       // Save timestamp
-      await Hive.box('idle_space_farm')
+      await Hive.box('eldoria_chronicles')
           .put('lastSaved', DateTime.now().toIso8601String());
 
       return true;
@@ -2109,7 +2093,7 @@ class GameProvider with ChangeNotifier {
 
   Future<bool> loadGame() async {
     try {
-      final box = await Hive.openBox('idle_space_farm');
+      final box = await Hive.openBox('eldoria_chronicles');
 
       // Check if save exists
       if (!box.containsKey('lastSaved')) {
@@ -2160,7 +2144,7 @@ class GameProvider with ChangeNotifier {
 // Delete the saved game
   Future<bool> deleteSave() async {
     try {
-      final box = await Hive.openBox('idle_space_farm');
+      final box = await Hive.openBox('eldoria_chronicles');
       await box.clear();
       resetAllGameData(); // Reset to default state
       return true;
@@ -2173,7 +2157,7 @@ class GameProvider with ChangeNotifier {
   // Reset Resources
   void resetResources() {
     for (var resource in _resourceRepository.getAllResources()) {
-      resource.amount = 0.0;
+      resource.amount = 100000.0;
       _resourceRepository.updateResource(resource);
     }
     notifyListeners();

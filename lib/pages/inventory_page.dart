@@ -1,11 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import 'package:provider/provider.dart';
 import '../main.dart';
-import '../models/equipment_model.dart';
-import '../models/girl_farmer_model.dart';
-import '../models/potion_model.dart';
-import '../providers/game_provider.dart';
 import 'inventory_equipment_tab.dart';
 import 'inventory_potions_tab.dart';
 
