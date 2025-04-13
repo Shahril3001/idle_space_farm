@@ -1,7 +1,7 @@
 ---
 
 # Eldoria Chronicles: Idle RPG
-![Screenshot](assets/images/icons/eldoria_chronicles.png)
+<img src="assets/images/icons/eldoria_chronicles.png" alt="Screenshot" width="300" height="300">
 A Flutter Game Development Experiment*
 
 ---
