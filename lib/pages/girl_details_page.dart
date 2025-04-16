@@ -34,20 +34,56 @@ class GirlDetailsPage extends StatelessWidget {
 
                 // Tab bar
                 Container(
-                  color: Colors.black.withOpacity(0.7),
-                  child: TabBar(
-                    labelColor: Color(0xFFCAA04D),
-                    unselectedLabelColor: Colors.white70,
-                    indicatorColor: Color(0xFFCAA04D),
-                    indicatorSize: TabBarIndicatorSize.tab,
-                    labelPadding: EdgeInsets.symmetric(horizontal: 16),
-                    isScrollable: true,
-                    tabs: [
-                      SizedBox(width: 100, child: Tab(text: 'Details')),
-                      SizedBox(width: 100, child: Tab(text: 'Stats')),
-                      SizedBox(width: 100, child: Tab(text: 'Abilities')),
-                      SizedBox(width: 100, child: Tab(text: 'Equipments')),
-                    ],
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.9),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(5)),
+                  ),
+                  child: Center(
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Flexible(
+                          child: TabBar(
+                            labelColor: Color(0xFFCAA04D),
+                            unselectedLabelColor: Colors.white70,
+                            indicatorColor: Color(0xFFCAA04D),
+                            indicatorSize: TabBarIndicatorSize.tab,
+                            labelPadding: EdgeInsets.symmetric(horizontal: 16),
+                            tabs: [
+                              Tab(
+                                icon: Image.asset(
+                                  'assets/images/icons/girl-bio.png',
+                                  width: 34,
+                                  height: 34,
+                                ),
+                              ),
+                              Tab(
+                                icon: Image.asset(
+                                  'assets/images/icons/girl-stats.png',
+                                  width: 34,
+                                  height: 34,
+                                ),
+                              ),
+                              Tab(
+                                icon: Image.asset(
+                                  'assets/images/icons/girl-abilities.png',
+                                  width: 34,
+                                  height: 34,
+                                ),
+                              ),
+                              Tab(
+                                icon: Image.asset(
+                                  'assets/images/icons/girl-equipment.png',
+                                  width: 34,
+                                  height: 34,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
 
@@ -108,24 +144,24 @@ class GirlDetailsPage extends StatelessWidget {
                 children: [
                   _buildStarRating(girl.stars),
                   SizedBox(height: 15),
-                  _buildAttributeRow('assets/images/icons/level.png', 'Level',
-                      "${girl.level}"),
+                  _buildAttributeRow('assets/images/icons/stats-level.png',
+                      'Level', "${girl.level}"),
                   Divider(color: Colors.white54),
                   SizedBox(height: 10),
-                  _buildAttributeRow('assets/images/icons/attack.png', 'Attack',
-                      "${girl.attackPoints}"),
+                  _buildAttributeRow('assets/images/icons/stats-attack.png',
+                      'Attack', "${girl.attackPoints}"),
                   SizedBox(height: 10),
-                  _buildAttributeRow('assets/images/icons/defense.png',
+                  _buildAttributeRow('assets/images/icons/stats-defense.png',
                       'Defense', "${girl.defensePoints}"),
                   SizedBox(height: 10),
-                  _buildAttributeRow('assets/images/icons/agility.png',
+                  _buildAttributeRow('assets/images/icons/stats-agility.png',
                       'Agility', "${girl.agilityPoints}"),
                   SizedBox(height: 10),
-                  _buildAttributeRow('assets/images/icons/critical.png',
+                  _buildAttributeRow('assets/images/icons/stats-critical.png',
                       'Critical', "${girl.criticalPoint}%"),
                   SizedBox(height: 10),
-                  _buildAttributeRow('assets/images/icons/mine.png', 'Mining',
-                      girl.miningEfficiency.toStringAsFixed(2)),
+                  _buildAttributeRow('assets/images/icons/stats-mine.png',
+                      'Mining', girl.miningEfficiency.toStringAsFixed(2)),
                 ],
               ),
             ),
@@ -148,13 +184,13 @@ class GirlDetailsPage extends StatelessWidget {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _buildAttributeRow(
-                  'assets/images/icons/race.png', 'Race', girl.race),
+                  'assets/images/icons/stats-race.png', 'Race', girl.race),
               SizedBox(height: 10),
               _buildAttributeRow(
-                  'assets/images/icons/class.png', 'Class', girl.type),
+                  'assets/images/icons/stats-class.png', 'Class', girl.type),
               SizedBox(height: 10),
-              _buildAttributeRow(
-                  'assets/images/icons/region.png', 'Region', girl.region),
+              _buildAttributeRow('assets/images/icons/stats-region.png',
+                  'Region', girl.region),
               SizedBox(height: 10),
               Divider(color: Colors.white54),
               SizedBox(height: 10),
@@ -218,10 +254,7 @@ class GirlDetailsPage extends StatelessWidget {
         fontFamily: 'GameFont',
         fontSize: 20,
         fontWeight: FontWeight.bold,
-        color: Colors.white,
-        shadows: [
-          Shadow(color: Colors.black, blurRadius: 5, offset: Offset(2, 2))
-        ],
+        color: Colors.black.withOpacity(0.7),
       ),
     );
   }
@@ -231,11 +264,11 @@ class GirlDetailsPage extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceEvenly,
       children: [
         _buildStatBox("HP", girl.hp, girl.maxHp, Colors.redAccent,
-            'assets/images/icons/healthp.png'),
+            'assets/images/icons/stats-healthp.png'),
         _buildStatBox("MP", girl.mp, girl.maxMp, Colors.blueAccent,
-            'assets/images/icons/manap.png'),
+            'assets/images/icons/stats-manap.png'),
         _buildStatBox("SP", girl.sp, girl.maxSp, Colors.greenAccent,
-            'assets/images/icons/specialp.png'),
+            'assets/images/icons/stats-specialp.png'),
       ],
     );
   }
@@ -963,12 +996,12 @@ class GirlDetailsPage extends StatelessWidget {
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          _buildButton("Upgrade", "assets/images/icons/upgrade.png",
+          _buildButton("Upgrade", "assets/images/icons/stats-upgrade.png",
               Colors.black.withOpacity(0.8), () {
             _showUpgradeConfirmation(context, gameProvider);
           }),
           SizedBox(width: 20),
-          _buildButton("Sell", "assets/images/icons/sell.png",
+          _buildButton("Sell", "assets/images/icons/stats-sell.png",
               Colors.black.withOpacity(0.8), () {
             _confirmSell(context, gameProvider, girl);
           }),

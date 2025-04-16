@@ -209,29 +209,29 @@ extension ElementTypeExtension on ElementType {
   String get iconAsset {
     switch (this) {
       case ElementType.none:
-        return 'assets/images/icons/elemental-none.png';
+        return 'assets/images/abilities/elemental-none.png';
       case ElementType.fire:
-        return 'assets/images/icons/elemental-fire.png';
+        return 'assets/images/abilities/elemental-fire.png';
       case ElementType.water:
-        return 'assets/images/icons/elemental-water.png';
+        return 'assets/images/abilities/elemental-water.png';
       case ElementType.earth:
-        return 'assets/images/icons/elemental-earth.png';
+        return 'assets/images/abilities/elemental-earth.png';
       case ElementType.wind:
-        return 'assets/images/icons/elemental-wind.png';
+        return 'assets/images/abilities/elemental-wind.png';
       case ElementType.thunder:
-        return 'assets/images/icons/elemental-thunder.png';
+        return 'assets/images/abilities/elemental-thunder.png';
       case ElementType.snow:
-        return 'assets/images/icons/elemental-ice.png';
+        return 'assets/images/abilities/elemental-ice.png';
       case ElementType.nature:
-        return 'assets/images/icons/elemental-nature.png';
+        return 'assets/images/abilities/elemental-nature.png';
       case ElementType.dark:
-        return 'assets/images/icons/elemental-dark.png';
+        return 'assets/images/abilities/elemental-dark.png';
       case ElementType.light:
-        return 'assets/images/icons/elemental-light.png';
+        return 'assets/images/abilities/elemental-light.png';
       case ElementType.poison:
-        return 'assets/images/icons/elemental-poison.png';
+        return 'assets/images/abilities/elemental-poison.png';
       case ElementType.divine:
-        return 'assets/images/icons/elemental-divine.png';
+        return 'assets/images/abilities/elemental-divine.png';
     }
   }
 

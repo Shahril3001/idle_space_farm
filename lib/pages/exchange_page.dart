@@ -8,12 +8,6 @@ class TransactionExchangePage extends StatelessWidget {
     final gameProvider = Provider.of<GameProvider>(context);
 
     return Scaffold(
-      appBar: CustomAppBar(
-        title: 'Exchange',
-        height: 40,
-        padding: EdgeInsets.zero,
-        margin: EdgeInsets.zero,
-      ),
       body: Container(
         decoration: BoxDecoration(
           image: DecorationImage(
@@ -71,17 +65,21 @@ class TransactionExchangePage extends StatelessWidget {
         "to": "Minerals",
         "fromAmount": 150.0, // Use double instead of int
         "toAmount": 1000.0, // Use double instead of int
-        "fromIcon": 'assets/images/icons/golds.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/minerals.png', // Updated to image asset
+        "fromIcon":
+            'assets/images/icons/resources-golds.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-minerals.png', // Updated to image asset
       },
       {
-        "label": "150 Golds ➝ 500 Mana",
+        "label": "150 Golds ➝ 500 Runes",
         "from": "Credits",
         "to": "Energy",
         "fromAmount": 150.0, // Use double instead of int
         "toAmount": 500.0, // Use double instead of int
-        "fromIcon": 'assets/images/icons/golds.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/mana.png', // Updated to image asset
+        "fromIcon":
+            'assets/images/icons/resources-golds.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-runes.png', // Updated to image asset
       },
       {
         "label": "1000 Minerals ➝ 150 Golds",
@@ -90,36 +88,42 @@ class TransactionExchangePage extends StatelessWidget {
         "fromAmount": 1000.0, // Use double instead of int
         "toAmount": 150.0, // Use double instead of int
         "fromIcon":
-            'assets/images/icons/minerals.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/golds.png', // Updated to image asset
+            'assets/images/icons/resources-minerals.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-golds.png', // Updated to image asset
       },
       {
-        "label": "500 Mana ➝ 150 Golds",
+        "label": "500 Runes ➝ 150 Golds",
         "from": "Energy",
         "to": "Credits",
         "fromAmount": 500.0, // Use double instead of int
         "toAmount": 150.0, // Use double instead of int
-        "fromIcon": 'assets/images/icons/mana.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/golds.png', // Updated to image asset
+        "fromIcon":
+            'assets/images/icons/resources-runes.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-golds.png', // Updated to image asset
       },
       {
-        "label": "1000 Minerals ➝ 500 Mana",
+        "label": "1000 Minerals ➝ 500 Runes",
         "from": "Minerals",
         "to": "Energy",
         "fromAmount": 1000.0, // Use double instead of int
         "toAmount": 500.0, // Use double instead of int
         "fromIcon":
-            'assets/images/icons/minerals.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/mana.png', // Updated to image asset
+            'assets/images/icons/resources-minerals.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-runes.png', // Updated to image asset
       },
       {
-        "label": "500 Mana ➝ 1000 Minerals",
+        "label": "500 Runes ➝ 1000 Minerals",
         "from": "Energy",
         "to": "Minerals",
         "fromAmount": 500.0, // Use double instead of int
         "toAmount": 1000.0, // Use double instead of int
-        "fromIcon": 'assets/images/icons/mana.png', // Updated to image asset
-        "toIcon": 'assets/images/icons/minerals.png', // Updated to image asset
+        "fromIcon":
+            'assets/images/icons/resources-runes.png', // Updated to image asset
+        "toIcon":
+            'assets/images/icons/resources-minerals.png', // Updated to image asset
       },
     ];
 
@@ -177,14 +181,10 @@ class TransactionExchangePage extends StatelessWidget {
                       exchange["toAmount"],
                     );
 
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text(success
-                            ? "✅ Exchange Successful!"
-                            : "❌ Not enough ${exchange["from"]}!"),
-                        duration: Duration(seconds: 2),
-                        backgroundColor: success ? Colors.green : Colors.red,
-                      ),
+                    _showExchangeResultDialog(
+                      context,
+                      success: success,
+                      fromResource: exchange["from"],
                     );
                   },
                   style: ElevatedButton.styleFrom(
@@ -206,48 +206,56 @@ class TransactionExchangePage extends StatelessWidget {
       },
     );
   }
-}
 
-class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
-  final String title;
-  final double height;
-  final EdgeInsetsGeometry padding;
-  final EdgeInsetsGeometry margin;
-
-  const CustomAppBar({
-    Key? key,
-    required this.title,
-    this.height = 56.0, // Default height similar to AppBar
-    this.padding = EdgeInsets.zero, // Custom padding
-    this.margin = EdgeInsets.zero, // Custom margin
-  }) : super(key: key);
-
-  @override
-  Size get preferredSize => Size.fromHeight(height);
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: preferredSize.height,
-      padding: padding, // Apply custom padding
-      margin: margin, // Apply custom margin
-      decoration: BoxDecoration(
-        image: DecorationImage(
-          image: AssetImage("assets/images/ui/wood-ui.png"),
-          fit: BoxFit.cover,
-        ),
-      ),
-      child: Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            fontFamily: 'GameFont',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+  void _showExchangeResultDialog(BuildContext context,
+      {required bool success, required String fromResource}) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          backgroundColor: Colors.black.withOpacity(0.9),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(15),
+            side: BorderSide(
+              color: success ? Colors.green : Colors.red,
+              width: 2,
+            ),
           ),
-        ),
-      ),
+          title: Row(
+            children: [
+              Icon(
+                success ? Icons.check_circle : Icons.error,
+                color: success ? Colors.green : Colors.red,
+              ),
+              SizedBox(width: 10),
+              Text(
+                success ? "Success!" : "Failed!",
+                style: TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ],
+          ),
+          content: Text(
+            success
+                ? "Exchange completed successfully!"
+                : "Not enough $fromResource available!",
+            style: TextStyle(color: Colors.white70),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: Text(
+                "OK",
+                style: TextStyle(color: Color(0xFFCAA04D)),
+              ),
+            ),
+          ],
+        );
+      },
     );
   }
 }

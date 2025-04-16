@@ -144,7 +144,11 @@ class _ShopScreenState extends State<ShopScreen> {
               selected: _selectedCategoryIndex == index,
               onSelected: (selected) =>
                   setState(() => _selectedCategoryIndex = index),
-              avatar: Icon(_getCategoryIcon(category.id)),
+              avatar: Image.asset(
+                _getCategoryImage(category.id),
+                width: 50, // Adjust size as needed
+                height: 50,
+              ),
               selectedColor: Colors.blue[200],
               labelStyle: TextStyle(
                 color: _selectedCategoryIndex == index ? Colors.black : null,
@@ -174,6 +178,7 @@ class _ShopScreenState extends State<ShopScreen> {
     }
 
     return Card(
+      color: Colors.black.withOpacity(0.8),
       elevation: 3,
       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
       child: InkWell(
@@ -216,11 +221,13 @@ class _ShopScreenState extends State<ShopScreen> {
                 Padding(
                   padding: const EdgeInsets.all(8.0),
                   child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       Text(
                         item.name,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        textAlign: TextAlign.center,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              color: Colors.white, // Only override the color
+                            ),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -526,18 +533,18 @@ class _ShopScreenState extends State<ShopScreen> {
     }
   }
 
-  IconData _getCategoryIcon(String categoryId) {
+  String _getCategoryImage(String categoryId) {
     switch (categoryId) {
       case 'girls':
-        return Icons.person;
+        return 'assets/images/icons/shop-girl.png';
       case 'equipment':
-        return Icons.shield;
+        return 'assets/images/icons/shop-equipment.png';
       case 'potions':
-        return Icons.local_drink;
+        return 'assets/images/icons/shop-potion.png';
       case 'abilities':
-        return Icons.menu_book;
+        return 'assets/images/icons/shop-scrollabilities.png';
       default:
-        return Icons.shopping_cart;
+        return 'assets/images/icons/elemental-none.png';
     }
   }
 }

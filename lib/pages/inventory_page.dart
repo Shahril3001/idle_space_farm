@@ -33,12 +33,38 @@ class _InventoryPageState extends State<InventoryPage>
           height: 40,
           padding: EdgeInsets.zero,
           margin: EdgeInsets.zero,
-          bottom: TabBar(
-            controller: _tabController,
-            tabs: [
-              Tab(text: 'Equipment'),
-              Tab(text: 'Potions'),
-            ],
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(48), // Adjust height as needed
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.9),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+              ),
+              child: TabBar(
+                labelColor: Color(0xFFCAA04D),
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: Color(0xFFCAA04D),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelPadding: EdgeInsets.symmetric(horizontal: 16),
+                controller: _tabController,
+                tabs: [
+                  Tab(
+                    icon: Image.asset(
+                      'assets/images/icons/inventory-equipment.png',
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
+                  Tab(
+                    icon: Image.asset(
+                      'assets/images/icons/inventory-potion.png',
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
         body: Container(
@@ -48,14 +74,39 @@ class _InventoryPageState extends State<InventoryPage>
               fit: BoxFit.cover,
             ),
           ),
-          child: TabBarView(
-            controller: _tabController,
+          child: Column(
             children: [
-              EquipmentTab(),
-              PotionsTab(),
+              Expanded(
+                child: TabBarView(
+                  controller: _tabController,
+                  children: [
+                    EquipmentTab(),
+                    PotionsTab(),
+                  ],
+                ),
+              ),
+              _buildBackButton(context), // Add back button here
             ],
           ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildBackButton(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(20.0),
+      child: ElevatedButton(
+        onPressed: () => Navigator.pop(context),
+        style: ElevatedButton.styleFrom(
+          backgroundColor: Color(0xFFCAA04D),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
+          minimumSize: Size(double.infinity, 50),
+        ),
+        child: Text("Back",
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
       ),
     );
   }

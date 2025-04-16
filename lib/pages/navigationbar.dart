@@ -165,35 +165,35 @@ class _HomePageState extends State<HomePage> {
                 items: <BottomNavigationBarItem>[
                   BottomNavigationBarItem(
                     icon: _buildBottomNavIcon(
-                      'assets/images/icons/transaction.png',
+                      'assets/images/icons/nav-exchange.png',
                       _selectedIndex == 0, // Check if this item is selected
                     ),
-                    label: 'Summon',
+                    label: 'Exchange',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildBottomNavIcon(
-                      'assets/images/icons/valkyrie.png',
+                      'assets/images/icons/nav-barrack.png',
                       _selectedIndex == 1, // Check if this item is selected
                     ),
-                    label: 'Girl',
+                    label: 'Barrack',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildBottomNavIcon(
-                      'assets/images/icons/adventure.png',
+                      'assets/images/icons/nav-adventure.png',
                       _selectedIndex == 2, // Check if this item is selected
                     ),
                     label: 'Castle',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildBottomNavIcon(
-                      'assets/images/icons/farm.png',
+                      'assets/images/icons/nav-farm.png',
                       _selectedIndex == 3, // Check if this item is selected
                     ),
-                    label: 'Map',
+                    label: 'Mine',
                   ),
                   BottomNavigationBarItem(
                     icon: _buildBottomNavIcon(
-                      'assets/images/icons/shop.png',
+                      'assets/images/icons/nav-shop.png',
                       _selectedIndex == 4, // Check if this item is selected
                     ),
                     label: 'Shop',
@@ -235,21 +235,21 @@ class _HomePageState extends State<HomePage> {
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
           children: [
             _resourceText(
-              Image.asset('assets/images/icons/golds.png',
+              Image.asset('assets/images/icons/resources-golds.png',
                   width: 24, height: 24),
               "",
               gameProvider.getCredits(),
               Colors.amberAccent,
             ),
             _resourceText(
-              Image.asset('assets/images/icons/minerals.png',
+              Image.asset('assets/images/icons/resources-minerals.png',
                   width: 24, height: 24),
               "",
               gameProvider.getMinerals(),
               Colors.cyan,
             ),
             _resourceText(
-              Image.asset('assets/images/icons/mana.png',
+              Image.asset('assets/images/icons/resources-runes.png',
                   width: 24, height: 24),
               "",
               gameProvider.getEnergy(),

@@ -92,15 +92,36 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
           child: Column(
             children: [
               Container(
-                color: Colors.black.withOpacity(0.7),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.9),
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+                ),
                 child: TabBar(
                   labelColor: const Color(0xFFCAA04D),
                   unselectedLabelColor: Colors.white70,
                   indicatorColor: const Color(0xFFCAA04D),
-                  tabs: const [
-                    Tab(text: 'Details'),
-                    Tab(text: 'Stats'),
-                    Tab(text: 'Abilities'),
+                  tabs: [
+                    Tab(
+                      icon: Image.asset(
+                        'assets/images/icons/girl-bio.png',
+                        width: 34,
+                        height: 34,
+                      ),
+                    ),
+                    Tab(
+                      icon: Image.asset(
+                        'assets/images/icons/girl-stats.png',
+                        width: 34,
+                        height: 34,
+                      ),
+                    ),
+                    Tab(
+                      icon: Image.asset(
+                        'assets/images/icons/girl-abilities.png',
+                        width: 34,
+                        height: 34,
+                      ),
+                    ),
                   ],
                 ),
               ),
@@ -132,7 +153,7 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
             style: TextStyle(
                 color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFCAA04D),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           padding: EdgeInsets.symmetric(vertical: 10),
@@ -156,7 +177,7 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
             style: TextStyle(
                 color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFCAA04D),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           padding: EdgeInsets.symmetric(vertical: 10),
@@ -199,19 +220,19 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
                   _buildStarRating(girl.stars),
                   const SizedBox(height: 15),
                   _buildAttributeRow(
-                    'assets/images/icons/race.png',
+                    'assets/images/icons/stats-race.png',
                     'Race',
                     girl.race,
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/class.png',
+                    'assets/images/icons/stats-class.png',
                     'Class',
                     girl.type,
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/region.png',
+                    'assets/images/icons/stats-region.png',
                     'Region',
                     girl.region,
                   ),
@@ -263,38 +284,38 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
               child: Column(
                 children: [
                   _buildAttributeRow(
-                    'assets/images/icons/level.png',
+                    'assets/images/icons/stats-level.png',
                     'Level',
                     "${girl.level}",
                   ),
                   const Divider(color: Colors.white54),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/attack.png',
+                    'assets/images/icons/stats-attack.png',
                     'Attack',
                     "${girl.attackPoints}",
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/defense.png',
+                    'assets/images/icons/stats-defense.png',
                     'Defense',
                     "${girl.defensePoints}",
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/agility.png',
+                    'assets/images/icons/stats-agility.png',
                     'Agility',
                     "${girl.agilityPoints}",
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/critical.png',
+                    'assets/images/icons/stats-critical.png',
                     'Critical',
                     "${girl.criticalPoint}%",
                   ),
                   const SizedBox(height: 10),
                   _buildAttributeRow(
-                    'assets/images/icons/mine.png',
+                    'assets/images/icons/stats-mine.png',
                     'Mining',
                     "${(girl.miningEfficiency * 100).toStringAsFixed(1)}%",
                   ),
@@ -364,21 +385,21 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
           girl.hp,
           girl.maxHp,
           Colors.redAccent,
-          'assets/images/icons/healthp.png',
+          'assets/images/icons/stats-healthp.png',
         ),
         _buildStatBox(
           "MP",
           girl.mp,
           girl.maxMp,
           Colors.blueAccent,
-          'assets/images/icons/manap.png',
+          'assets/images/icons/stats-manap.png',
         ),
         _buildStatBox(
           "SP",
           girl.sp,
           girl.maxSp,
           Colors.greenAccent,
-          'assets/images/icons/specialp.png',
+          'assets/images/icons/stats-specialp.png',
         ),
       ],
     );
@@ -572,49 +593,57 @@ class _GirlCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Card(
-      elevation: 3,
-      color: Colors.black.withOpacity(0.7),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-      ),
-      child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(10),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Center(
-              child: ClipRRect(
-                child: Image.asset(
-                  girl.imageFace,
-                  width: double.infinity, // Fixed width
-                  height: 110, // Fixed height
-                  fit: BoxFit.cover,
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            Text(
-              girl.name,
-              textAlign: TextAlign.center,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    color: Colors.white,
-                    fontFamily: 'GameFont',
-                  ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-            ),
-            Text(
-              girl.race,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: Colors.white70,
-                  ),
-            ),
-            _buildStarRating(girl.stars),
-          ],
+        color: Colors.black.withOpacity(0.8),
+        elevation: 2,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(8),
         ),
-      ),
-    );
+        child: InkWell(
+          onTap: onTap,
+          borderRadius: BorderRadius.circular(10),
+          child: SizedBox(
+            // Using SizedBox instead of Column for tighter layout
+            width: double.infinity, // Ensures full width
+            child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Tightly fits content
+              children: [
+                // 1. True edge-to-edge image
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
+                  ),
+                  child: Image.asset(
+                    girl.imageFace,
+                    height: 110,
+                    fit: BoxFit.cover, // Fills width
+                  ),
+                ),
+                Column(
+                  children: [
+                    Text(
+                      girl.name,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.white,
+                            fontFamily: 'GameFont',
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      girl.race,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white70,
+                          ),
+                    ),
+                    if (_buildStarRating != null) _buildStarRating!(girl.stars),
+                  ],
+                ),
+              ],
+            ),
+          ),
+        ));
   }
 
   Widget _buildStarRating(int stars) {

@@ -59,7 +59,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildSummonButton(BuildContext context) {
     return _buildIconButton(
-      'assets/images/icons/summon.png',
+      'assets/images/icons/nav-summon.png',
       'Summon',
       () {
         Navigator.push(
@@ -89,7 +89,7 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildRightButton(BuildContext context) {
     return _buildIconButton(
-      'assets/images/icons/inventory.png',
+      'assets/images/icons/nav-inventory.png',
       'Inventory',
       () {
         Navigator.push(
@@ -136,17 +136,17 @@ class DashboardPage extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Image(
-              image:
-                  ImageCacheManager.getImage('assets/images/icons/battle.png'),
-              width: 30,
-              height: 30,
+              image: ImageCacheManager.getImage(
+                  'assets/images/icons/nav-battle.png'),
+              width: 35,
+              height: 35,
             ),
             SizedBox(width: 8),
             Text(
-              'Battle',
+              'BATTLE',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 18,
+                fontSize: 20,
               ),
             ),
           ],
@@ -165,16 +165,18 @@ class DashboardPage extends StatelessWidget {
               MainAxisAlignment.spaceEvenly, // Evenly spaced buttons
           children: [
             _buildIconButton(
-                'assets/images/icons/achievements.png', 'Milestone', () {
+                'assets/images/icons/nav-achievements.png', 'Milestone', () {
               print('Dungeon pressed');
             }),
-            _buildIconButton('assets/images/icons/reward.png', 'Reward', () {
+            _buildIconButton('assets/images/icons/nav-reward.png', 'Reward',
+                () {
               print('Dungeon pressed');
             }),
-            _buildIconButton('assets/images/icons/codex.png', 'Codex', () {
+            _buildIconButton('assets/images/icons/nav-codex.png', 'Codex', () {
               _showCodexPopup(context);
             }),
-            _buildIconButton('assets/images/icons/settings.png', 'Setting', () {
+            _buildIconButton('assets/images/icons/nav-settings.png', 'Setting',
+                () {
               _showSettingsPopup(context);
             }),
           ],
@@ -642,7 +644,7 @@ class DashboardPage extends StatelessWidget {
                     'Battle',
                     style: TextStyle(
                       color: Colors.white,
-                      fontSize: 20,
+                      fontSize: 26,
                       fontWeight: FontWeight.bold,
                     ),
                     textAlign: TextAlign.center,
@@ -657,18 +659,18 @@ class DashboardPage extends StatelessWidget {
                   mainAxisSpacing: 8,
                   children: [
                     _buildAdventureButtonRow(
-                      iconPath: 'assets/images/icons/dungeon.png',
-                      label: 'Dungeon',
+                      iconPath: 'assets/images/icons/battle-dungeon.png',
+                      label: 'Dungeon Invansion',
                       onPressed: () => _navigateTo(context, MapScreen()),
                     ),
                     _buildAdventureButtonRow(
-                      iconPath: 'assets/images/icons/dungeon.png',
-                      label: 'PvE Arena',
+                      iconPath: 'assets/images/icons/battle-girl.png',
+                      label: 'Champion Arena',
                       onPressed: () => _navigateTo(context, MapScreen()),
                     ),
                     _buildAdventureButtonRow(
-                      iconPath: 'assets/images/icons/dungeon.png',
-                      label: 'Challenges',
+                      iconPath: 'assets/images/icons/battle-boss.png',
+                      label: 'Boss Raid',
                       onPressed: () => _navigateTo(context, MapScreen()),
                     ),
                   ],
@@ -708,9 +710,8 @@ class DashboardPage extends StatelessWidget {
         children: [
           Image(
             image: ImageCacheManager.getImage(iconPath),
-            width: 36,
-            height: 36,
-            color: Colors.white,
+            width: 40,
+            height: 40,
           ),
           SizedBox(width: 12), // Space between icon and text
           Text(

@@ -10,9 +10,21 @@ class GachaMainPage extends StatefulWidget {
   _GachaMainPageState createState() => _GachaMainPageState();
 }
 
-class _GachaMainPageState extends State<GachaMainPage> {
-  int _currentPageIndex = 0;
-  final PageController _pageController = PageController();
+class _GachaMainPageState extends State<GachaMainPage>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
+
+  @override
+  void initState() {
+    super.initState();
+    _tabController = TabController(length: 2, vsync: this);
+  }
+
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -23,25 +35,52 @@ class _GachaMainPageState extends State<GachaMainPage> {
           height: 40,
           padding: EdgeInsets.zero,
           margin: EdgeInsets.zero,
+          bottom: PreferredSize(
+            preferredSize: Size.fromHeight(48), // Adjust height as needed
+            child: Container(
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.9),
+                borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+              ),
+              child: TabBar(
+                labelColor: Color(0xFFCAA04D),
+                unselectedLabelColor: Colors.white70,
+                indicatorColor: Color(0xFFCAA04D),
+                indicatorSize: TabBarIndicatorSize.tab,
+                labelPadding: EdgeInsets.symmetric(horizontal: 16),
+                controller: _tabController,
+                tabs: [
+                  Tab(
+                    icon: Image.asset(
+                      'assets/images/icons/summon-girl.png',
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
+                  Tab(
+                    icon: Image.asset(
+                      'assets/images/icons/summon-equipment.png',
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ),
         ),
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+              image: ImageCacheManager.getImage('assets/images/ui/summon.png'),
               fit: BoxFit.cover,
             ),
           ),
           child: Column(
             children: [
-              _buildCustomNavigationBar(),
               Expanded(
-                child: PageView(
-                  controller: _pageController,
-                  onPageChanged: (index) {
-                    setState(() {
-                      _currentPageIndex = index;
-                    });
-                  },
+                child: TabBarView(
+                  controller: _tabController,
                   children: [
                     GachaGirlPage(),
                     GachaItemPage(),
@@ -62,7 +101,7 @@ class _GachaMainPageState extends State<GachaMainPage> {
       child: ElevatedButton(
         onPressed: () => Navigator.pop(context),
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
+          backgroundColor: Color(0xFFCAA04D),
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
           minimumSize: Size(double.infinity, 50),
@@ -73,46 +112,6 @@ class _GachaMainPageState extends State<GachaMainPage> {
       ),
     );
   }
-
-  Widget _buildCustomNavigationBar() {
-    return Container(
-      height: 48,
-      color: Colors.black.withOpacity(0.9),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          _buildNavButton('Girl', 0),
-          SizedBox(width: 20),
-          _buildNavButton('Equipment', 1),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildNavButton(String label, int index) {
-    return TextButton(
-      onPressed: () {
-        setState(() {
-          _currentPageIndex = index;
-          _pageController.animateToPage(
-            index,
-            duration: Duration(milliseconds: 300),
-            curve: Curves.easeInOut,
-          );
-        });
-      },
-      style: TextButton.styleFrom(
-        foregroundColor:
-            _currentPageIndex == index ? Colors.amberAccent : Colors.white,
-        textStyle: TextStyle(
-          fontFamily: 'GameFont',
-          fontSize: 17,
-          fontWeight: FontWeight.bold,
-        ),
-      ),
-      child: Text(label),
-    );
-  }
 }
 
 class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
@@ -120,6 +119,7 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
   final double height;
   final EdgeInsetsGeometry padding;
   final EdgeInsetsGeometry margin;
+  final PreferredSizeWidget? bottom;
 
   const CustomAppBar({
     Key? key,
@@ -127,10 +127,12 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
     this.height = 56.0,
     this.padding = EdgeInsets.zero,
     this.margin = EdgeInsets.zero,
+    this.bottom,
   }) : super(key: key);
 
   @override
-  Size get preferredSize => Size.fromHeight(height);
+  Size get preferredSize =>
+      Size.fromHeight(height + (bottom?.preferredSize.height ?? 0));
 
   @override
   Widget build(BuildContext context) {
@@ -144,16 +146,22 @@ class CustomAppBar extends StatelessWidget implements PreferredSizeWidget {
           fit: BoxFit.cover,
         ),
       ),
-      child: Center(
-        child: Text(
-          title,
-          style: TextStyle(
-            fontFamily: 'GameFont',
-            fontSize: 20,
-            fontWeight: FontWeight.bold,
-            color: Colors.white,
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Center(
+            child: Text(
+              title,
+              style: TextStyle(
+                fontFamily: 'GameFont',
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+            ),
           ),
-        ),
+          if (bottom != null) bottom!,
+        ],
       ),
     );
   }
@@ -165,13 +173,13 @@ class GachaGirlPage extends StatelessWidget {
     final gameProvider = Provider.of<GameProvider>(context);
     return _buildGachaSection(
       context: context,
+      title: 'Summon Girl',
       image: Image.asset(
-        "assets/images/icons/summon-girl.png",
-        width: 150,
-        height: 150,
+        "assets/images/ui/summon-girl.png",
+        width: 250,
+        height: 250,
         fit: BoxFit.cover,
       ),
-      title: 'Summon Girl',
       subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
       button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
           Icons.casino, Color(0xFFCAA04D), true),
@@ -187,13 +195,13 @@ class GachaItemPage extends StatelessWidget {
     final gameProvider = Provider.of<GameProvider>(context);
     return _buildGachaSection(
       context: context,
+      title: 'Summon Equipment',
       image: Image.asset(
-        "assets/images/icons/summon-item.png",
-        width: 150,
-        height: 150,
+        "assets/images/ui/summon-equipment.png",
+        width: 250,
+        height: 250,
         fit: BoxFit.cover,
       ),
-      title: 'Summon Equipment',
       subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
       button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
           Icons.shield, Color(0xFFCAA04D), false),
@@ -242,8 +250,6 @@ Widget _buildGlassCard({
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            if (image != null) image,
-            SizedBox(height: 10),
             Text(
               title,
               style: TextStyle(
@@ -254,6 +260,8 @@ Widget _buildGlassCard({
               ),
             ),
             Divider(color: Colors.white54),
+            if (image != null) image,
+            SizedBox(height: 18),
             Text(
               content,
               style: TextStyle(
