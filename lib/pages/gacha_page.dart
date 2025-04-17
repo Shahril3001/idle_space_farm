@@ -254,7 +254,7 @@ Widget _buildGlassCard({
               title,
               style: TextStyle(
                 fontFamily: 'GameFont',
-                fontSize: 18,
+                fontSize: 22,
                 fontWeight: FontWeight.bold,
                 color: Colors.amberAccent,
               ),

@@ -13,8 +13,9 @@ class ShopScreen extends StatefulWidget {
   State<ShopScreen> createState() => _ShopScreenState();
 }
 
-class _ShopScreenState extends State<ShopScreen> {
-  int _selectedCategoryIndex = 0;
+class _ShopScreenState extends State<ShopScreen>
+    with SingleTickerProviderStateMixin {
+  late TabController _tabController;
   final Map<String, int> _purchaseQuantities = {};
 
   @override
@@ -23,10 +24,23 @@ class _ShopScreenState extends State<ShopScreen> {
     _initializeShop();
   }
 
+  @override
+  void dispose() {
+    _tabController.dispose();
+    super.dispose();
+  }
+
   Future<void> _initializeShop() async {
     final gameProvider = Provider.of<GameProvider>(context, listen: false);
     if (gameProvider.shopCategories.isEmpty) {
       await gameProvider.initializeShop();
+    }
+    // Initialize tab controller after shop is loaded
+    if (gameProvider.shopCategories.isNotEmpty) {
+      _tabController = TabController(
+        length: gameProvider.shopCategories.length,
+        vsync: this,
+      );
     }
   }
 
@@ -43,57 +57,94 @@ class _ShopScreenState extends State<ShopScreen> {
       return const Center(child: Text('No shop items available'));
     }
 
-    final currentCategory = shopCategories[_selectedCategoryIndex];
-    final currentItems = currentCategory.items;
+    // Initialize tab controller if not already initialized
+    if (_tabController.length != shopCategories.length) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        setState(() {
+          _tabController = TabController(
+            length: shopCategories.length,
+            vsync: this,
+          );
+        });
+      });
+    }
 
     return Scaffold(
-        appBar: AppBar(
-          title: const Text('Shop'),
-          centerTitle: true,
-          actions: [
-            IconButton(
-              icon: const Icon(Icons.refresh),
-              tooltip:
-                  'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
-              onPressed: () => _showRefreshDialog(context, gameProvider),
-            ),
-          ],
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
-              fit: BoxFit.cover,
-            ),
+      appBar: AppBar(
+        title: const Text('Shop'),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            tooltip:
+                'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
+            onPressed: () => _showRefreshDialog(context, gameProvider),
           ),
-          child: Column(
-            children: [
-              _buildCategoryTabs(shopCategories),
-              Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.all(8.0),
-                  child: GridView.builder(
-                    gridDelegate:
-                        const SliverGridDelegateWithFixedCrossAxisCount(
-                      crossAxisCount: 3,
-                      crossAxisSpacing: 8,
-                      mainAxisSpacing: 8,
-                      childAspectRatio: 0.6,
-                    ),
-                    itemCount: currentItems.length,
-                    itemBuilder: (context, index) {
-                      return _buildShopItemCard(
-                          context, currentItems[index], gameProvider);
-                    },
+        ],
+        bottom: PreferredSize(
+          preferredSize: Size.fromHeight(45), // Adjust height as needed
+          child: Container(
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.9),
+              borderRadius: BorderRadius.vertical(top: Radius.circular(5)),
+            ),
+            child: TabBar(
+              labelColor: Color(0xFFCAA04D),
+              unselectedLabelColor: Colors.white70,
+              indicatorColor: Color(0xFFCAA04D),
+              indicatorSize: TabBarIndicatorSize.tab,
+              labelPadding: EdgeInsets.symmetric(horizontal: 16),
+              controller: _tabController,
+              tabs: shopCategories.map((category) {
+                return Tab(
+                  icon: Image.asset(
+                    category.iconPath,
+                    width: 30,
+                    height: 30,
                   ),
-                ),
-              ),
-            ],
+                );
+              }).toList(),
+            ),
           ),
-        ));
+        ),
+      ),
+      body: Container(
+        decoration: BoxDecoration(
+          image: DecorationImage(
+            image: ImageCacheManager.getImage('assets/images/ui/app-bg.png'),
+            fit: BoxFit.cover,
+          ),
+        ),
+        child: TabBarView(
+          controller: _tabController,
+          children: shopCategories.map((category) {
+            return _buildCategoryView(category, gameProvider);
+          }).toList(),
+        ),
+      ),
+    );
   }
 
-  // New method for refresh dialog
+  Widget _buildCategoryView(ShopCategory category, GameProvider gameProvider) {
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: GridView.builder(
+        gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+          crossAxisCount: 3,
+          crossAxisSpacing: 8,
+          mainAxisSpacing: 8,
+          childAspectRatio: 0.6,
+        ),
+        itemCount: category.items.length,
+        itemBuilder: (context, index) {
+          return _buildShopItemCard(
+              context, category.items[index], gameProvider);
+        },
+      ),
+    );
+  }
+
+  // ... (keep all other existing methods the same)
   Future<void> _showRefreshDialog(
       BuildContext context, GameProvider gameProvider) async {
     final refreshesLeft = 3 - (gameProvider.shop?.refreshCountToday ?? 0);
@@ -127,37 +178,6 @@ class _ShopScreenState extends State<ShopScreen> {
     if (shouldRefresh == true) {
       gameProvider.manualRefreshShop();
     }
-  }
-
-  Widget _buildCategoryTabs(List<ShopCategory> categories) {
-    return SizedBox(
-      height: 60,
-      child: ListView.builder(
-        scrollDirection: Axis.horizontal,
-        itemCount: categories.length,
-        itemBuilder: (context, index) {
-          final category = categories[index];
-          return Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: ChoiceChip(
-              label: Text(category.name),
-              selected: _selectedCategoryIndex == index,
-              onSelected: (selected) =>
-                  setState(() => _selectedCategoryIndex = index),
-              avatar: Image.asset(
-                _getCategoryImage(category.id),
-                width: 50, // Adjust size as needed
-                height: 50,
-              ),
-              selectedColor: Colors.blue[200],
-              labelStyle: TextStyle(
-                color: _selectedCategoryIndex == index ? Colors.black : null,
-              ),
-            ),
-          );
-        },
-      ),
-    );
   }
 
   Widget _buildShopItemCard(
@@ -279,7 +299,6 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  // New method for purchase confirmation dialog
   Future<void> _showPurchaseConfirmationDialog(
       BuildContext context, ShopItem item, GameProvider gameProvider) async {
     final shouldPurchase = await showDialog<bool>(
@@ -388,7 +407,6 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  // Reusable dialog builder
   Widget _buildBasicDialog({
     required String title,
     required dynamic content,
@@ -445,12 +463,10 @@ class _ShopScreenState extends State<ShopScreen> {
     );
   }
 
-  // Helper method to format prices for display
   String _formatPrices(Map<String, int> prices) {
     return prices.entries.map((e) => '${e.value} ${e.key}').join(', ');
   }
 
-  // ... (keep all other existing methods the same)
   Color _getRarityColor(String rarity) {
     return switch (rarity) {
       'Common' => Colors.grey,
@@ -530,21 +546,6 @@ class _ShopScreenState extends State<ShopScreen> {
         return Colors.green[200]!;
       default:
         return Colors.grey[200]!;
-    }
-  }
-
-  String _getCategoryImage(String categoryId) {
-    switch (categoryId) {
-      case 'girls':
-        return 'assets/images/icons/shop-girl.png';
-      case 'equipment':
-        return 'assets/images/icons/shop-equipment.png';
-      case 'potions':
-        return 'assets/images/icons/shop-potion.png';
-      case 'abilities':
-        return 'assets/images/icons/shop-scrollabilities.png';
-      default:
-        return 'assets/images/icons/elemental-none.png';
     }
   }
 }

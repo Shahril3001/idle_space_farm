@@ -146,7 +146,7 @@ class DashboardPage extends StatelessWidget {
               'BATTLE',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 20,
+                fontSize: 17,
               ),
             ),
           ],

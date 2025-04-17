@@ -340,26 +340,26 @@ List<ShopCategory> createDefaultShopCategories() {
   return [
     ShopCategory(
       id: 'girls',
-      name: 'Girls',
-      iconPath: 'assets/icons/shop_girls.png',
+      name: 'Girl',
+      iconPath: 'assets/images/icons/shop-girl.png',
       items: girlItems,
     ),
     ShopCategory(
       id: 'equipment',
       name: 'Equipment',
-      iconPath: 'assets/icons/shop_equipment.png',
+      iconPath: 'assets/images/icons/shop-equipment.png',
       items: equipmentItems,
     ),
     ShopCategory(
       id: 'potions',
-      name: 'Potions',
-      iconPath: 'assets/icons/shop_potions.png',
+      name: 'Potion',
+      iconPath: 'assets/images/icons/shop-potion.png',
       items: potionItems,
     ),
     ShopCategory(
       id: 'abilities',
-      name: 'Ability Scrolls',
-      iconPath: 'assets/icons/shop_scrolls.png',
+      name: 'Ability',
+      iconPath: 'assets/images/icons/shop-abilities.png',
       items: abilityItems,
     ),
   ];
