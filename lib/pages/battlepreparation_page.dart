@@ -68,7 +68,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
             mainAxisSize: MainAxisSize.min,
             children: [
               if (character is GirlFarmer)
-                Image.asset(character.image, height: 100)
+                Image.asset(character.imageFace, height: 60)
               else
                 const Icon(Icons.dangerous, size: 60, color: Colors.red),
               const SizedBox(height: 16),
@@ -106,7 +106,8 @@ class _PreparationScreenState extends State<PreparationScreen> {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: ImageCacheManager.getImage('assets/images/ui/mine.png'),
+              image:
+                  ImageCacheManager.getImage('assets/images/ui/battle-bg.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -137,7 +138,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
               width: double.infinity,
               padding: const EdgeInsets.all(8.0),
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
+                color: Colors.black.withOpacity(0.8),
                 borderRadius: BorderRadius.circular(4),
               ),
               child: Row(
@@ -202,7 +203,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
             width: double.infinity, // Makes container take full width of parent
             padding: EdgeInsets.all(8.0), // Add some padding
             decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7), // 70% opacity black
+              color: Colors.black.withOpacity(0.8), // 70% opacity black
               borderRadius:
                   BorderRadius.circular(4), // Optional rounded corners
             ),
@@ -335,7 +336,7 @@ class HeroCard extends StatelessWidget {
             children: [
               Expanded(
                 child: Image.asset(
-                  hero.image,
+                  hero.imageFace,
                   height: 80,
                   fit: BoxFit.contain,
                 ),

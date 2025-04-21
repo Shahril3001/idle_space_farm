@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'dart:math';
 import '../main.dart';
 import '../providers/game_provider.dart';
 import '../models/girl_farmer_model.dart';
@@ -98,17 +99,187 @@ class _GachaMainPageState extends State<GachaMainPage>
   Widget _buildBackButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          minimumSize: Size(double.infinity, 50),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: Text("Back",
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
+          child: Text(
+            "Back",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class GachaAnimation extends StatefulWidget {
+  final bool isCharacterGacha;
+  final VoidCallback onComplete;
+
+  const GachaAnimation({
+    Key? key,
+    required this.isCharacterGacha,
+    required this.onComplete,
+  }) : super(key: key);
+
+  @override
+  _GachaAnimationState createState() => _GachaAnimationState();
+}
+
+class _GachaAnimationState extends State<GachaAnimation>
+    with SingleTickerProviderStateMixin {
+  late AnimationController _controller;
+  late Animation<double> _scaleAnimation;
+  late Animation<double> _opacityAnimation;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: Duration(milliseconds: 1500),
+    );
+
+    _scaleAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.5, end: 1.2), weight: 0.5),
+      TweenSequenceItem(tween: Tween(begin: 1.2, end: 1.0), weight: 0.5),
+    ]).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _opacityAnimation = TweenSequence<double>([
+      TweenSequenceItem(tween: Tween(begin: 0.0, end: 1.0), weight: 0.3),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 1.0), weight: 0.4),
+      TweenSequenceItem(tween: Tween(begin: 1.0, end: 0.0), weight: 0.3),
+    ]).animate(
+      CurvedAnimation(parent: _controller, curve: Curves.easeInOut),
+    );
+
+    _controller.forward().then((_) {
+      widget.onComplete();
+    });
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Center(
+      child: AnimatedBuilder(
+        animation: _controller,
+        builder: (context, child) {
+          return Stack(
+            alignment: Alignment.center,
+            children: [
+              // Light burst effect
+              if (_controller.value < 0.8)
+                Opacity(
+                  opacity: _opacityAnimation.value * 0.7,
+                  child: Container(
+                    width: 300 * _scaleAnimation.value,
+                    height: 300 * _scaleAnimation.value,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      gradient: RadialGradient(
+                        colors: [
+                          Colors.yellow.withOpacity(0.8),
+                          Colors.transparent,
+                        ],
+                        stops: [0.1, 1.0],
+                      ),
+                    ),
+                  ),
+                ),
+
+              // Main summoning circle
+              Transform.scale(
+                scale: _scaleAnimation.value,
+                child: Opacity(
+                  opacity: _opacityAnimation.value,
+                  child: Container(
+                    width: 200,
+                    height: 200,
+                    decoration: BoxDecoration(
+                      shape: BoxShape.circle,
+                      border: Border.all(
+                        color: widget.isCharacterGacha
+                            ? Colors.blueAccent
+                            : Colors.amber,
+                        width: 3,
+                      ),
+                      boxShadow: [
+                        BoxShadow(
+                          color: widget.isCharacterGacha
+                              ? Colors.blue.withOpacity(0.5)
+                              : Colors.amber.withOpacity(0.5),
+                          blurRadius: 20,
+                          spreadRadius: 5,
+                        ),
+                      ],
+                    ),
+                    child: Center(
+                      child: Image.asset(
+                        widget.isCharacterGacha
+                            ? "assets/images/ui/transition-girl.png"
+                            : "assets/images/ui/transition-equipment.png",
+                        width: 250,
+                        height: 250,
+                        color: Colors.white.withOpacity(0.9),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Particle effects
+              ...List.generate(8, (index) {
+                final angle = (index / 8) * 2 * pi;
+                final distance = 100 * _controller.value;
+                return Positioned(
+                  left: 100 + distance * cos(angle),
+                  top: 100 + distance * sin(angle),
+                  child: Transform.rotate(
+                    angle: angle,
+                    child: Opacity(
+                      opacity: 1 - _controller.value,
+                      child: Icon(
+                        Icons.star,
+                        color: Colors.yellow,
+                        size: 20 * (1 - _controller.value),
+                      ),
+                    ),
+                  ),
+                );
+              }),
+            ],
+          );
+        },
       ),
     );
   }
@@ -177,14 +348,28 @@ class GachaGirlPage extends StatelessWidget {
       image: Image.asset(
         "assets/images/ui/summon-girl.png",
         width: 250,
-        height: 250,
+        height: 280,
         fit: BoxFit.cover,
       ),
       subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
-      button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
-          Icons.casino, Color(0xFFCAA04D), true),
-      button2: _buildGachaButton(context, gameProvider, '10x Pulls', 10,
-          Icons.auto_awesome, Color(0xFFCAA04D), true),
+      button1: _buildGachaButton(
+        context,
+        gameProvider,
+        '1x Pull',
+        1,
+        "assets/images/icons/gacha_01scroll.png", // Image asset path instead of IconData
+        Colors.blueAccent,
+        true,
+      ),
+      button2: _buildGachaButton(
+        context,
+        gameProvider,
+        '10x Pulls',
+        10,
+        "assets/images/icons/gacha_10scroll.png", // Image asset path
+        Colors.blueAccent,
+        true,
+      ),
     );
   }
 }
@@ -199,14 +384,28 @@ class GachaItemPage extends StatelessWidget {
       image: Image.asset(
         "assets/images/ui/summon-equipment.png",
         width: 250,
-        height: 250,
+        height: 280,
         fit: BoxFit.cover,
       ),
       subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
-      button1: _buildGachaButton(context, gameProvider, '1x Pull', 1,
-          Icons.shield, Color(0xFFCAA04D), false),
-      button2: _buildGachaButton(context, gameProvider, '10x Pulls', 10,
-          Icons.backpack, Color(0xFFCAA04D), false),
+      button1: _buildGachaButton(
+        context,
+        gameProvider,
+        '1x Pull',
+        1,
+        "assets/images/icons/gacha_01scroll.png", // Image asset path
+        Colors.blueAccent,
+        false,
+      ),
+      button2: _buildGachaButton(
+        context,
+        gameProvider,
+        '10x Pulls',
+        10,
+        "assets/images/icons/gacha_10scroll.png", // Image asset path
+        Colors.blueAccent,
+        false,
+      ),
     );
   }
 }
@@ -243,6 +442,10 @@ Widget _buildGlassCard({
       elevation: 10,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(10),
+        side: BorderSide(
+          color: Colors.blueAccent, // Border color
+          width: 2.0, // Border thickness
+        ),
       ),
       color: Colors.black.withOpacity(0.8),
       child: Padding(
@@ -256,7 +459,7 @@ Widget _buildGlassCard({
                 fontFamily: 'GameFont',
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
-                color: Colors.amberAccent,
+                color: Colors.blueAccent,
               ),
             ),
             Divider(color: Colors.white54),
@@ -292,7 +495,7 @@ Widget _buildGachaButton(
     GameProvider gameProvider,
     String label,
     int pulls,
-    IconData icon,
+    String iconAsset,
     Color color,
     bool isCharacterGacha) {
   return ElevatedButton.icon(
@@ -306,23 +509,43 @@ Widget _buildGachaButton(
       elevation: 8,
     ),
     onPressed: () {
-      if (isCharacterGacha) {
-        final girls = gameProvider.performGachaGirl(pulls: pulls);
-        if (girls.isNotEmpty) {
-          _showGachaResultsDialog(context, girls, true);
-        } else {
-          _showErrorSnackbar(context, '❌ Not enough Credits!');
-        }
-      } else {
-        final items = gameProvider.performEquipmentGacha(pulls: pulls);
-        if (items.isNotEmpty) {
-          _showGachaResultsDialog(context, items, false);
-        } else {
-          _showErrorSnackbar(context, '❌ Not enough Credits!');
-        }
-      }
+      // Show loading overlay with animation
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (context) => Dialog(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          child: GachaAnimation(
+            isCharacterGacha: isCharacterGacha,
+            onComplete: () {
+              Navigator.of(context).pop(); // Close animation
+              // Perform gacha after animation completes
+              if (isCharacterGacha) {
+                final girls = gameProvider.performGachaGirl(pulls: pulls);
+                if (girls.isNotEmpty) {
+                  _showGachaResultsDialog(context, girls, true);
+                } else {
+                  _showErrorSnackbar(context, '❌ Not enough Credits!');
+                }
+              } else {
+                final items = gameProvider.performEquipmentGacha(pulls: pulls);
+                if (items.isNotEmpty) {
+                  _showGachaResultsDialog(context, items, false);
+                } else {
+                  _showErrorSnackbar(context, '❌ Not enough Credits!');
+                }
+              }
+            },
+          ),
+        ),
+      );
     },
-    icon: Icon(icon, size: 18, color: Colors.white),
+    icon: Image.asset(
+      iconAsset,
+      width: 30,
+      height: 30,
+    ),
     label: Text(
       label,
       style: TextStyle(
@@ -336,56 +559,227 @@ Widget _buildGachaButton(
 
 void _showGachaResultsDialog(
     BuildContext context, List<dynamic> results, bool isCharacter) {
-  showDialog(
+  showGeneralDialog(
     context: context,
-    builder: (context) {
-      return AlertDialog(
-        backgroundColor: Colors.grey.withOpacity(0.7),
-        title: Text(
-          'Summoning Results',
-          textAlign: TextAlign.center,
-          style: TextStyle(
-            fontFamily: 'GameFont',
-            color: Colors.amberAccent,
-          ),
-        ),
-        content: SingleChildScrollView(
-          scrollDirection: Axis.horizontal,
-          child: Row(
-            children: [
-              SizedBox(
-                width: results.length > 4 ? 360 : results.length * 80,
-                child: GridView.builder(
-                  shrinkWrap: true,
-                  physics: NeverScrollableScrollPhysics(),
-                  gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                    crossAxisCount: 3,
-                    crossAxisSpacing: 8,
-                    mainAxisSpacing: 8,
-                    childAspectRatio: 1,
-                  ),
-                  itemCount: results.length,
-                  itemBuilder: (context, index) {
-                    return isCharacter
-                        ? _buildGirlCard(results[index] as GirlFarmer)
-                        : _buildEquipmentCard(results[index] as Equipment);
-                  },
-                ),
+    barrierDismissible: true,
+    barrierLabel: '',
+    barrierColor: Colors.black.withOpacity(0.7),
+    transitionDuration: Duration(milliseconds: 300),
+    pageBuilder: (context, animation, secondaryAnimation) {
+      return Scaffold(
+        backgroundColor: Colors.transparent,
+        body: Center(
+          child: Container(
+            margin: EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.grey[900]!.withOpacity(0.9),
+              borderRadius: BorderRadius.circular(15),
+              border: Border.all(
+                color: Colors.amberAccent,
+                width: 2,
               ),
-            ],
-          ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(),
-            child: Text(
-              'OK',
-              style: TextStyle(fontFamily: 'GameFont', color: Colors.white),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.5),
+                  blurRadius: 20,
+                  spreadRadius: 5,
+                ),
+              ],
+            ),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                // Header
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius:
+                        BorderRadius.vertical(top: Radius.circular(13)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      Text(
+                        'Summoning Results',
+                        style: TextStyle(
+                          fontFamily: 'GameFont',
+                          fontSize: 20,
+                          color: Colors.amberAccent,
+                        ),
+                      ),
+                      Text(
+                        '${results.length} Items',
+                        style: TextStyle(
+                          fontFamily: 'GameFont',
+                          fontSize: 16,
+                          color: Colors.white70,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Results Grid
+                Flexible(
+                  child: Container(
+                    constraints: BoxConstraints(
+                      maxHeight: MediaQuery.of(context).size.height * 0.7,
+                    ),
+                    padding: EdgeInsets.all(16),
+                    child: GridView.builder(
+                      shrinkWrap: true,
+                      gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+                        crossAxisCount:
+                            _calculateCrossAxisCount(context, results.length),
+                        crossAxisSpacing: 12,
+                        mainAxisSpacing: 12,
+                        childAspectRatio: 0.8,
+                      ),
+                      itemCount: results.length,
+                      itemBuilder: (context, index) {
+                        return isCharacter
+                            ? _buildGirlCard(results[index] as GirlFarmer)
+                            : _buildEnhancedEquipmentCard(
+                                results[index] as Equipment);
+                      },
+                    ),
+                  ),
+                ),
+
+                // Close Button
+                Container(
+                  padding: EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: Colors.black.withOpacity(0.7),
+                    borderRadius:
+                        BorderRadius.vertical(bottom: Radius.circular(13)),
+                  ),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.end,
+                    children: [
+                      ElevatedButton(
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.red[900],
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(10),
+                          ),
+                          padding: EdgeInsets.symmetric(
+                              horizontal: 24, vertical: 10),
+                        ),
+                        onPressed: () => Navigator.of(context).pop(),
+                        child: Text(
+                          'Close',
+                          style: TextStyle(
+                            fontFamily: 'GameFont',
+                            fontSize: 16,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
             ),
           ),
-        ],
+        ),
       );
     },
+    transitionBuilder: (context, animation, secondaryAnimation, child) {
+      return FadeTransition(
+        opacity: animation,
+        child: ScaleTransition(
+          scale: animation.drive(Tween(begin: 0.8, end: 1.0).chain(
+            CurveTween(curve: Curves.easeOutBack),
+          )),
+          child: child,
+        ),
+      );
+    },
+  );
+}
+
+int _calculateCrossAxisCount(BuildContext context, int itemCount) {
+  final screenWidth = MediaQuery.of(context).size.width;
+  if (screenWidth > 600) {
+    return itemCount > 3 ? 4 : itemCount;
+  } else {
+    return itemCount > 2 ? 3 : itemCount;
+  }
+}
+
+Widget _buildEnhancedEquipmentCard(Equipment equipment) {
+  final rarityColor = _getRarityColor(equipment.rarity);
+
+  return Container(
+    decoration: BoxDecoration(
+      borderRadius: BorderRadius.circular(10),
+      color: rarityColor.withOpacity(0.1),
+      border: Border.all(
+        color: rarityColor,
+        width: 1.5,
+      ),
+      boxShadow: [
+        BoxShadow(
+          color: rarityColor.withOpacity(0.3),
+          blurRadius: 8,
+          spreadRadius: 1,
+        ),
+      ],
+    ),
+    child: Column(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Rarity indicator
+        Container(
+          width: 90,
+          padding: EdgeInsets.symmetric(vertical: 4),
+          decoration: BoxDecoration(
+            color: rarityColor.withOpacity(0.3),
+            borderRadius: BorderRadius.vertical(top: Radius.circular(8)),
+          ),
+          child: Text(
+            equipment.rarity.toString().split('.').last.toUpperCase(),
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'GameFont',
+              fontSize: 12,
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+
+        // Equipment icon
+        Expanded(
+          child: Padding(
+            padding: EdgeInsets.all(8),
+            child: Icon(
+              _getEquipmentIcon(equipment.slot),
+              size: 40,
+              color: rarityColor,
+            ),
+          ),
+        ),
+
+        // Equipment name
+        Padding(
+          padding: EdgeInsets.symmetric(horizontal: 8),
+          child: Text(
+            equipment.name,
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              fontFamily: 'GameFont',
+              fontSize: 12,
+              color: Colors.white,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
+          ),
+        ),
+      ],
+    ),
   );
 }
 
@@ -412,48 +806,6 @@ Widget _buildGirlCard(GirlFarmer girl) {
         textAlign: TextAlign.center,
         style: TextStyle(
             fontFamily: 'GameFont', color: Colors.white, fontSize: 12),
-      ),
-    ],
-  );
-}
-
-Widget _buildEquipmentCard(Equipment equipment) {
-  return Column(
-    children: [
-      Container(
-        width: 90,
-        height: 90,
-        padding: EdgeInsets.all(8),
-        decoration: BoxDecoration(
-          color: _getRarityColor(equipment.rarity).withOpacity(0.2),
-          borderRadius: BorderRadius.circular(8),
-          border: Border.all(
-            color: _getRarityColor(equipment.rarity),
-            width: 2,
-          ),
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Icon(
-              _getEquipmentIcon(equipment.slot),
-              size: 30,
-              color: _getRarityColor(equipment.rarity),
-            ),
-            SizedBox(height: 4),
-            Text(
-              equipment.name,
-              textAlign: TextAlign.center,
-              style: TextStyle(
-                fontFamily: 'GameFont',
-                fontSize: 10,
-                color: Colors.white,
-              ),
-              maxLines: 2,
-              overflow: TextOverflow.ellipsis,
-            ),
-          ],
-        ),
       ),
     ],
   );

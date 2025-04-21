@@ -1,5 +1,8 @@
 import 'package:hive/hive.dart';
 import 'package:collection/collection.dart';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
+import 'dart:math';
 
 import '../data/ability_data.dart';
 import '../data/equipment_data.dart';
@@ -9,7 +12,6 @@ import 'ability_model.dart';
 import 'equipment_model.dart';
 import 'girl_farmer_model.dart';
 import 'potion_model.dart';
-import 'dart:math';
 
 part 'shop_model.g.dart';
 
@@ -37,6 +39,23 @@ class ShopModel {
   int get refreshCountToday => _refreshCountToday;
   DateTime get lastDailyReset => _lastDailyReset;
 
+  bool needsDailyReset(DateTime now) {
+    // Convert to Singapore timezone
+    final singapore = tz.getLocation('Asia/Singapore');
+    final nowSgt = tz.TZDateTime.from(now, singapore);
+    final lastResetSgt = tz.TZDateTime.from(_lastDailyReset, singapore);
+
+    // Reset if:
+    // 1. It's a different day, OR
+    // 2. It's the same day but last reset was before 8:00 AM and now is after 8:00 AM
+    return !isSameDay(nowSgt, lastResetSgt) ||
+        (lastResetSgt.hour < 8 && nowSgt.hour >= 8);
+  }
+
+  set lastDailyReset(DateTime value) => _lastDailyReset = value;
+  set refreshCountToday(int value) => _refreshCountToday = value;
+  set lastRefreshTime(DateTime value) => _lastRefreshTime = value;
+
   ShopModel({
     required this.categories,
     Map<String, double>? currencyValues,
@@ -59,9 +78,12 @@ class ShopModel {
 
   bool get canRefresh {
     final now = DateTime.now();
-    if (!isSameDay(now, _lastDailyReset)) {
+    final singapore = tz.getLocation('Asia/Singapore');
+    final nowSgt = tz.TZDateTime.from(now, singapore);
+
+    if (needsDailyReset(nowSgt)) {
       _refreshCountToday = 0;
-      _lastDailyReset = now;
+      _lastDailyReset = nowSgt;
       return true;
     }
     return _refreshCountToday < 3;

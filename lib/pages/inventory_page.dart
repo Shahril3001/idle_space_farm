@@ -96,17 +96,36 @@ class _InventoryPageState extends State<InventoryPage>
   Widget _buildBackButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          minimumSize: Size(double.infinity, 50),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: Text("Back",
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
+          child: Text(
+            "Back",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
+          ),
+        ),
       ),
     );
   }

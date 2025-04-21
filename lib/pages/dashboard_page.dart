@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'daily_reward_page.dart';
 import 'inventory_page.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
@@ -33,7 +34,7 @@ class DashboardPage extends StatelessWidget {
             Align(
               alignment: Alignment.bottomCenter,
               child: Padding(
-                padding: EdgeInsets.only(bottom: 24),
+                padding: EdgeInsets.only(bottom: 10),
                 child: _buildBottomButtonRow(context),
               ),
             ),
@@ -119,14 +120,38 @@ class DashboardPage extends StatelessWidget {
 
   Widget _buildCenterButton(BuildContext context) {
     return Container(
-      width: 180, // Wider than other buttons
-      height: 80, // Same height as others
+      width: 200,
+      height: 62,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        gradient: LinearGradient(
+          begin: Alignment.topCenter,
+          end: Alignment.bottomCenter,
+          colors: [
+            const Color(0xFFA12626), //Top color
+            const Color(0xFF380A0A), // Dark red at bottom
+          ],
+        ),
+        border: Border.all(
+          color: Color(0xFF742C2C), // Gold border color
+          width: 1, // Border width
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            spreadRadius: 1,
+            blurRadius: 4,
+            offset: Offset(0, 2),
+          ),
+        ],
+      ),
       child: ElevatedButton(
         onPressed: () {
           _showAdventurePopup(context);
         },
         style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.black.withOpacity(0.8),
+          backgroundColor: Colors.transparent, // Make button transparent
+          shadowColor: Colors.transparent, // Remove default shadow
           padding: EdgeInsets.symmetric(horizontal: 12),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(10),
@@ -146,7 +171,8 @@ class DashboardPage extends StatelessWidget {
               'BATTLE',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 17,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
               ),
             ),
           ],
@@ -159,7 +185,7 @@ class DashboardPage extends StatelessWidget {
     return Align(
       alignment: Alignment.topCenter,
       child: Padding(
-        padding: const EdgeInsets.only(top: 10.0),
+        padding: const EdgeInsets.only(top: 5.0),
         child: Row(
           mainAxisAlignment:
               MainAxisAlignment.spaceEvenly, // Evenly spaced buttons
@@ -170,7 +196,27 @@ class DashboardPage extends StatelessWidget {
             }),
             _buildIconButton('assets/images/icons/nav-reward.png', 'Reward',
                 () {
-              print('Dungeon pressed');
+              Navigator.push(
+                context,
+                PageRouteBuilder(
+                  transitionDuration: Duration(milliseconds: 500),
+                  pageBuilder: (context, animation, secondaryAnimation) =>
+                      DailyRewardPage(),
+                  transitionsBuilder:
+                      (context, animation, secondaryAnimation, child) {
+                    return FadeTransition(
+                      opacity: animation,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: Offset(0, 0.5),
+                          end: Offset.zero,
+                        ).animate(animation),
+                        child: child,
+                      ),
+                    );
+                  },
+                ),
+              );
             }),
             _buildIconButton('assets/images/icons/nav-codex.png', 'Codex', () {
               _showCodexPopup(context);
@@ -192,8 +238,8 @@ class DashboardPage extends StatelessWidget {
       style: ElevatedButton.styleFrom(
         backgroundColor: Colors.black.withOpacity(0.8),
         padding: EdgeInsets.zero,
-        minimumSize: Size(80, 80),
-        fixedSize: Size(80, 80),
+        minimumSize: Size(65, 65),
+        fixedSize: Size(65, 65),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
         ),
@@ -204,10 +250,9 @@ class DashboardPage extends StatelessWidget {
         children: [
           Image(
             image: ImageCacheManager.getImage(iconPath),
-            width: 30,
-            height: 30,
+            width: 35,
+            height: 35,
           ),
-          SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
@@ -236,7 +281,10 @@ class DashboardPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey),
+              border: Border.all(
+                color: Colors.grey,
+                width: 2.0,
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -493,7 +541,10 @@ class DashboardPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey),
+              border: Border.all(
+                color: Colors.grey,
+                width: 2.0,
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -631,7 +682,10 @@ class DashboardPage extends StatelessWidget {
             decoration: BoxDecoration(
               color: Colors.black.withOpacity(0.8),
               borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.grey),
+              border: Border.all(
+                color: Colors.grey,
+                width: 2.0,
+              ),
             ),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -660,7 +714,7 @@ class DashboardPage extends StatelessWidget {
                   children: [
                     _buildAdventureButtonRow(
                       iconPath: 'assets/images/icons/battle-dungeon.png',
-                      label: 'Dungeon Invansion',
+                      label: 'Dungeon Invasion',
                       onPressed: () => _navigateTo(context, MapScreen()),
                     ),
                     _buildAdventureButtonRow(

@@ -146,17 +146,34 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        // ignore: sort_child_properties_last
-        child: Text("Back",
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          padding: EdgeInsets.symmetric(vertical: 10),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          // ignore: sort_child_properties_last
+          child: Text("Back",
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
         ),
       ),
     );
@@ -166,21 +183,38 @@ class _GirlCodexPageState extends State<GirlCodexPage> {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      child: ElevatedButton(
-        onPressed: () {
-          setState(() {
-            _selectedGirl = null;
-          });
-        },
-        // ignore: sort_child_properties_last
-        child: Text("Back",
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          padding: EdgeInsets.symmetric(vertical: 10),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ElevatedButton(
+          onPressed: () {
+            setState(() {
+              _selectedGirl = null;
+            });
+          },
+          // ignore: sort_child_properties_last
+          child: Text("Back",
+              style: TextStyle(
+                  color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
         ),
       ),
     );

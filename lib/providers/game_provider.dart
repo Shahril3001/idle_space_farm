@@ -1,8 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:hive/hive.dart';
+import 'dart:async';
+import 'dart:math';
+import 'package:timezone/timezone.dart' as tz;
+import 'package:timezone/data/latest.dart' as tz;
+
 import '../data/ability_data.dart';
 import '../data/potion_data.dart';
 import '../models/ability_model.dart';
+import '../models/daily_reward_model.dart';
 import '../models/floor_model.dart';
 import '../models/potion_model.dart';
 import '../models/resource_model.dart';
@@ -11,16 +17,17 @@ import '../models/girl_farmer_model.dart';
 import '../models/equipment_model.dart';
 import '../models/shop_model.dart';
 import '../repositories/ability_repository.dart';
+import '../repositories/dailyreward_repository.dart';
 import '../repositories/farm_repository.dart';
-import '../repositories/potion_model.dart';
+import '../repositories/potion_repository.dart';
 import '../repositories/resource_repository.dart';
 import '../repositories/equipment_repository.dart';
 import '../repositories/girl_repository.dart';
-import 'dart:async';
-import 'dart:math';
-import '../data/girl_data.dart'; // Import the girlsData list
+import '../data/girl_data.dart';
 import '../data/equipment_data.dart';
 import '../repositories/shop_repository.dart';
+
+import 'daily_reward_provider.dart';
 
 class GameProvider with ChangeNotifier {
   final ResourceRepository _resourceRepository;
@@ -31,11 +38,15 @@ class GameProvider with ChangeNotifier {
   final ShopRepository _shopRepository;
   final PotionRepository _potionRepository;
 
+  late DailyRewardProvider _dailyRewardProvider;
+  bool _isDailyRewardLoading = false;
+
   bool _isInitialized = false;
   DateTime? _lastUpdateTime;
   Timer? _resourceTimer;
 
   Timer? _dailyCheckTimer;
+  static late tz.Location _singaporeLocation;
 
   ShopModel? _shop;
   bool _isShopLoading = false;
@@ -51,6 +62,7 @@ class GameProvider with ChangeNotifier {
     required AbilityRepository abilityRepository,
     required ShopRepository shopRepository,
     required PotionRepository potionRepository,
+    required DailyRewardRepository dailyRewardRepository,
   })  : _resourceRepository = resourceRepository,
         _farmRepository = farmRepository,
         _equipmentRepository = equipmentRepository,
@@ -58,13 +70,108 @@ class GameProvider with ChangeNotifier {
         _abilityRepository = abilityRepository,
         _shopRepository = shopRepository,
         _potionRepository = potionRepository {
+    _dailyRewardProvider = DailyRewardProvider(
+      rewardRepo: dailyRewardRepository,
+      resourceRepo: _resourceRepository,
+      equipmentRepo: _equipmentRepository,
+      potionRepo: _potionRepository,
+    );
+
+    _initializeDailyRewards();
     _initializeGame();
+    _initializeTimeZones();
     onAppStart();
   }
 
   Future<void> _initializeGame() async {
     _isInitialized = true;
     notifyListeners();
+  }
+
+  // Daily reward
+  Future<void> _initializeDailyRewards() async {
+    _isDailyRewardLoading = true;
+    notifyListeners();
+
+    await _dailyRewardProvider.initializeDailyRewards();
+
+    _isDailyRewardLoading = false;
+    notifyListeners();
+  }
+
+  Future<bool> canClaimDailyReward() => _dailyRewardProvider.canClaimReward();
+  Future<int> getDailyRewardStreak() => _dailyRewardProvider.getCurrentStreak();
+  Future<DailyReward?> getTodaysDailyReward() async {
+    final canClaim = await canClaimDailyReward();
+    final streak = await getDailyRewardStreak();
+    final allRewards = await getAllDailyRewards();
+
+    // If can still claim today, return current reward
+    if (canClaim) {
+      return allRewards.firstWhere(
+        (r) => r.day == (streak == 7 ? 1 : streak + 1),
+        orElse: () => allRewards.firstWhere((r) => r.day == 1),
+      );
+    }
+
+    // If cannot claim, return next reward in sequence
+    return allRewards.firstWhere(
+      (r) => r.day == (streak == 7 ? 1 : streak + 1),
+      orElse: () => allRewards.firstWhere((r) => r.day == 1),
+    );
+  }
+
+  Future<List<DailyReward>> getAllDailyRewards() =>
+      _dailyRewardProvider.getAllRewards();
+
+  Future<bool> claimDailyReward() async {
+    final success = await _dailyRewardProvider.claimReward();
+    if (success) {
+      notifyListeners();
+    }
+    return success;
+  }
+
+  bool get isDailyRewardLoading => _isDailyRewardLoading;
+
+  // For debugging
+  Future<void> resetDailyRewards() async {
+    await _dailyRewardProvider.resetRewards();
+    notifyListeners();
+  }
+
+  Future<void> _initializeTimeZones() async {
+    tz.initializeTimeZones();
+    _singaporeLocation = tz.getLocation('Asia/Singapore');
+  }
+
+// Helper methods for time handling
+  tz.TZDateTime get _nowSgt => tz.TZDateTime.now(_singaporeLocation);
+
+  tz.TZDateTime _getTodayAt8AM() {
+    final now = _nowSgt;
+    return tz.TZDateTime(
+      _singaporeLocation,
+      now.year,
+      now.month,
+      now.day,
+      8, // 8 AM
+    );
+  }
+
+  tz.TZDateTime _getYesterdayAt8AM() {
+    final now = _nowSgt;
+    return tz.TZDateTime(
+      _singaporeLocation,
+      now.year,
+      now.month,
+      now.day - 1,
+      8,
+    );
+  }
+
+  bool _isAfter8AM(tz.TZDateTime time) {
+    return time.hour >= 8;
   }
 
   bool get isShopLoading => _isShopLoading;
@@ -89,6 +196,12 @@ class GameProvider with ChangeNotifier {
       if (_shop == null) {
         debugPrint('No shop found in repository, creating default shop...');
         _shop = ShopModel(categories: createDefaultShopCategories());
+        _shop = ShopModel(
+          categories: createDefaultShopCategories(),
+          lastRefreshTime: _nowSgt,
+          lastDailyReset: _getTodayAt8AM(),
+          refreshCountToday: 0,
+        );
         await _shopRepository.saveShop(_shop!);
         debugPrint('Default shop created and saved');
       } else {
@@ -98,12 +211,19 @@ class GameProvider with ChangeNotifier {
           debugPrint(
               'Category "${category.name}" has ${category.items.length} items');
         });
+        await _checkAndPerformDailyReset();
       }
     } catch (e, stackTrace) {
       debugPrint('Error initializing shop: $e');
       debugPrint('Stack trace: $stackTrace');
       debugPrint('Falling back to default shop');
       _shop = ShopModel(categories: createDefaultShopCategories());
+      _shop = ShopModel(
+        categories: createDefaultShopCategories(),
+        lastRefreshTime: _nowSgt,
+        lastDailyReset: _getTodayAt8AM(),
+        refreshCountToday: 0,
+      );
     } finally {
       _isShopLoading = false;
       notifyListeners();
@@ -111,11 +231,39 @@ class GameProvider with ChangeNotifier {
     }
   }
 
+  Future<void> _checkAndPerformDailyReset() async {
+    final nowSgt = _nowSgt;
+    final lastReset =
+        tz.TZDateTime.from(_shop!.lastDailyReset, _singaporeLocation);
+
+    final needsReset = !_isSameDay(nowSgt, lastReset) ||
+        (lastReset.hour < 8 && nowSgt.hour >= 8);
+
+    if (needsReset) {
+      await _performDailyReset();
+    }
+  }
+
+  bool _isSameDay(tz.TZDateTime a, DateTime b) {
+    final bSgt = tz.TZDateTime.from(b, _singaporeLocation);
+    return a.year == bSgt.year && a.month == bSgt.month && a.day == bSgt.day;
+  }
+
+  Future<void> _performDailyReset() async {
+    final nowSgt = _nowSgt;
+    _shop!.refreshShop(createDefaultShopCategories());
+    _shop!.lastDailyReset =
+        _isAfter8AM(nowSgt) ? _getTodayAt8AM() : _getYesterdayAt8AM();
+    _shop!.refreshCountToday = 0;
+    await _shopRepository.saveShop(_shop!);
+    notifyListeners();
+  }
+
+  // Timer-based daily check
   void startDailyRefreshCheck() {
     _dailyCheckTimer?.cancel();
-    // Check every hour for daily reset
-    _dailyCheckTimer = Timer.periodic(Duration(hours: 1), (_) {
-      checkDailyReset();
+    _dailyCheckTimer = Timer.periodic(const Duration(days: 1), (_) {
+      _checkAndPerformDailyReset();
     });
   }
 
@@ -126,6 +274,7 @@ class GameProvider with ChangeNotifier {
     if (!_shop!.isSameDay(now, _shop!.lastDailyReset)) {
       _shop!.refreshShop(createDefaultShopCategories());
       _shopRepository.saveShop(_shop!);
+      _checkAndPerformDailyReset();
       notifyListeners();
     }
   }
@@ -144,7 +293,12 @@ class GameProvider with ChangeNotifier {
   Future<void> manualRefreshShop() async {
     if (_shop == null || !_shop!.canRefresh) return;
 
+    await _checkAndPerformDailyReset();
+
     _shop!.refreshShop(createDefaultShopCategories());
+    _shop!.refreshCountToday = _shop!.refreshCountToday + 1;
+    _shop!.lastRefreshTime = _nowSgt;
+
     await _shopRepository.saveShop(_shop!);
     notifyListeners();
   }
@@ -2165,11 +2319,11 @@ class GameProvider with ChangeNotifier {
 
   // Reset All Game Data
   void resetAllGameData() {
-    resetResources();
     _farmRepository.clearAllFarms();
     _initializeFarms();
     _girlRepository.clearAllGirls();
     _equipmentRepository.clearAllEquipment();
+    resetResources();
     notifyListeners();
   }
 

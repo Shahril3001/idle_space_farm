@@ -33,7 +33,7 @@ class FarmPage extends StatelessWidget {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: ImageCacheManager.getImage('assets/images/ui/mine.png'),
+              image: ImageCacheManager.getImage('assets/images/ui/farm-bg.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -150,25 +150,45 @@ class FarmPage extends StatelessWidget {
           shape:
               RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
           margin: const EdgeInsets.all(8),
-          child: Padding(
-            padding: const EdgeInsets.all(5.0),
+          child: SizedBox(
+            // Using SizedBox instead of Column for tighter layout
+            width: double.infinity,
+            height: 160, // Ensures full width
             child: Column(
+              crossAxisAlignment:
+                  CrossAxisAlignment.center, // Tightly fits content
               children: [
-                CircleAvatar(
-                  backgroundImage: AssetImage(girlFarmer.image),
-                  radius: 50,
-                ),
-                SizedBox(height: 2),
-                Text(
-                  girlFarmer.name,
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    color:
-                        Colors.white, // Ensures text is visible on colored bg
+                // 1. True edge-to-edge image
+                ClipRRect(
+                  borderRadius: const BorderRadius.vertical(
+                    top: Radius.circular(10),
+                  ),
+                  child: Image.asset(
+                    girlFarmer.imageFace,
+                    height: 110,
+                    fit: BoxFit.cover, // Fills width
                   ),
                 ),
-                SizedBox(height: 5),
+                Column(
+                  children: [
+                    Text(
+                      girlFarmer.name,
+                      textAlign: TextAlign.center,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            color: Colors.white,
+                            fontFamily: 'GameFont',
+                          ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    Text(
+                      girlFarmer.race,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                            color: Colors.white70,
+                          ),
+                    ),
+                  ],
+                ),
               ],
             ),
           ),
@@ -187,7 +207,8 @@ class FarmPage extends StatelessWidget {
           child: Column(
             children: [
               CircleAvatar(
-                  backgroundImage: NetworkImage(girlFarmer.image), radius: 25),
+                  backgroundImage: NetworkImage(girlFarmer.imageFace),
+                  radius: 25),
               SizedBox(height: 8),
               Text(girlFarmer.name,
                   style: TextStyle(fontWeight: FontWeight.bold)),
@@ -223,8 +244,8 @@ class FarmPage extends StatelessWidget {
                         TextStyle(fontSize: 18, fontWeight: FontWeight.bold)),
                 Center(
                   child: CircleAvatar(
-                    backgroundImage: AssetImage(assignedGirl?.image ??
-                        "assets/images/girls/noimage.png"),
+                    backgroundImage: AssetImage(assignedGirl?.imageFace ??
+                        "assets/images/icons/page-noimage.png"),
                     radius: 50,
                   ),
                 ),
@@ -347,7 +368,7 @@ class FarmPage extends StatelessWidget {
             children: [
               Center(
                 child: CircleAvatar(
-                  backgroundImage: AssetImage(girlFarmer.image),
+                  backgroundImage: AssetImage(girlFarmer.imageFace),
                   radius: 60,
                 ),
               ),
@@ -375,17 +396,35 @@ class FarmPage extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        // ignore: sort_child_properties_last
-        child: Text("Back",
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
+          child: Text(
+            "Back",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          padding: EdgeInsets.symmetric(vertical: 10),
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
+          ),
         ),
       ),
     );

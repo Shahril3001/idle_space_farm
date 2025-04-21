@@ -429,21 +429,21 @@ final List<Enemy> bossEnemies = [
   Enemy(
     id: "boss_1",
     name: "Goblin King",
-    level: 5,
-    attackPoints: 25,
-    defensePoints: 18,
-    agilityPoints: 12,
-    hp: 300,
-    maxHp: 300,
-    mp: 80,
-    sp: 50,
+    level: 20,
+    attackPoints: 30,
+    defensePoints: 20,
+    agilityPoints: 20,
+    hp: 500,
+    maxHp: 500,
+    mp: 100,
+    sp: 100,
     imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
         abilitiesID: "boss_ability_001",
         name: "Royal Cleave",
         description: "Powerful attack that hits all enemies",
-        attackBonus: 20,
+        attackBonus: 100,
         hpBonus: 25, // Damage
         mpCost: 15,
         cooldown: 4,
@@ -456,8 +456,8 @@ final List<Enemy> bossEnemies = [
         abilitiesID: "boss_ability_002",
         name: "Battle Frenzy",
         description: "Increases attack and agility",
-        attackBonus: 10,
-        agilityBonus: 8,
+        attackBonus: 15,
+        agilityBonus: 10,
         mpCost: 15,
         cooldown: 5,
         type: AbilityType.buff,
@@ -476,13 +476,13 @@ final List<Enemy> bossEnemies = [
     id: "boss_2",
     name: "Lich",
     level: 10,
-    attackPoints: 30,
-    defensePoints: 15,
-    agilityPoints: 10,
-    hp: 400,
-    maxHp: 400,
-    mp: 150,
-    sp: 80,
+    attackPoints: 40,
+    defensePoints: 20,
+    agilityPoints: 25,
+    hp: 600,
+    maxHp: 600,
+    mp: 200,
+    sp: 100,
     imageE: 'assets/images/enemies/pawn-goblin.png',
     abilities: [
       AbilitiesModel(
@@ -503,7 +503,7 @@ final List<Enemy> bossEnemies = [
         name: "Life Drain",
         description: "Steals HP from enemy",
         attackBonus: 15,
-        hpBonus: -30, // Damage (negative for heal calculation)
+        hpBonus: -50, // Damage (negative for heal calculation)
         mpCost: 25,
         cooldown: 5,
         type: AbilityType.heal, // Will be handled specially in applyEffect
@@ -542,7 +542,7 @@ List<Enemy> generateEnemies(
 
   for (int i = 0; i < _getEnemyCount(difficulty); i++) {
     // 30% chance to spawn a boss if available, otherwise regular enemy
-    final bool spawnBoss = bossEnemies.isNotEmpty && random.nextDouble() < 0.3;
+    final bool spawnBoss = bossEnemies.isNotEmpty && random.nextDouble() < 0.9;
     final Enemy baseEnemy = spawnBoss
         ? bossEnemies[random.nextInt(bossEnemies.length)]
         : regularEnemies[random.nextInt(regularEnemies.length)];

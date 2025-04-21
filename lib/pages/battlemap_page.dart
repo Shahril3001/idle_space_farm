@@ -33,6 +33,15 @@ class MapScreen extends StatelessWidget {
       'color': Colors.yellow,
     },
     {
+      'name': 'Sunken Ruin',
+      'image': 'assets/images/dungeons/dungeon005.png',
+      'level': '10-15',
+      'monstertype': 'Sunken',
+      'region': 'Sunken',
+      'difficulty': 'Hard',
+      'color': Colors.blueGrey,
+    },
+    {
       'name': 'Volcanic Core',
       'image': 'assets/images/dungeons/dungeon003.png',
       'level': '10-15',
@@ -42,22 +51,13 @@ class MapScreen extends StatelessWidget {
       'color': Colors.red,
     },
     {
-      'name': 'Abyssal Depths',
-      'image': 'assets/images/dungeons/dungeon004.png',
-      'level': '15-20',
-      'monstertype': 'Abyssal',
-      'region': 'Abyssal',
-      'difficulty': 'Very Hard',
-      'color': Colors.purple,
-    },
-    {
       'name': 'Eternal Void',
-      'image': 'assets/images/dungeons/dungeon005.png',
+      'image': 'assets/images/dungeons/dungeon004.png',
       'level': '15-20',
       'monstertype': 'Void',
       'region': 'Void',
       'difficulty': 'Very Hard',
-      'color': Colors.blueGrey,
+      'color': Colors.purple,
     },
   ];
 
@@ -74,7 +74,8 @@ class MapScreen extends StatelessWidget {
         body: Container(
           decoration: BoxDecoration(
             image: DecorationImage(
-              image: ImageCacheManager.getImage('assets/images/ui/mine.png'),
+              image:
+                  ImageCacheManager.getImage('assets/images/ui/battle-bg.png'),
               fit: BoxFit.cover,
             ),
           ),
@@ -272,12 +273,22 @@ class MapScreen extends StatelessWidget {
               child: SingleChildScrollView(
                 child: Column(
                   children: [
-                    _buildInfoRow(Icons.location_on, "Region: $region"),
-                    _buildInfoRow(Icons.stairs, "Levels: ${dungeon['level']}"),
-                    _buildInfoRow(Icons.star,
-                        "Base Difficulty: ${dungeon['difficulty']}"),
-                    _buildInfoRow(Icons.category,
-                        "Monster Type: ${dungeon['monstertype']}"),
+                    _buildInfoRow(
+                      Image.asset('assets/images/icons/battle-region.png'),
+                      "Region: $region",
+                    ),
+                    _buildInfoRow(
+                      Image.asset('assets/images/icons/battle-level.png'),
+                      "Levels: ${dungeon['level']}",
+                    ),
+                    _buildInfoRow(
+                      Image.asset('assets/images/icons/battle-difficulty.png'),
+                      "Base Difficulty: ${dungeon['difficulty']}",
+                    ),
+                    _buildInfoRow(
+                      Image.asset('assets/images/icons/battle-monstertype.png'),
+                      "Monster Type: ${dungeon['monstertype']}",
+                    ),
 
                     SizedBox(height: 20),
                     Text(
@@ -318,12 +329,12 @@ class MapScreen extends StatelessWidget {
     );
   }
 
-  Widget _buildInfoRow(IconData icon, String text) {
+  Widget _buildInfoRow(Widget imageWidget, String text) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 8.0),
       child: Row(
         children: [
-          Icon(icon, color: Colors.deepPurple.shade200),
+          SizedBox(width: 30, height: 30, child: imageWidget),
           SizedBox(width: 10),
           Text(
             text,
@@ -338,7 +349,7 @@ class MapScreen extends StatelessWidget {
       Color color, int level, String region) {
     return ElevatedButton(
       style: ElevatedButton.styleFrom(
-        backgroundColor: color.withOpacity(0.7),
+        backgroundColor: color.withOpacity(0.8),
         foregroundColor: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(10),
@@ -413,16 +424,34 @@ class MapScreen extends StatelessWidget {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        child: Text("Back",
+      child: Container(
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
+        ),
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          child: Text(
+            "Back",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Colors.redAccent,
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          padding: EdgeInsets.symmetric(vertical: 10),
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
+          ),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
         ),
       ),
     );

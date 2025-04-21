@@ -296,10 +296,10 @@ class _EquipmentTabState extends State<EquipmentTab> {
                     setState(() => _showAssignedOnly = value ?? false),
                 activeColor: Color(0xFFCAA04D),
               ),
-              Text('Show Assigned Only', style: TextStyle(color: Colors.white)),
+              Text('Show Assigned Only', style: TextStyle(color: Colors.black)),
               Spacer(),
               IconButton(
-                icon: Icon(Icons.refresh, color: Colors.white),
+                icon: Icon(Icons.refresh, color: Colors.black),
                 onPressed: () {
                   setState(() {
                     _filterQuery = '';

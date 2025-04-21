@@ -38,7 +38,7 @@ class TransactionExchangePage extends StatelessWidget {
                         "Select Exchange Option",
                         style: TextStyle(
                           fontWeight: FontWeight.bold,
-                          fontSize: 16,
+                          fontSize: 20,
                           color: Colors.white,
                         ),
                       ),
@@ -151,7 +151,7 @@ class TransactionExchangePage extends StatelessWidget {
                 Text(
                   exchange["fromAmount"].toString(),
                   style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),
@@ -160,14 +160,14 @@ class TransactionExchangePage extends StatelessWidget {
                 SizedBox(width: 8),
                 Image.asset(
                   exchange["toIcon"], // Use image asset
-                  width: 24, // Adjust size as needed
-                  height: 24,
+                  width: 20, // Adjust size as needed
+                  height: 20,
                 ),
                 SizedBox(width: 8),
                 Text(
                   exchange["toAmount"].toString(),
                   style: TextStyle(
-                      fontSize: 16,
+                      fontSize: 14,
                       color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),

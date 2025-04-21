@@ -31,16 +31,25 @@ class _ShopScreenState extends State<ShopScreen>
   }
 
   Future<void> _initializeShop() async {
-    final gameProvider = Provider.of<GameProvider>(context, listen: false);
-    if (gameProvider.shopCategories.isEmpty) {
-      await gameProvider.initializeShop();
-    }
-    // Initialize tab controller after shop is loaded
-    if (gameProvider.shopCategories.isNotEmpty) {
-      _tabController = TabController(
-        length: gameProvider.shopCategories.length,
-        vsync: this,
-      );
+    try {
+      final gameProvider = Provider.of<GameProvider>(context, listen: false);
+      await gameProvider.initializeShop(); // This now handles timezone init
+
+      if (gameProvider.shopCategories.isNotEmpty) {
+        _tabController = TabController(
+          length: gameProvider.shopCategories.length,
+          vsync: this,
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Error initializing shop: $e'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
     }
   }
 
@@ -73,12 +82,23 @@ class _ShopScreenState extends State<ShopScreen>
       appBar: AppBar(
         title: const Text('Shop'),
         centerTitle: true,
+        automaticallyImplyLeading: false, // This hides the back button
         actions: [
-          IconButton(
-            icon: const Icon(Icons.refresh),
-            tooltip:
-                'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)',
-            onPressed: () => _showRefreshDialog(context, gameProvider),
+          Container(
+            margin: EdgeInsets.only(right: 8), // Add some spacing from the edge
+
+            child: IconButton(
+              icon: Image.asset(
+                'assets/images/icons/shop-refresh.png',
+                width: 35, // Adjust width as needed
+                height: 35, // Adjust height as needed
+              ),
+              color: Colors.blueGrey[800], // Icon color (fallback)
+              tooltip:
+                  'Refresh (${3 - (gameProvider.shop?.refreshCountToday ?? 0)} left today)\n'
+                  'Next reset: 8:00 AM SGT',
+              onPressed: () => _showRefreshDialog(context, gameProvider),
+            ),
           ),
         ],
         bottom: PreferredSize(
@@ -147,6 +167,7 @@ class _ShopScreenState extends State<ShopScreen>
   // ... (keep all other existing methods the same)
   Future<void> _showRefreshDialog(
       BuildContext context, GameProvider gameProvider) async {
+    // Get remaining refreshes (handles null case)
     final refreshesLeft = 3 - (gameProvider.shop?.refreshCountToday ?? 0);
 
     if (refreshesLeft <= 0) {
@@ -154,7 +175,15 @@ class _ShopScreenState extends State<ShopScreen>
         context: context,
         builder: (context) => _buildBasicDialog(
           title: "No Refreshes Left",
-          content: "You've used all 3 refreshes for today.",
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                  "You've used all 3 refreshes today.\n"
+                  "New refreshes available at 8:00 AM SGT",
+                  style: TextStyle(fontSize: 11, color: Colors.white)),
+            ],
+          ),
           backgroundColor: Colors.grey[900]!,
           borderColor: Colors.redAccent,
         ),
@@ -166,8 +195,21 @@ class _ShopScreenState extends State<ShopScreen>
       context: context,
       builder: (context) => _buildBasicDialog(
         title: "Refresh Shop?",
-        content:
-            "You have $refreshesLeft refresh${refreshesLeft == 1 ? '' : 'es'} left today.",
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+                "You have $refreshesLeft refresh${refreshesLeft == 1 ? '' : 'es'} left today.",
+                style: TextStyle(fontSize: 12, color: Colors.white)),
+            SizedBox(height: 8),
+            Text("Next reset: 8:00 AM SGT",
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                )),
+          ],
+        ),
         backgroundColor: Colors.grey[850]!,
         borderColor: Colors.blueAccent,
         showActions: true,
@@ -176,7 +218,38 @@ class _ShopScreenState extends State<ShopScreen>
     );
 
     if (shouldRefresh == true) {
-      gameProvider.manualRefreshShop();
+      try {
+        await gameProvider.manualRefreshShop();
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Shop refreshed successfully!",
+                      style: TextStyle(fontSize: 12, color: Colors.white)),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text("Failed to refresh shop: $e",
+                      style: TextStyle(fontSize: 12, color: Colors.white)),
+                ],
+              ),
+              duration: Duration(seconds: 2),
+            ),
+          );
+        }
+      }
     }
   }
 
@@ -268,10 +341,9 @@ class _ShopScreenState extends State<ShopScreen>
               ],
             ),
             if (isPurchased) _buildStatusBadge('P', Colors.green),
-            if (!canAfford && !isPurchased)
-              _buildStatusBadge('Can\'t Afford', Colors.red),
+            if (!canAfford && !isPurchased) _buildStatusBadge('CA', Colors.red),
             if (!hasStock && !isPurchased)
-              _buildStatusBadge('Out of Stock', Colors.orange),
+              _buildStatusBadge('OS', Colors.orange),
             if (isGirlItem && girl != null)
               Positioned(
                 top: 8,
@@ -305,8 +377,14 @@ class _ShopScreenState extends State<ShopScreen>
       context: context,
       builder: (context) => _buildBasicDialog(
         title: "Confirm Purchase",
-        content:
-            "Are you sure you want to buy ${item.name} for ${_formatPrices(item.prices)}?",
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Text(
+                "Are you sure you want to buy ${item.name} for ${_formatPrices(item.prices)}?",
+                style: TextStyle(fontSize: 12, color: Colors.white)),
+          ],
+        ),
         backgroundColor: Colors.grey[850]!,
         borderColor: Colors.blueAccent,
         showActions: true,
@@ -337,7 +415,8 @@ class _ShopScreenState extends State<ShopScreen>
             content: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                const Text("How many would you like to purchase?"),
+                const Text("How many would you like to purchase?",
+                    style: TextStyle(fontSize: 12, color: Colors.white)),
                 const SizedBox(height: 16),
                 Row(
                   children: [
@@ -368,7 +447,12 @@ class _ShopScreenState extends State<ShopScreen>
                 ),
                 Text('$quantity', style: const TextStyle(fontSize: 24)),
                 const SizedBox(height: 8),
-                Text('Total Cost:'),
+                Text('Total Cost:',
+                    style: TextStyle(
+                      fontSize: 13,
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                    )),
                 _buildPriceTags(item.prices
                     .map((key, value) => MapEntry(key, value * quantity))),
               ],
@@ -529,7 +613,7 @@ class _ShopScreenState extends State<ShopScreen>
         return Chip(
           label: Text('${entry.value} ${entry.key}'),
           backgroundColor: _getCurrencyColor(entry.key),
-          labelStyle: const TextStyle(fontSize: 12),
+          labelStyle: const TextStyle(fontSize: 11),
           visualDensity: VisualDensity.compact,
         );
       }).toList(),

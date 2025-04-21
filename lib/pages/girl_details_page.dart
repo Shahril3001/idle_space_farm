@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../main.dart';
@@ -30,7 +32,7 @@ class GirlDetailsPage extends StatelessWidget {
             child: Column(
               children: [
                 // Top section with portrait and name
-                _buildTopSection(),
+                _buildTopSection(context),
 
                 // Tab bar
                 Container(
@@ -112,12 +114,12 @@ class GirlDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopSection() {
+  Widget _buildTopSection(context) {
     return Container(
       margin: EdgeInsets.only(top: 20),
       child: Column(
         children: [
-          _buildCharacterPortrait(),
+          _buildCharacterPortrait(context),
           SizedBox(height: 10),
           _buildCharacterName(),
           SizedBox(height: 10),
@@ -225,25 +227,134 @@ class GirlDetailsPage extends StatelessWidget {
     );
   }
 
-  Widget _buildCharacterPortrait() {
+  Widget _buildCharacterPortrait(BuildContext context) {
+    // Add context parameter here
     return Hero(
       tag: 'girl-image-${girl.id}',
       child: Stack(
         alignment: Alignment.center,
         children: [
+          // Main Image with Shadow
           Container(
             width: 220,
             height: 300,
             decoration: BoxDecoration(
               borderRadius: BorderRadius.circular(20),
-              image: DecorationImage(
-                image: AssetImage(girl.image),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 1,
+                  spreadRadius: 2,
+                  offset: Offset(0, 5),
+                ),
+                BoxShadow(
+                  color: Colors.black.withOpacity(0.6),
+                  blurRadius: 0,
+                  spreadRadius: 2,
+                  offset: Offset(0, 5),
+                ),
+              ],
+            ),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                girl.image,
                 fit: BoxFit.cover,
+              ),
+            ),
+          ),
+
+          // View Full Button
+          Positioned(
+            bottom: 15,
+            left: 15,
+            child: InkWell(
+              onTap: () => _showFullImage(
+                  context, girl.image), // Now context is available
+              borderRadius: BorderRadius.circular(20),
+              child: Container(
+                padding: EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                  border: Border.all(
+                    color: Colors.white.withOpacity(0.5),
+                    width: 1,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.5),
+                      blurRadius: 5,
+                      offset: Offset(0, 2),
+                    ),
+                  ],
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.fullscreen, size: 20, color: Colors.white),
+                    SizedBox(width: 5),
+                    Text(
+                      'View',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 12,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ],
+                ),
               ),
             ),
           ),
         ],
       ),
+    );
+  }
+
+  void _showFullImage(BuildContext context, String imagePath) {
+    showDialog(
+      context: context,
+      barrierColor:
+          Colors.transparent, // Make the actual dialog barrier transparent
+      builder: (context) {
+        return GestureDetector(
+          onTap: () => Navigator.pop(context), // Close when tapping outside
+          child: Stack(
+            children: [
+              // Blurred background that's tappable
+              Positioned.fill(
+                child: BackdropFilter(
+                  filter: ImageFilter.blur(sigmaX: 8.0, sigmaY: 8.0),
+                  child: Container(
+                    color: Colors.black.withOpacity(0.3),
+                  ),
+                ),
+              ),
+
+              // Image content (won't close when tapping this)
+              Center(
+                child: GestureDetector(
+                  onTap:
+                      () {}, // Empty handler to prevent closing when tapping image
+                  child: Hero(
+                    tag: 'girl-image-${girl.id}',
+                    child: InteractiveViewer(
+                      panEnabled: true,
+                      minScale: 1,
+                      maxScale: 3,
+                      child: Image.asset(
+                        imagePath,
+                        fit: BoxFit.contain,
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 
@@ -1044,17 +1155,36 @@ class GirlDetailsPage extends StatelessWidget {
   Widget _buildBackButton(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.all(20.0),
-      child: ElevatedButton(
-        onPressed: () => Navigator.pop(context),
-        style: ElevatedButton.styleFrom(
-          backgroundColor: Color(0xFFCAA04D),
-          shape:
-              RoundedRectangleBorder(borderRadius: BorderRadius.circular(15)),
-          minimumSize: Size(double.infinity, 50),
+      child: Container(
+        width: double.infinity,
+        decoration: BoxDecoration(
+          gradient: LinearGradient(
+            begin: Alignment.topCenter,
+            end: Alignment.bottomCenter,
+            colors: [
+              const Color(0xFFA12626), //Top color
+              const Color(0xFF611818), // Dark red at bottom
+            ],
+          ),
+          borderRadius: BorderRadius.circular(15),
         ),
-        child: Text("Back",
+        child: ElevatedButton(
+          onPressed: () => Navigator.pop(context),
+          style: ElevatedButton.styleFrom(
+            backgroundColor:
+                Colors.transparent, // Make button background transparent
+            shadowColor: Colors.transparent, // Remove shadow
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(15),
+            ),
+            padding: EdgeInsets.symmetric(vertical: 10),
+          ),
+          child: Text(
+            "Back",
             style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16)),
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
+          ),
+        ),
       ),
     );
   }

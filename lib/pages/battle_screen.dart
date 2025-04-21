@@ -22,33 +22,39 @@ class BattleScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider(
-      create: (_) => BattleProvider(),
-      child: SafeArea(
-        child: Scaffold(
-          appBar: CustomAppBar(
-            title: region,
-            height: 40,
-            padding: EdgeInsets.zero,
-            margin: EdgeInsets.zero,
-          ),
-          body: Stack(
-            children: [
-              Container(
-                decoration: BoxDecoration(
-                  image: DecorationImage(
-                    image:
-                        ImageCacheManager.getImage('assets/images/ui/mine.png'),
-                    fit: BoxFit.cover,
+    return WillPopScope(
+      onWillPop: () async {
+        // Return false to prevent going back
+        return false;
+      },
+      child: ChangeNotifierProvider(
+        create: (_) => BattleProvider(),
+        child: SafeArea(
+          child: Scaffold(
+            appBar: CustomAppBar(
+              title: region,
+              height: 40,
+              padding: EdgeInsets.zero,
+              margin: EdgeInsets.zero,
+            ),
+            body: Stack(
+              children: [
+                Container(
+                  decoration: BoxDecoration(
+                    image: DecorationImage(
+                      image: ImageCacheManager.getImage(
+                          'assets/images/ui/battle-bg.png'),
+                      fit: BoxFit.cover,
+                    ),
                   ),
                 ),
-              ),
-              _BattleContent(
-                heroes: heroes,
-                enemies: enemies,
-                difficulty: difficulty,
-              ),
-            ],
+                _BattleContent(
+                  heroes: heroes,
+                  enemies: enemies,
+                  difficulty: difficulty,
+                ),
+              ],
+            ),
           ),
         ),
       ),
@@ -219,9 +225,24 @@ class __BattleContentState extends State<_BattleContent> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(title,
-              style:
-                  const TextStyle(fontSize: 20, fontWeight: FontWeight.bold)),
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8.0),
+            margin: const EdgeInsets.symmetric(vertical: 4.0),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(5.0),
+            ),
+            child: Center(
+              child: Text(
+                title,
+                style: const TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: Colors.white),
+              ),
+            ),
+          ),
           const SizedBox(height: 10),
           Expanded(
             child: ListView.builder(
@@ -234,11 +255,12 @@ class __BattleContentState extends State<_BattleContent> {
                   margin: const EdgeInsets.only(bottom: 8),
                   child: ListTile(
                     leading: unit is GirlFarmer
-                        ? Image.asset(unit.image, height: 40)
+                        ? Image.asset(unit.imageFace, height: 40)
                         : const Icon(Icons.dangerous,
                             color: Colors.red, size: 30),
                     title: Text(unit.name,
-                        style: const TextStyle(fontWeight: FontWeight.bold)),
+                        style: const TextStyle(
+                            fontWeight: FontWeight.bold, fontSize: 13)),
                     subtitle: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
@@ -250,25 +272,27 @@ class __BattleContentState extends State<_BattleContent> {
                           minHeight: 6,
                         ),
                         const SizedBox(height: 4),
-                        Text("HP: ${unit.hp}/${unit.maxHp}"),
+                        Text("HP: ${unit.hp}/${unit.maxHp}",
+                            style: const TextStyle(fontSize: 11)),
                         if (unit is GirlFarmer) ...[
-                          Text("MP: ${unit.mp}"),
+                          Text("MP: ${unit.mp}",
+                              style: const TextStyle(fontSize: 11)),
                           const SizedBox(height: 4),
-                          Wrap(
-                            spacing: 5,
-                            children: unit.abilities
-                                .map((ability) => Chip(
-                                      label: Text(
-                                        ability.name,
-                                        style: const TextStyle(fontSize: 10),
-                                      ),
-                                      backgroundColor: ability.cooldownTimer > 0
-                                          ? Colors.grey[400]
-                                          : Colors.blue[200],
-                                      padding: const EdgeInsets.all(2),
-                                    ))
-                                .toList(),
-                          ),
+                          // Wrap(
+                          //   spacing: 5,
+                          //   children: unit.abilities
+                          //       .map((ability) => Chip(
+                          //             label: Text(
+                          //               ability.name,
+                          //               style: const TextStyle(fontSize: 10),
+                          //             ),
+                          //             backgroundColor: ability.cooldownTimer > 0
+                          //                 ? Colors.grey[400]
+                          //                 : Colors.blue[200],
+                          //             padding: const EdgeInsets.all(2),
+                          //           ))
+                          //       .toList(),
+                          // ),
                         ],
                       ],
                     ),
@@ -290,11 +314,26 @@ class __BattleContentState extends State<_BattleContent> {
       padding: const EdgeInsets.all(16.0),
       child: Column(
         children: [
-          Text(
-            "Round ${provider.currentRound}",
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+          Container(
+            width: double.infinity, // Takes full available width
+            padding: const EdgeInsets.all(2.0),
+            decoration: BoxDecoration(
+              color: Colors.grey[200],
+              borderRadius: BorderRadius.circular(5.0),
+              border: Border.all(
+                color: Colors.grey[300]!, // Gold border color
+                width: 1, // Border width
+              ),
+            ),
+            child: Center(
+              child: Text(
+                "Round ${provider.currentRound}",
+                style:
+                    const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
+              ),
+            ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 5),
           Expanded(
             child: Row(
               children: [

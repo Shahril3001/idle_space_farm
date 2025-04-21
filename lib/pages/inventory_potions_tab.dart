@@ -248,7 +248,7 @@ class _PotionsTabState extends State<PotionsTab> {
               ),
               SizedBox(width: 10),
               IconButton(
-                icon: Icon(Icons.refresh, color: Colors.white),
+                icon: Icon(Icons.refresh, color: Colors.black),
                 onPressed: () {
                   setState(() {
                     _filterQuery = '';
