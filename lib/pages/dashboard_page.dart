@@ -1,3 +1,4 @@
+import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
 import 'daily_reward_page.dart';
 import 'inventory_page.dart';
@@ -8,8 +9,48 @@ import 'battlemap_page.dart';
 import 'codex_page_girl.dart';
 import 'gacha_page.dart';
 
-class DashboardPage extends StatelessWidget {
+class DashboardPage extends StatefulWidget {
   const DashboardPage({Key? key}) : super(key: key);
+
+  @override
+  _DashboardPageState createState() => _DashboardPageState();
+}
+
+class _DashboardPageState extends State<DashboardPage> {
+  late AudioPlayer _audioPlayer;
+  bool _isMusicPlaying = true;
+
+  @override
+  void initState() {
+    super.initState();
+    _audioPlayer = Provider.of<AudioPlayer>(context, listen: false);
+    _playBackgroundMusic();
+  }
+
+  Future<void> _playBackgroundMusic() async {
+    try {
+      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
+      await _audioPlayer.play(AssetSource('audios/mp3/main_audio.mp3'));
+      setState(() => _isMusicPlaying = true);
+    } catch (e) {
+      debugPrint('Error playing background music: $e');
+    }
+  }
+
+  Future<void> _toggleMusic() async {
+    if (_isMusicPlaying) {
+      await _audioPlayer.pause();
+    } else {
+      await _audioPlayer.resume();
+    }
+    setState(() => _isMusicPlaying = !_isMusicPlaying);
+  }
+
+  @override
+  void dispose() {
+    // Don't dispose the audio player here since it's managed globally
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +346,12 @@ class DashboardPage extends StatelessWidget {
                 ),
 
                 Divider(color: Colors.grey),
-
+                _buildSettingsButton(
+                  icon: Icons.music_note,
+                  label: 'Music',
+                  onPressed:
+                      () {}, // Empty callback, handled in _buildSettingsButton
+                ),
                 // Save Management Section
                 _buildSettingsButton(
                   icon: Icons.save,
@@ -439,6 +485,24 @@ class DashboardPage extends StatelessWidget {
     required String label,
     required VoidCallback onPressed,
   }) {
+    if (label == 'Music') {
+      return Padding(
+        padding: EdgeInsets.symmetric(vertical: 4),
+        child: ElevatedButton.icon(
+          icon: Icon(icon, color: Colors.white),
+          label: Text(
+            '$label ${_isMusicPlaying ? 'ON' : 'OFF'}',
+            style: TextStyle(color: Colors.white),
+          ),
+          onPressed: _toggleMusic,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: Colors.black.withOpacity(0.5),
+            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
+            alignment: Alignment.centerLeft,
+          ),
+        ),
+      );
+    }
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
       child: ElevatedButton.icon(

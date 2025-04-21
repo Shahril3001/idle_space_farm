@@ -2,6 +2,8 @@ import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:hive/hive.dart';
@@ -30,6 +32,8 @@ import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
 import 'repositories/shop_repository.dart';
+
+final AudioPlayer backgroundAudioPlayer = AudioPlayer();
 
 class ImageCacheManager {
   static final Map<String, ImageProvider> _cache = {};
@@ -69,8 +73,14 @@ class ImageCacheManager {
 }
 
 void main() async {
-  debugPrintRebuildDirtyWidgets = false;
+  // Initialize Flutter binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
+  // Now you can initialize the audio player
+  await backgroundAudioPlayer.setReleaseMode(ReleaseMode.loop);
+  await backgroundAudioPlayer.setPlayerMode(PlayerMode.mediaPlayer);
+
+  debugPrintRebuildDirtyWidgets = false;
+
   final appDocumentDirectory =
       await path_provider.getApplicationDocumentsDirectory();
   Hive.init(appDocumentDirectory.path);
@@ -157,6 +167,7 @@ void main() async {
         ChangeNotifierProvider(
           create: (_) => BattleProvider(),
         ),
+        Provider<AudioPlayer>.value(value: backgroundAudioPlayer),
       ],
       child: const MyApp(),
     ),
@@ -439,6 +450,7 @@ class _SplashScreenState extends State<SplashScreen>
                   style: const TextStyle(
                     color: Colors.black87,
                     fontSize: 13,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 10),
@@ -473,21 +485,21 @@ class _SplashScreenState extends State<SplashScreen>
                   Padding(
                     padding: const EdgeInsets.all(10.0),
                     child: Container(
-                      width: 300,
+                      width: 250,
                       decoration: BoxDecoration(
                         gradient: const LinearGradient(
                           begin: Alignment.topCenter,
                           end: Alignment.bottomCenter,
                           colors: [
-                            ui.Color(0xFF30A528), // Vibrant red top
-                            ui.Color(0xFF155710), // Deep red bottom
+                            ui.Color(0xFFE2A833), // Vibrant red top
+                            ui.Color(0xFFBA8721), // Deep red bottom
                           ],
                           stops: [0.0, 0.8],
                         ),
                         borderRadius: BorderRadius.circular(20),
                         boxShadow: [
                           BoxShadow(
-                            color: Colors.green[900]!.withOpacity(0.5),
+                            color: ui.Color(0xFFBB804F).withOpacity(0.5),
                             blurRadius: 10,
                             spreadRadius: 2,
                             offset: Offset(0, 4),
@@ -532,20 +544,7 @@ class _SplashScreenState extends State<SplashScreen>
               ],
             ),
           ),
-          const Positioned(
-            bottom: 20,
-            left: 0,
-            right: 0,
-            child: Center(
-              child: Text(
-                '© 2025 Eldoria Chronicles Idle RPG',
-                style: const TextStyle(
-                  color: Colors.black87,
-                  fontSize: 12,
-                ),
-              ),
-            ),
-          ),
+
           // Copyright text
           const Positioned(
             bottom: 20,

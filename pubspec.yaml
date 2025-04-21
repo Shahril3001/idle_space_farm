@@ -46,6 +46,7 @@ dependencies:
   external_path: ^2.0.1
   flutter_native_splash: ^2.4.4
   timezone: 0.9.1
+  audioplayers: ^5.1.0
 
 dev_dependencies:
   flutter_test:
@@ -75,6 +76,8 @@ flutter:
     - assets/images/potions/
     - assets/images/abilities/
     - assets/images/locations/
+    - assets/audios/mp3/
+    - assets/audios/wav/
     
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
