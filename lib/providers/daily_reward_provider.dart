@@ -43,19 +43,22 @@ class DailyRewardProvider {
     if (rewards.isEmpty) {
       final defaultRewards = [
         DailyReward(
-            day: 1, rewardType: 'resource', rewardId: 'Credits', amount: 100),
+            day: 1, rewardType: 'resource', rewardId: 'Gold', amount: 500),
         DailyReward(
             day: 2,
             rewardType: 'equipment',
             rewardId: 'wpn_001'), // Rusty Sword
         DailyReward(
-            day: 3, rewardType: 'resource', rewardId: 'Minerals', amount: 250),
+            day: 3,
+            rewardType: 'resource',
+            rewardId: 'Girl Scroll',
+            amount: 100),
         DailyReward(
             day: 4,
             rewardType: 'potion',
             rewardId: 'potion_hp_common'), // Minor Vitality Tonic
         DailyReward(
-            day: 5, rewardType: 'resource', rewardId: 'Energy', amount: 250),
+            day: 5, rewardType: 'resource', rewardId: 'Gem', amount: 50),
         DailyReward(
             day: 6,
             rewardType: 'equipment',
@@ -236,6 +239,7 @@ class DailyRewardProvider {
     final newEquipment = Equipment(
       id: '${equipment.id}_${DateTime.now().millisecondsSinceEpoch}',
       name: equipment.name,
+      imageEquip: equipment.imageEquip,
       slot: equipment.slot,
       rarity: equipment.rarity,
       weaponType: equipment.weaponType,

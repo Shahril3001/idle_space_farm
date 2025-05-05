@@ -1,5 +1,5 @@
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/material.dart';
+import '../providers/audio_manager.dart';
 import 'daily_reward_page.dart';
 import 'inventory_page.dart';
 import 'package:provider/provider.dart';
@@ -17,41 +17,6 @@ class DashboardPage extends StatefulWidget {
 }
 
 class _DashboardPageState extends State<DashboardPage> {
-  late AudioPlayer _audioPlayer;
-  bool _isMusicPlaying = true;
-
-  @override
-  void initState() {
-    super.initState();
-    _audioPlayer = Provider.of<AudioPlayer>(context, listen: false);
-    _playBackgroundMusic();
-  }
-
-  Future<void> _playBackgroundMusic() async {
-    try {
-      await _audioPlayer.setReleaseMode(ReleaseMode.loop);
-      await _audioPlayer.play(AssetSource('audios/mp3/main_audio.mp3'));
-      setState(() => _isMusicPlaying = true);
-    } catch (e) {
-      debugPrint('Error playing background music: $e');
-    }
-  }
-
-  Future<void> _toggleMusic() async {
-    if (_isMusicPlaying) {
-      await _audioPlayer.pause();
-    } else {
-      await _audioPlayer.resume();
-    }
-    setState(() => _isMusicPlaying = !_isMusicPlaying);
-  }
-
-  @override
-  void dispose() {
-    // Don't dispose the audio player here since it's managed globally
-    super.dispose();
-  }
-
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -310,6 +275,7 @@ class _DashboardPageState extends State<DashboardPage> {
   // Inside DashboardPage class
   void _showSettingsPopup(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context, listen: false);
+    final audioManager = Provider.of<AudioManager>(context, listen: false);
 
     showDialog(
       context: context,
@@ -346,12 +312,11 @@ class _DashboardPageState extends State<DashboardPage> {
                 ),
 
                 Divider(color: Colors.grey),
-                _buildSettingsButton(
-                  icon: Icons.music_note,
-                  label: 'Music',
-                  onPressed:
-                      () {}, // Empty callback, handled in _buildSettingsButton
-                ),
+
+                // Audio Settings Section
+                _buildAudioSettingsSection(context, audioManager),
+
+                Divider(color: Colors.grey),
                 // Save Management Section
                 _buildSettingsButton(
                   icon: Icons.save,
@@ -480,29 +445,65 @@ class _DashboardPageState extends State<DashboardPage> {
     );
   }
 
+  Widget _buildAudioSettingsSection(
+      BuildContext context, AudioManager audioManager) {
+    return ListenableBuilder(
+      listenable: audioManager,
+      builder: (context, _) {
+        return Column(
+          children: [
+            SwitchListTile(
+              title: Text('Mute All', style: TextStyle(color: Colors.white)),
+              value: audioManager.isMuted,
+              onChanged: (value) async {
+                await audioManager.toggleMute();
+              },
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Music Volume', style: TextStyle(color: Colors.white)),
+                  Slider(
+                    value: audioManager.isMuted ? 0 : audioManager.bgmVolume,
+                    onChanged: (value) async {
+                      await audioManager.setBGMVolume(value);
+                    },
+                    activeColor: Colors.white,
+                    inactiveColor: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+            Padding(
+              padding: EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text('Sound Effects', style: TextStyle(color: Colors.white)),
+                  Slider(
+                    value: audioManager.isMuted ? 0 : audioManager.sfxVolume,
+                    onChanged: (value) async {
+                      await audioManager.setSFXVolume(value);
+                    },
+                    activeColor: Colors.white,
+                    inactiveColor: Colors.grey,
+                  ),
+                ],
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   Widget _buildSettingsButton({
     required IconData icon,
     required String label,
     required VoidCallback onPressed,
   }) {
-    if (label == 'Music') {
-      return Padding(
-        padding: EdgeInsets.symmetric(vertical: 4),
-        child: ElevatedButton.icon(
-          icon: Icon(icon, color: Colors.white),
-          label: Text(
-            '$label ${_isMusicPlaying ? 'ON' : 'OFF'}',
-            style: TextStyle(color: Colors.white),
-          ),
-          onPressed: _toggleMusic,
-          style: ElevatedButton.styleFrom(
-            backgroundColor: Colors.black.withOpacity(0.5),
-            padding: EdgeInsets.symmetric(vertical: 12, horizontal: 16),
-            alignment: Alignment.centerLeft,
-          ),
-        ),
-      );
-    }
     return Padding(
       padding: EdgeInsets.symmetric(vertical: 4),
       child: ElevatedButton.icon(

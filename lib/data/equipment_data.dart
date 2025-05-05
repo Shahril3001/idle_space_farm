@@ -5,6 +5,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_001",
     name: "Rusty Sword",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.common,
@@ -15,6 +16,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_002",
     name: "Wooden Staff",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.common,
@@ -25,6 +27,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_003",
     name: "Chipped Dagger",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.common,
@@ -35,6 +38,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_004",
     name: "Wooden Shield",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedShield,
     rarity: EquipmentRarity.common,
@@ -45,6 +49,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_005",
     name: "Hunting Bow",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.common,
@@ -57,6 +62,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_001",
     name: "Leather Vest",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.common,
@@ -66,6 +72,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_002",
     name: "Cloth Robe",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.common,
@@ -76,6 +83,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_003",
     name: "Leather Helmet",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.common,
@@ -87,6 +95,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_001",
     name: "Copper Ring",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.common,
@@ -95,6 +104,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_002",
     name: "Leather Gloves",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.glove,
     rarity: EquipmentRarity.common,
@@ -103,6 +113,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_003",
     name: "Lucky Charm",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.charm,
     rarity: EquipmentRarity.common,
@@ -111,6 +122,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_004",
     name: "Traveler's Shoes",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.shoes,
     rarity: EquipmentRarity.common,
@@ -121,6 +133,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_101",
     name: "Iron Broadsword",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.uncommon,
@@ -130,6 +143,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_102",
     name: "Apprentice's Wand",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.uncommon,
@@ -141,6 +155,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_103",
     name: "Iron Shield",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedShield,
     rarity: EquipmentRarity.uncommon,
@@ -150,6 +165,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_104",
     name: "Longbow",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.uncommon,
@@ -161,6 +177,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_101",
     name: "Chainmail",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.uncommon,
@@ -171,6 +188,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_102",
     name: "Iron Helmet",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.uncommon,
@@ -182,6 +200,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_201",
     name: "Silver Rapier",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.rare,
@@ -193,6 +212,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_202",
     name: "Arcane Tome",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.rare,
@@ -204,6 +224,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_203",
     name: "Tower Shield",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedShield,
     rarity: EquipmentRarity.rare,
@@ -214,6 +235,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_204",
     name: "Greatsword",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.rare,
@@ -225,6 +247,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_301",
     name: "Dragonbone Greatsword",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -236,6 +259,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_302",
     name: "Staff of the Archmage",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -249,6 +273,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_401",
     name: "Excalibur",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.legendary,
@@ -265,6 +290,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_501",
     name: "Blade of Creation",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.mythic,
@@ -283,6 +309,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_301",
     name: "Amulet of the Phoenix",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.epic,
@@ -293,6 +320,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_401",
     name: "Armor of the Fallen King",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.legendary,
@@ -304,6 +332,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_402",
     name: "Crown of Wisdom",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.legendary,
@@ -315,6 +344,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_302",
     name: "Gloves of Haste",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.glove,
     rarity: EquipmentRarity.epic,
@@ -327,6 +357,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_305",
     name: "Glacier Fang",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -339,6 +370,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_306",
     name: "Searing Emberblade",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -351,6 +383,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_404",
     name: "Aegis of the Sun",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.legendary,
@@ -365,6 +398,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_405",
     name: "Veil of Shadows",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.legendary,
@@ -379,6 +413,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_401",
     name: "Ring of Eternity",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.mythic,
@@ -393,6 +428,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_402",
     name: "Talisman of Balance",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.mythic,
@@ -408,6 +444,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_406",
     name: "Robes of the Timeweaver",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.mythic,
@@ -422,6 +459,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_503",
     name: "Soulrender",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.mythic,
@@ -435,6 +473,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_403",
     name: "Bracelet of Thorns",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.legendary,
@@ -448,6 +487,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_307",
     name: "Windslicer Katana",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -459,6 +499,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_308",
     name: "Twilight Pike",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.epic,
@@ -472,6 +513,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_407",
     name: "Mantle of Cinders",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.epic,
@@ -483,6 +525,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_408",
     name: "Moonveil Robe",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.epic,
@@ -496,6 +539,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_402",
     name: "Frostfang",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.legendary,
@@ -508,6 +552,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_403",
     name: "Hammer of Titans",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.legendary,
@@ -522,6 +567,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_409",
     name: "Scarab Scale Plate",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.legendary,
@@ -533,6 +579,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_410",
     name: "Mask of the Oracle",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.legendary,
@@ -546,6 +593,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_304",
     name: "Charm of Echoes",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.charm,
     rarity: EquipmentRarity.epic,
@@ -556,6 +604,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_305",
     name: "Shadowstep Anklet",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.shoes,
     rarity: EquipmentRarity.epic,
@@ -568,6 +617,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_504",
     name: "Nova Edge",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.twoHandedWeapon,
     rarity: EquipmentRarity.mythic,
@@ -583,6 +633,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_411",
     name: "Shroud of the Void",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.mythic,
@@ -598,6 +649,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_404",
     name: "Celestial Bindings",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.glove,
     rarity: EquipmentRarity.mythic,
@@ -610,6 +662,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_405",
     name: "Cursed Loop",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.mythic,
@@ -624,6 +677,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_101",
     name: "Traveler's Gloves",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.glove,
     rarity: EquipmentRarity.uncommon,
@@ -634,6 +688,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_102",
     name: "Apprentice’s Hood",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.head,
     rarity: EquipmentRarity.uncommon,
@@ -644,6 +699,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "wpn_103",
     name: "Rusty Shortsword",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.weapon,
     weaponType: WeaponType.oneHandedWeapon,
     rarity: EquipmentRarity.common,
@@ -655,6 +711,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "acc_202",
     name: "Locket of Serenity",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.accessory,
     accessoryType: AccessoryType.amulet,
     rarity: EquipmentRarity.rare,
@@ -665,6 +722,7 @@ final List<Equipment> equipmentList = [
   Equipment(
     id: "arm_203",
     name: "Mercenary’s Vest",
+    imageEquip: 'assets/images/equipments/weapon1-sword.png',
     slot: EquipmentSlot.armor,
     armorType: ArmorType.body,
     rarity: EquipmentRarity.rare,

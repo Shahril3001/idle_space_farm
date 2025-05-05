@@ -119,11 +119,15 @@ class Equipment {
   @HiveField(18)
   final AccessoryType? accessoryType; // Only for accessories
 
+  @HiveField(19) // New field for image path
+  final String? imageEquip; // Path to the equipment image asset
+
   Equipment({
     required this.id,
     required this.name,
     required this.slot,
     required this.rarity,
+    required this.imageEquip,
     this.weaponType,
     this.armorType,
     this.accessoryType,
@@ -155,6 +159,52 @@ class Equipment {
       (slot == EquipmentSlot.accessory && accessoryType != null) ||
           (slot != EquipmentSlot.accessory && accessoryType == null),
       'Accessory type must be set only for accessories',
+    );
+  }
+
+  Equipment copyWith({
+    String? id,
+    String? name,
+    EquipmentSlot? slot,
+    int? attackBonus,
+    int? defenseBonus,
+    int? hpBonus,
+    int? agilityBonus,
+    int? enhancementLevel,
+    EquipmentRarity? rarity,
+    List<String>? allowedTypes,
+    List<String>? allowedRaces,
+    bool? isTradable,
+    int? mpBonus,
+    int? spBonus,
+    int? criticalPoint,
+    String? assignedTo,
+    WeaponType? weaponType,
+    ArmorType? armorType,
+    AccessoryType? accessoryType,
+    String? imageEquip,
+  }) {
+    return Equipment(
+      id: id ?? this.id,
+      name: name ?? this.name,
+      slot: slot ?? this.slot,
+      rarity: rarity ?? this.rarity,
+      imageEquip: imageEquip ?? this.imageEquip,
+      weaponType: weaponType ?? this.weaponType,
+      armorType: armorType ?? this.armorType,
+      accessoryType: accessoryType ?? this.accessoryType,
+      attackBonus: attackBonus ?? this.attackBonus,
+      defenseBonus: defenseBonus ?? this.defenseBonus,
+      hpBonus: hpBonus ?? this.hpBonus,
+      agilityBonus: agilityBonus ?? this.agilityBonus,
+      enhancementLevel: enhancementLevel ?? this.enhancementLevel,
+      allowedTypes: allowedTypes ?? this.allowedTypes,
+      allowedRaces: allowedRaces ?? this.allowedRaces,
+      isTradable: isTradable ?? this.isTradable,
+      mpBonus: mpBonus ?? this.mpBonus,
+      spBonus: spBonus ?? this.spBonus,
+      criticalPoint: criticalPoint ?? this.criticalPoint,
+      assignedTo: assignedTo ?? this.assignedTo,
     );
   }
 
@@ -253,6 +303,7 @@ class Equipment {
     return Equipment(
       id: map['id'] as String,
       name: map['name'] as String,
+      imageEquip: map['imageEquip'] as String,
       slot: EquipmentSlot.values[map['slot'] as int],
       rarity: EquipmentRarity.values[map['rarity'] as int],
       weaponType: map['weaponType'] != null

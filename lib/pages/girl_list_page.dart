@@ -78,7 +78,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                             crossAxisCount: 3,
                             crossAxisSpacing: 8,
                             mainAxisSpacing: 8,
-                            childAspectRatio: 0.6,
+                            childAspectRatio: 0.67,
                           ),
                           itemCount: girlFarmers.length,
                           itemBuilder: (context, index) {
@@ -111,7 +111,7 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                         fit: BoxFit.cover,
                                       ),
                                     ),
-                                    const SizedBox(height: 8),
+                                    const SizedBox(height: 4),
                                     Padding(
                                       padding: const EdgeInsets.symmetric(
                                           horizontal:
@@ -123,13 +123,12 @@ class _ManageGirlListPageState extends State<ManageGirlListPage> {
                                             style: const TextStyle(
                                               fontWeight: FontWeight.bold,
                                               color: Colors.white,
-                                              fontSize: 14,
+                                              fontSize: 12,
                                             ),
                                             textAlign: TextAlign.center,
                                             maxLines: 1,
                                             overflow: TextOverflow.ellipsis,
                                           ),
-                                          const SizedBox(height: 4),
                                           Text(
                                             'Level: ${girl.level}',
                                             style: const TextStyle(

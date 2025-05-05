@@ -67,7 +67,7 @@ class ShopModel {
             {
               'Energy': 1.0,
               'Minerals': 0.8,
-              'Credits': 1.2,
+              'Gold': 1.2,
             },
         _lastRefreshTime = lastRefreshTime ?? DateTime.now(),
         purchasedItemIds = purchasedItemIds ?? {},
@@ -284,7 +284,7 @@ ShopItem createShopItemFromEquipment(Equipment eq) => ShopItem(
       id: 'equip_${eq.id}',
       name: eq.name,
       description: 'A piece of equipment: ${eq.name}',
-      prices: {'Credits': _calculateEquipmentPrice(eq)},
+      prices: {'Gold': _calculateEquipmentPrice(eq)},
       type: ShopItemType.equipment,
     );
 
@@ -293,7 +293,7 @@ ShopItem createShopItemFromGirl(GirlFarmer girl) => ShopItem(
       id: 'girl_${girl.id}',
       name: girl.name,
       description: girl.description,
-      prices: {'Credits': _calculateGirlPrice(girl)},
+      prices: {'Gold': _calculateGirlPrice(girl)},
       type: ShopItemType.girl,
     );
 
@@ -302,7 +302,7 @@ ShopItem createShopItemFromPotion(Potion potion) => ShopItem(
       id: 'potion_${potion.id}',
       name: potion.name,
       description: potion.description,
-      prices: {'Credits': potion.rarity == PotionRarity.common ? 100 : 250},
+      prices: {'Gold': potion.rarity == PotionRarity.common ? 50 : 100},
       type: ShopItemType.potion,
     );
 
@@ -311,28 +311,28 @@ ShopItem createShopItemFromAbility(AbilitiesModel ability) => ShopItem(
       id: 'ability_${ability.abilitiesID}',
       name: ability.name,
       description: ability.description,
-      prices: {'Credits': 500},
+      prices: {'Gold': 500},
       type: ShopItemType.abilityScroll,
     );
 
 // Price calculation methods
 int _calculateGirlPrice(GirlFarmer girl) {
   return switch (girl.rarity) {
-    'Common' => 1000,
-    'Rare' => 2500,
-    'Unique' => 5000,
-    _ => 1000,
+    'Common' => 50,
+    'Rare' => 100,
+    'Unique' => 200,
+    _ => 50,
   };
 }
 
 int _calculateEquipmentPrice(Equipment equip) {
   return switch (equip.rarity) {
-    EquipmentRarity.common => 500,
-    EquipmentRarity.uncommon => 1000,
-    EquipmentRarity.rare => 2000,
-    EquipmentRarity.epic => 4000,
-    EquipmentRarity.legendary => 8000,
-    EquipmentRarity.mythic => 15000,
+    EquipmentRarity.common => 50,
+    EquipmentRarity.uncommon => 100,
+    EquipmentRarity.rare => 200,
+    EquipmentRarity.epic => 400,
+    EquipmentRarity.legendary => 800,
+    EquipmentRarity.mythic => 1500,
   };
 }
 

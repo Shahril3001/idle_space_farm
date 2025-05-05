@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../main.dart';
 import 'inventory_equipment_tab.dart';
 import 'inventory_potions_tab.dart';
+import 'inventory_resources_tab.dart';
 
 class InventoryPage extends StatefulWidget {
   @override
@@ -15,7 +16,7 @@ class _InventoryPageState extends State<InventoryPage>
   @override
   void initState() {
     super.initState();
-    _tabController = TabController(length: 2, vsync: this);
+    _tabController = TabController(length: 3, vsync: this);
   }
 
   @override
@@ -62,6 +63,13 @@ class _InventoryPageState extends State<InventoryPage>
                       height: 30,
                     ),
                   ),
+                  Tab(
+                    icon: Image.asset(
+                      'assets/images/icons/inventory-resources.png', // Add this icon
+                      width: 30,
+                      height: 30,
+                    ),
+                  ),
                 ],
               ),
             ),
@@ -82,6 +90,7 @@ class _InventoryPageState extends State<InventoryPage>
                   children: [
                     EquipmentTab(),
                     PotionsTab(),
+                    ResourcesTab(),
                   ],
                 ),
               ),

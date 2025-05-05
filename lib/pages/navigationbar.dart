@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:idle_space_farm/pages/map_page.dart';
 import 'package:provider/provider.dart';
+import '../data/resource_data.dart';
 import '../providers/game_provider.dart';
 import 'exchange_page.dart';
 import 'girl_list_page.dart';
@@ -225,6 +226,9 @@ class _HomePageState extends State<HomePage> {
   }
 
   Widget _buildResourceDisplay(GameProvider gameProvider) {
+    // Define which resources to display
+    final resourcesToShow = ['Gold', 'Stamina', 'Gem'];
+
     return SafeArea(
       child: Container(
         padding: EdgeInsets.symmetric(vertical: 8.0, horizontal: 4.0),
@@ -233,44 +237,64 @@ class _HomePageState extends State<HomePage> {
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _resourceText(
-              Image.asset('assets/images/icons/resources-golds.png',
-                  width: 24, height: 24),
-              "",
-              gameProvider.getCredits(),
-              Colors.amberAccent,
-            ),
-            _resourceText(
-              Image.asset('assets/images/icons/resources-minerals.png',
-                  width: 24, height: 24),
-              "",
-              gameProvider.getMinerals(),
-              Colors.cyan,
-            ),
-            _resourceText(
-              Image.asset('assets/images/icons/resources-runes.png',
-                  width: 24, height: 24),
-              "",
-              gameProvider.getEnergy(),
-              Colors.redAccent,
-            ),
-          ],
+          children: resourcesToShow.map((resourceName) {
+            // Get the resource data from provider
+            final resource = gameProvider.getResourceByName(resourceName);
+            final amount = resource?.amount ?? 0.0;
+
+            return _ResourceItem(
+              resourceName: resourceName,
+              amount: amount,
+            );
+          }).toList(),
         ),
       ),
     );
   }
+}
 
-  Widget _resourceText(Widget icon, String label, double value, Color color) {
+String _formatAmount(double amount) {
+  if (amount >= 1000000) {
+    return '${(amount / 1000000).toStringAsFixed(1)}M';
+  } else if (amount >= 1000) {
+    return '${(amount / 1000).toStringAsFixed(1)}K';
+  }
+  return amount.toStringAsFixed(0);
+}
+
+// New reusable widget for resource items
+class _ResourceItem extends StatelessWidget {
+  final String resourceName;
+  final double amount;
+
+  const _ResourceItem({
+    required this.resourceName,
+    required this.amount,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    // Get the resource config (image path and color)
+    final config = ResourceData.getConfig(resourceName);
+
     return Row(
       children: [
-        icon, // Accepts any widget (Icon or Image)
+        Image.asset(
+          config?.imagePath ?? 'assets/images/resources/default.png',
+          width: 20,
+          height: 20,
+          errorBuilder: (context, error, stackTrace) => Icon(
+            Icons.monetization_on,
+            size: 24,
+            color: config?.color ?? Colors.grey,
+          ),
+        ),
         SizedBox(width: 4),
         Text(
-          "$label: ${value.toStringAsFixed(0)}",
+          _formatAmount(amount),
           style: TextStyle(
-            color: Colors.white,
-            fontSize: 14,
+            color: config?.color ?? Colors.white,
+            fontSize: 13,
             fontWeight: FontWeight.bold,
           ),
         ),

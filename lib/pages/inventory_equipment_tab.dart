@@ -11,7 +11,6 @@ class EquipmentTab extends StatefulWidget {
 
 class _EquipmentTabState extends State<EquipmentTab> {
   String _sortBy = 'Rarity';
-  String _filterQuery = '';
   EquipmentSlot? _selectedSlot;
   EquipmentRarity? _selectedRarity;
   bool _showAssignedOnly = false;
@@ -19,8 +18,8 @@ class _EquipmentTabState extends State<EquipmentTab> {
   @override
   Widget build(BuildContext context) {
     final gameProvider = Provider.of<GameProvider>(context);
-    List<Equipment> equipmentList = gameProvider.equipment;
-    equipmentList = _applyFiltersAndSorting(equipmentList);
+    List<Equipment> equipmentList =
+        _applyFiltersAndSorting(gameProvider.equipment);
 
     return Padding(
       padding: EdgeInsets.symmetric(horizontal: 12, vertical: 8),
@@ -39,13 +38,6 @@ class _EquipmentTabState extends State<EquipmentTab> {
 
   List<Equipment> _applyFiltersAndSorting(List<Equipment> equipmentList) {
     // Apply filters
-    if (_filterQuery.isNotEmpty) {
-      equipmentList = equipmentList
-          .where((eq) =>
-              eq.name.toLowerCase().contains(_filterQuery.toLowerCase()))
-          .toList();
-    }
-
     if (_selectedSlot != null) {
       equipmentList =
           equipmentList.where((eq) => eq.slot == _selectedSlot).toList();
@@ -135,10 +127,11 @@ class _EquipmentTabState extends State<EquipmentTab> {
                       ),
                     ),
                     child: Center(
-                      child: Icon(
-                        _getSlotIcon(equipment.slot),
-                        color: _getRarityColor(equipment.rarity),
-                        size: 30,
+                      child: Image.asset(
+                        equipment.imageEquip ??
+                            'assets/images/equipments/default_icon.png',
+                        width: 70,
+                        height: 70,
                       ),
                     ),
                   ),
@@ -176,138 +169,49 @@ class _EquipmentTabState extends State<EquipmentTab> {
 
   Widget _buildFilterControls() {
     return Padding(
-      padding: EdgeInsets.symmetric(vertical: 8, horizontal: 12),
+      padding: EdgeInsets.symmetric(vertical: 8),
       child: Column(
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: TextField(
-                    decoration: InputDecoration(
-                      hintText: 'Search...',
-                      hintStyle: TextStyle(color: Colors.black),
-                      prefixIcon: Icon(Icons.search, color: Colors.black),
-                      border: InputBorder.none,
-                      contentPadding:
-                          EdgeInsets.symmetric(vertical: 8, horizontal: 12),
-                    ),
-                    style: TextStyle(color: Colors.black),
-                    onChanged: (value) => setState(() => _filterQuery = value),
-                  ),
-                ),
+              _buildFilterDropdown<EquipmentSlot>(
+                value: _selectedSlot,
+                hint: 'All Slots',
+                items: EquipmentSlot.values,
+                itemBuilder: (slot) => _getSlotName(slot),
+                onChanged: (value) => setState(() => _selectedSlot = value),
+                icon: Icons.category,
               ),
-              SizedBox(width: 10),
-              Container(
-                decoration: BoxDecoration(
-                  color: Color(0xFFCAA04D),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                padding: EdgeInsets.symmetric(horizontal: 8),
-                child: DropdownButton<String>(
-                  value: _sortBy,
-                  onChanged: (String? newValue) =>
-                      setState(() => _sortBy = newValue!),
-                  items: ['Rarity', 'Name', 'Level'].map((value) {
-                    return DropdownMenuItem(
-                      value: value,
-                      child: Text(value, style: TextStyle(color: Colors.white)),
-                    );
-                  }).toList(),
-                  dropdownColor: Color(0xFFCAA04D),
-                  icon: Icon(Icons.sort, color: Colors.white),
-                  underline: SizedBox(),
-                ),
+              _buildFilterDropdown<EquipmentRarity>(
+                value: _selectedRarity,
+                hint: 'All Rarities',
+                items: EquipmentRarity.values,
+                itemBuilder: (rarity) => rarity.toString().split('.').last,
+                onChanged: (value) => setState(() => _selectedRarity = value),
+                icon: Icons.star,
               ),
             ],
           ),
           SizedBox(height: 8),
           Row(
+            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
             children: [
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFCAA04D),
-                    borderRadius: BorderRadius.circular(10),
+              _buildSortDropdown(),
+              Row(
+                children: [
+                  Checkbox(
+                    value: _showAssignedOnly,
+                    onChanged: (value) =>
+                        setState(() => _showAssignedOnly = value ?? false),
+                    activeColor: Color(0xFFCAA04D),
                   ),
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: DropdownButton<EquipmentSlot>(
-                    value: _selectedSlot,
-                    hint: Text('All Slots',
-                        style: TextStyle(color: Colors.white)),
-                    onChanged: (EquipmentSlot? newValue) =>
-                        setState(() => _selectedSlot = newValue),
-                    items: EquipmentSlot.values.map((slot) {
-                      return DropdownMenuItem(
-                        value: slot,
-                        child: Text(
-                          _getSlotName(slot),
-                          style: TextStyle(color: Colors.white),
-                        ),
-                      );
-                    }).toList(),
-                    dropdownColor: Color(0xFFCAA04D),
-                    icon: Icon(Icons.category, color: Colors.white),
-                    underline: SizedBox(),
-                  ),
-                ),
+                  Text('Assigned Only', style: TextStyle(color: Colors.black)),
+                ],
               ),
-              SizedBox(width: 10),
-              Expanded(
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: Color(0xFFCAA04D),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  padding: EdgeInsets.symmetric(horizontal: 8),
-                  child: DropdownButton<EquipmentRarity>(
-                    value: _selectedRarity,
-                    hint: Text('All Rarities',
-                        style: TextStyle(color: Colors.white)),
-                    onChanged: (EquipmentRarity? newValue) =>
-                        setState(() => _selectedRarity = newValue),
-                    items: EquipmentRarity.values.map((rarity) {
-                      return DropdownMenuItem(
-                        value: rarity,
-                        child: Text(
-                          rarity.toString().split('.').last,
-                          style: TextStyle(color: _getRarityColor(rarity)),
-                        ),
-                      );
-                    }).toList(),
-                    dropdownColor: Color(0xFFCAA04D),
-                    icon: Icon(Icons.star, color: Colors.white),
-                    underline: SizedBox(),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          SizedBox(height: 8),
-          Row(
-            children: [
-              Checkbox(
-                value: _showAssignedOnly,
-                onChanged: (value) =>
-                    setState(() => _showAssignedOnly = value ?? false),
-                activeColor: Color(0xFFCAA04D),
-              ),
-              Text('Show Assigned Only', style: TextStyle(color: Colors.black)),
-              Spacer(),
               IconButton(
                 icon: Icon(Icons.refresh, color: Colors.black),
-                onPressed: () {
-                  setState(() {
-                    _filterQuery = '';
-                    _selectedSlot = null;
-                    _selectedRarity = null;
-                    _showAssignedOnly = false;
-                  });
-                },
+                onPressed: _resetFilters,
               ),
             ],
           ),
@@ -316,15 +220,90 @@ class _EquipmentTabState extends State<EquipmentTab> {
     );
   }
 
+  Widget _buildFilterDropdown<T>({
+    required T? value,
+    required String hint,
+    required List<T> items,
+    required String Function(T) itemBuilder,
+    required void Function(T?) onChanged,
+    required IconData icon,
+  }) {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFFCAA04D),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: DropdownButton<T>(
+        value: value,
+        hint: Text(hint, style: TextStyle(color: Colors.white)),
+        onChanged: onChanged,
+        items: items.map((item) {
+          return DropdownMenuItem(
+            value: item,
+            child: Text(
+              itemBuilder(item),
+              style: TextStyle(
+                color: item is EquipmentRarity
+                    ? _getRarityColor(item)
+                    : Colors.white,
+              ),
+            ),
+          );
+        }).toList(),
+        dropdownColor: Color(0xFFCAA04D),
+        icon: Icon(icon, color: Colors.white),
+        underline: SizedBox(),
+      ),
+    );
+  }
+
+  Widget _buildSortDropdown() {
+    return Container(
+      decoration: BoxDecoration(
+        color: Color(0xFFCAA04D),
+        borderRadius: BorderRadius.circular(10),
+      ),
+      padding: EdgeInsets.symmetric(horizontal: 8),
+      child: DropdownButton<String>(
+        value: _sortBy,
+        onChanged: (String? newValue) => setState(() => _sortBy = newValue!),
+        items: ['Rarity', 'Name', 'Level'].map((value) {
+          return DropdownMenuItem(
+            value: value,
+            child: Text(value, style: TextStyle(color: Colors.white)),
+          );
+        }).toList(),
+        dropdownColor: Color(0xFFCAA04D),
+        icon: Icon(Icons.sort, color: Colors.white),
+        underline: SizedBox(),
+      ),
+    );
+  }
+
+  void _resetFilters() {
+    setState(() {
+      _selectedSlot = null;
+      _selectedRarity = null;
+      _showAssignedOnly = false;
+    });
+  }
+
   Color _getRarityColor(EquipmentRarity rarity) {
-    return switch (rarity) {
-      EquipmentRarity.common => Colors.grey,
-      EquipmentRarity.uncommon => Colors.green,
-      EquipmentRarity.rare => Colors.blue,
-      EquipmentRarity.epic => Colors.purple,
-      EquipmentRarity.legendary => Colors.orange,
-      EquipmentRarity.mythic => Colors.red,
-    };
+    switch (rarity) {
+      case EquipmentRarity.common:
+        return Colors.grey;
+      case EquipmentRarity.uncommon:
+        return Colors.green;
+      case EquipmentRarity.rare:
+        return Colors.blue;
+      case EquipmentRarity.epic:
+        return Colors.purple;
+      case EquipmentRarity.legendary:
+        return Colors.orange;
+      case EquipmentRarity.mythic:
+        return Colors.red;
+    }
   }
 
   String _getSlotName(EquipmentSlot slot) {
@@ -332,19 +311,22 @@ class _EquipmentTabState extends State<EquipmentTab> {
   }
 
   IconData _getSlotIcon(EquipmentSlot slot) {
-    return switch (slot) {
-      EquipmentSlot.weapon => Icons.sports_martial_arts,
-      EquipmentSlot.armor => Icons.security,
-      EquipmentSlot.accessory => Icons.emoji_events,
-    };
+    switch (slot) {
+      case EquipmentSlot.weapon:
+        return Icons.sports_martial_arts;
+      case EquipmentSlot.armor:
+        return Icons.security;
+      case EquipmentSlot.accessory:
+        return Icons.emoji_events;
+    }
   }
 }
 
-// Equipment Details Page (same as before)
 class EquipmentDetailsPage extends StatefulWidget {
   final Equipment equipment;
   const EquipmentDetailsPage({Key? key, required this.equipment})
       : super(key: key);
+
   @override
   _EquipmentDetailsPageState createState() => _EquipmentDetailsPageState();
 }
@@ -365,8 +347,7 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
     if (_equipment.assignedTo != null) {
       _currentlyAssignedGirl = gameProvider.girlFarmers.firstWhere(
         (girl) => girl.id == _equipment.assignedTo,
-        // ignore: cast_from_null_always_fails
-        orElse: () => null as GirlFarmer,
+        orElse: () => null!,
       );
     }
   }
@@ -490,10 +471,11 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
                     ),
                   ),
                   child: Center(
-                    child: Icon(
-                      _getSlotIcon(_equipment.slot),
-                      color: _getRarityColor(_equipment.rarity),
-                      size: 40,
+                    child: Image.asset(
+                      _equipment.imageEquip ??
+                          'assets/images/equipments/default_icon.png',
+                      width: 70,
+                      height: 70,
                     ),
                   ),
                 ),
@@ -565,9 +547,10 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
             Text(
               'Stats',
               style: TextStyle(
-                  fontSize: 18,
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white),
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
             ),
             SizedBox(height: 8),
             _buildStatRow(
@@ -703,26 +686,24 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
   }
 
   Color _getRarityColor(EquipmentRarity rarity) {
-    return switch (rarity) {
-      EquipmentRarity.common => Colors.grey,
-      EquipmentRarity.uncommon => Colors.green,
-      EquipmentRarity.rare => Colors.blue,
-      EquipmentRarity.epic => Colors.purple,
-      EquipmentRarity.legendary => Colors.orange,
-      EquipmentRarity.mythic => Colors.red,
-    };
+    switch (rarity) {
+      case EquipmentRarity.common:
+        return Colors.grey;
+      case EquipmentRarity.uncommon:
+        return Colors.green;
+      case EquipmentRarity.rare:
+        return Colors.blue;
+      case EquipmentRarity.epic:
+        return Colors.purple;
+      case EquipmentRarity.legendary:
+        return Colors.orange;
+      case EquipmentRarity.mythic:
+        return Colors.red;
+    }
   }
 
   String _getSlotName(EquipmentSlot slot) {
     return slot.toString().split('.').last;
-  }
-
-  IconData _getSlotIcon(EquipmentSlot slot) {
-    return switch (slot) {
-      EquipmentSlot.weapon => Icons.sports_martial_arts,
-      EquipmentSlot.armor => Icons.security,
-      EquipmentSlot.accessory => Icons.emoji_events,
-    };
   }
 
   void _showEquipDialog(GameProvider gameProvider) {
@@ -834,7 +815,7 @@ class _EquipmentDetailsPageState extends State<EquipmentDetailsPage> {
   }
 
   void _enhanceEquipment(GameProvider gameProvider, double cost) {
-    if (gameProvider.getCredits() < cost) {
+    if (gameProvider.getGold() < cost) {
       _showResultDialog('Error', 'Not enough credits to enhance!',
           isError: true);
       return;

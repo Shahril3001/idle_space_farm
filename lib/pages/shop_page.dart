@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../data/equipment_data.dart';
 import '../data/girl_data.dart';
+import '../data/potion_data.dart';
+import '../data/resource_data.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/shop_model.dart';
 import '../providers/game_provider.dart';
@@ -294,20 +297,8 @@ class _ShopScreenState extends State<ShopScreen>
                           const BorderRadius.vertical(top: Radius.circular(12)),
                     ),
                     child: Center(
-                      child: isGirlItem && girl != null
-                          ? ClipRRect(
-                              borderRadius: const BorderRadius.vertical(
-                                  top: Radius.circular(12)),
-                              child: Image.asset(
-                                girl.imageFace,
-                                width: double.infinity,
-                                height: double.infinity,
-                                fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) =>
-                                    _buildFallbackIcon(item.type),
-                              ),
-                            )
-                          : _buildFallbackIcon(item.type),
+                      child: _buildItemImage(
+                          item, gameProvider), // Updated this line
                     ),
                   ),
                 ),
@@ -319,6 +310,7 @@ class _ShopScreenState extends State<ShopScreen>
                         item.name,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                              fontSize: 12, fontWeight: FontWeight.bold,
                               color: Colors.white, // Only override the color
                             ),
                         maxLines: 1,
@@ -369,6 +361,63 @@ class _ShopScreenState extends State<ShopScreen>
         ),
       ),
     );
+  }
+
+  Widget _buildItemImage(ShopItem item, GameProvider gameProvider) {
+    try {
+      switch (item.type) {
+        case ShopItemType.girl:
+          final girl = girlsData.firstWhere((g) => g.id == item.itemId);
+          return ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(12)),
+            child: Image.asset(
+              girl.imageFace,
+              width: double.infinity,
+              height: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (context, error, stackTrace) =>
+                  _buildFallbackIcon(item.type),
+            ),
+          );
+
+        case ShopItemType.equipment:
+          final equipment =
+              equipmentList.firstWhere((e) => e.id == item.itemId);
+          return Image.asset(
+            equipment.imageEquip ??
+                'assets/images/equipment/${equipment.slot.name}.png',
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackIcon(item.type),
+          );
+
+        case ShopItemType.potion:
+          final potion =
+              PotionDatabase.allPotions.firstWhere((p) => p.id == item.itemId);
+          return Image.asset(
+            potion.iconAsset,
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackIcon(item.type),
+          );
+
+        case ShopItemType.abilityScroll:
+          return Image.asset(
+            'assets/images/abilities/${item.itemId}.png',
+            width: double.infinity,
+            height: double.infinity,
+            fit: BoxFit.contain,
+            errorBuilder: (context, error, stackTrace) =>
+                _buildFallbackIcon(item.type),
+          );
+      }
+    } catch (e) {
+      return _buildFallbackIcon(item.type);
+    }
   }
 
   Future<void> _showPurchaseConfirmationDialog(
@@ -610,26 +659,29 @@ class _ShopScreenState extends State<ShopScreen>
     return Wrap(
       spacing: 4,
       children: prices.entries.map((entry) {
+        final resourceConfig = ResourceData.getConfig(entry.key);
         return Chip(
-          label: Text('${entry.value} ${entry.key}'),
-          backgroundColor: _getCurrencyColor(entry.key),
-          labelStyle: const TextStyle(fontSize: 11),
+          // ${entry.key}
+          label: Text(
+            '${entry.value}',
+            style: TextStyle(
+              color: Colors.black,
+              fontSize: 12,
+            ),
+          ),
+          backgroundColor: Colors.grey[200],
+          avatar: resourceConfig != null
+              ? Image.asset(
+                  resourceConfig.imagePath,
+                  width: 20,
+                  height: 20,
+                  errorBuilder: (context, error, stackTrace) =>
+                      Icon(Icons.monetization_on, size: 20),
+                )
+              : null,
           visualDensity: VisualDensity.compact,
         );
       }).toList(),
     );
-  }
-
-  Color _getCurrencyColor(String currency) {
-    switch (currency) {
-      case 'Energy':
-        return Colors.amber[200]!;
-      case 'Minerals':
-        return Colors.blue[200]!;
-      case 'Credits':
-        return Colors.green[200]!;
-      default:
-        return Colors.grey[200]!;
-    }
   }
 }

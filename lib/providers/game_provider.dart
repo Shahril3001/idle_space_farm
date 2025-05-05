@@ -7,6 +7,9 @@ import 'package:timezone/data/latest.dart' as tz;
 
 import '../data/ability_data.dart';
 import '../data/potion_data.dart';
+import '../data/girl_data.dart';
+import '../data/equipment_data.dart';
+
 import '../models/ability_model.dart';
 import '../models/daily_reward_model.dart';
 import '../models/floor_model.dart';
@@ -16,6 +19,7 @@ import '../models/farm_model.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/equipment_model.dart';
 import '../models/shop_model.dart';
+
 import '../repositories/ability_repository.dart';
 import '../repositories/dailyreward_repository.dart';
 import '../repositories/farm_repository.dart';
@@ -23,8 +27,6 @@ import '../repositories/potion_repository.dart';
 import '../repositories/resource_repository.dart';
 import '../repositories/equipment_repository.dart';
 import '../repositories/girl_repository.dart';
-import '../data/girl_data.dart';
-import '../data/equipment_data.dart';
 import '../repositories/shop_repository.dart';
 
 import 'daily_reward_provider.dart';
@@ -85,7 +87,97 @@ class GameProvider with ChangeNotifier {
 
   Future<void> _initializeGame() async {
     _isInitialized = true;
+    await _resourceRepository.initializeDefaultResources();
     notifyListeners();
+  }
+
+  Resource? getResourceByName(String name) {
+    return _resourceRepository.getResourceByName(name);
+  }
+
+  List<Resource> getAllResources() {
+    return _resourceRepository.getAllResources();
+  }
+
+  // Resource System ==========================================
+  double getGold() =>
+      _resourceRepository.getResourceByName('Gold')?.amount ?? 0.0;
+  double getStamina() =>
+      _resourceRepository.getResourceByName('Stamina')?.amount ?? 0.0;
+  double getGem() =>
+      _resourceRepository.getResourceByName('Gem')?.amount ?? 0.0;
+  double getSilver() =>
+      _resourceRepository.getResourceByName('Silver')?.amount ?? 0.0;
+  double getMetal() =>
+      _resourceRepository.getResourceByName('Metal')?.amount ?? 0.0;
+  double getRune() =>
+      _resourceRepository.getResourceByName('Rune')?.amount ?? 0.0;
+  double getSkillBook() =>
+      _resourceRepository.getResourceByName('Skill Book')?.amount ?? 0.0;
+  double getAwakeningShard() =>
+      _resourceRepository.getResourceByName('Awakening Shard')?.amount ?? 0.0;
+  double getEnhancementStone() =>
+      _resourceRepository.getResourceByName('Enhancement Stone')?.amount ?? 0.0;
+  double getForgeMaterial() =>
+      _resourceRepository.getResourceByName('Forge Material')?.amount ?? 0.0;
+  double getGirlScroll() =>
+      _resourceRepository.getResourceByName('Girl Scroll')?.amount ?? 0.0;
+  double getEquipmentChest() =>
+      _resourceRepository.getResourceByName('Equipment Chest')?.amount ?? 0.0;
+  double getDiamond() =>
+      _resourceRepository.getResourceByName('Diamond')?.amount ?? 0.0;
+  double getDungeonKey() =>
+      _resourceRepository.getResourceByName('Dungeon Key')?.amount ?? 0.0;
+  double getArenaTicket() =>
+      _resourceRepository.getResourceByName('Arena Ticket')?.amount ?? 0.0;
+  double getRaidTicket() =>
+      _resourceRepository.getResourceByName('Raid Ticket')?.amount ?? 0.0;
+
+  bool exchangeResources(
+      String from, String to, double fromAmount, double toAmount) {
+    final fromResource = _resourceRepository.getResourceByName(from);
+    final toResource = _resourceRepository.getResourceByName(to);
+
+    if (fromResource != null && fromResource.amount >= fromAmount) {
+      // Deduct from source
+      fromResource.amount -= fromAmount;
+      _resourceRepository.updateResource(fromResource);
+
+      // Add to target
+      toResource?.amount += toAmount;
+      if (toResource != null) {
+        _resourceRepository.updateResource(toResource);
+      }
+
+      notifyListeners();
+      return true; // ✅ Successful exchange
+    } else {
+      return false; // ❌ Not enough resources
+    }
+  }
+
+  double getResourceAmount(String name) {
+    return _resourceRepository.getResourceByName(name)?.amount ?? 0.0;
+  }
+
+  Future<void> updateResourceAmount(String name, double amount) async {
+    final resource = _resourceRepository.getResourceByName(name) ??
+        Resource(name: name, amount: 0);
+    await _resourceRepository.updateResource(resource.copyWith(amount: amount));
+    notifyListeners();
+  }
+
+  // Helper for UI
+  List<ResourceDisplay> getResourceDisplays(List<String> names) {
+    return names.map((name) {
+      final resource = _resourceRepository.getResourceByName(name);
+      return ResourceDisplay(
+        name: name,
+        amount: resource?.amount ?? 0,
+        imagePath: resource?.imagePath ?? '',
+        color: resource?.color ?? Colors.grey,
+      );
+    }).toList();
   }
 
   // Daily reward
@@ -490,6 +582,7 @@ class GameProvider with ChangeNotifier {
     final newEquipment = Equipment(
       id: 'equip_${DateTime.now().millisecondsSinceEpoch}',
       name: equipTemplate.name,
+      imageEquip: equipTemplate.imageEquip,
       slot: equipTemplate.slot,
       rarity: equipTemplate.rarity,
       weaponType: equipTemplate.weaponType,
@@ -552,40 +645,6 @@ class GameProvider with ChangeNotifier {
     notifyListeners();
   }
 
-  // Resource System ==========================================
-
-  double getCredits() =>
-      _resourceRepository.getResourceByName('Credits')?.amount ?? 0.0;
-
-  double getMinerals() =>
-      _resourceRepository.getResourceByName('Minerals')?.amount ?? 0.0;
-
-  double getEnergy() =>
-      _resourceRepository.getResourceByName('Energy')?.amount ?? 0.0;
-
-  bool exchangeResources(
-      String from, String to, double fromAmount, double toAmount) {
-    final fromResource = _resourceRepository.getResourceByName(from);
-    final toResource = _resourceRepository.getResourceByName(to);
-
-    if (fromResource != null && fromResource.amount >= fromAmount) {
-      // Deduct from source
-      fromResource.amount -= fromAmount;
-      _resourceRepository.updateResource(fromResource);
-
-      // Add to target
-      toResource?.amount += toAmount;
-      if (toResource != null) {
-        _resourceRepository.updateResource(toResource);
-      }
-
-      notifyListeners();
-      return true; // ✅ Successful exchange
-    } else {
-      return false; // ❌ Not enough resources
-    }
-  }
-
   Future<void> onAppStart() async {
     print("DEBUG: Initializing game data...");
     _initializeGameData();
@@ -602,14 +661,6 @@ class GameProvider with ChangeNotifier {
 
   void _initializeGameData() {
     print("DEBUG: Initializing game data...");
-    if (_resourceRepository.getAllResources().isEmpty) {
-      _resourceRepository
-          .addResource(Resource(name: 'Energy', amount: 1000000.0));
-      _resourceRepository
-          .addResource(Resource(name: 'Minerals', amount: 1000000.0));
-      _resourceRepository
-          .addResource(Resource(name: 'Credits', amount: 1000000.0));
-    }
 
     if (_farmRepository.getAllFarms().isEmpty) {
       print("DEBUG: Initializing farms...");
@@ -627,18 +678,18 @@ class GameProvider with ChangeNotifier {
       name: 'Aetheris',
       resourcePerSecond: 1.0,
       unlockCost: 50.0,
-      resourceType: 'Energy',
+      resourceType: 'Gold',
       upgradeCost: 50.0,
-      position: Offset(110, 830), // Example position
+      position: Offset(200, 400), // Example position
     );
 
     final mineralExtractor = Farm(
       name: 'Eldoria',
       resourcePerSecond: 2.0,
       unlockCost: 100.0,
-      resourceType: 'Minerals',
+      resourceType: 'Metal',
       upgradeCost: 100.0,
-      position: Offset(370, 800), // Example position
+      position: Offset(200, 300), // Example position
     );
 
     // Add floors to farms
@@ -738,7 +789,7 @@ class GameProvider with ChangeNotifier {
       final potion = _potionRepository.getPotionById(potionId);
       if (potion == null) return false;
 
-      final credits = _resourceRepository.getResourceByName('Credits');
+      final credits = _resourceRepository.getResourceByName('Gold');
       if (credits == null) return false;
 
       if (potion.quantity < quantity) {
@@ -1091,7 +1142,7 @@ class GameProvider with ChangeNotifier {
     if (equipment == null) return false;
 
     final cost = _calculateEnhancementCost(equipment);
-    final credits = _resourceRepository.getResourceByName('Credits');
+    final credits = _resourceRepository.getResourceByName('Gold');
 
     if (credits == null || credits.amount < cost) {
       return false;
@@ -1141,7 +1192,7 @@ class GameProvider with ChangeNotifier {
 
     // Add credits
     final sellValue = calculateSellValue(equipment);
-    final credits = _resourceRepository.getResourceByName('Credits');
+    final credits = _resourceRepository.getResourceByName('Gold');
     if (credits != null) {
       credits.amount += sellValue;
       _resourceRepository.updateResource(credits);
@@ -1176,7 +1227,7 @@ class GameProvider with ChangeNotifier {
   }
 
   List<Equipment> performEquipmentGacha({int pulls = 1}) {
-    final credits = _resourceRepository.getResourceByName('Credits');
+    final credits = _resourceRepository.getResourceByName('Equipment Chest');
     final cost = pulls * 10;
 
     if (credits == null || credits.amount < cost) return [];
@@ -1211,6 +1262,7 @@ class GameProvider with ChangeNotifier {
         final newEquipment = Equipment(
           id: '${equipment.id}_${DateTime.now().millisecondsSinceEpoch}',
           name: equipment.name,
+          imageEquip: equipment.imageEquip,
           slot: equipment.slot,
           rarity: equipment.rarity,
           weaponType: equipment.weaponType,
@@ -1258,6 +1310,7 @@ class GameProvider with ChangeNotifier {
         EquipmentSlot.weapon => Equipment(
             id: '${rarity.name}_weapon_$now',
             name: '$capitalizedRarity ${_getRandomWeaponName(random)}',
+            imageEquip: _getWeaponImagePath(_getRandomWeaponType(random)),
             slot: slot,
             rarity: rarity,
             weaponType: _getRandomWeaponType(random),
@@ -1276,6 +1329,7 @@ class GameProvider with ChangeNotifier {
         EquipmentSlot.armor => Equipment(
             id: '${rarity.name}_armor_$now',
             name: '$capitalizedRarity ${_getRandomArmorName(random)}',
+            imageEquip: _getArmorImagePath(_getRandomArmorType(random)),
             slot: slot,
             rarity: rarity,
             armorType: _getRandomArmorType(random),
@@ -1294,6 +1348,7 @@ class GameProvider with ChangeNotifier {
         EquipmentSlot.accessory => Equipment(
             id: '${rarity.name}_accessory_$now',
             name: '$capitalizedRarity ${_getRandomAccessoryName(random)}',
+            imageEquip: _getAccessoryImagePath(_getRandomAccessoryType(random)),
             slot: slot,
             rarity: rarity,
             accessoryType: _getRandomAccessoryType(random),
@@ -1316,7 +1371,32 @@ class GameProvider with ChangeNotifier {
     }
   }
 
-// Helper methods for random generation
+  String _getWeaponImagePath(WeaponType weaponType) {
+    return switch (weaponType) {
+      WeaponType.oneHandedWeapon => 'assets/images/equipments/sword.png',
+      WeaponType.oneHandedShield => 'assets/images/equipments/shield.png',
+      WeaponType.twoHandedWeapon => 'assets/images/equipments/greatsword.png',
+    };
+  }
+
+  String _getArmorImagePath(ArmorType armorType) {
+    return switch (armorType) {
+      ArmorType.head => 'assets/images/equipments/helmet.png',
+      ArmorType.body => 'assets/images/equipments/chestplate.png',
+    };
+  }
+
+  String _getAccessoryImagePath(AccessoryType accessoryType) {
+    return switch (accessoryType) {
+      AccessoryType.amulet => 'assets/images/equipments/amulet.png',
+      AccessoryType.charm => 'assets/images/equipments/charm.png',
+      AccessoryType.glove => 'assets/images/equipments/glove.png',
+      AccessoryType.shoes => 'assets/images/equipments/shoes.png',
+      AccessoryType.pendant => 'assets/images/equipments/pendant.png',
+    };
+  }
+
+  // Helper methods for random generation
   String _getRandomWeaponName(Random random) {
     final types = ['Sword', 'Axe', 'Mace', 'Dagger', 'Bow', 'Staff'];
     return types[random.nextInt(types.length)];
@@ -1412,7 +1492,7 @@ class GameProvider with ChangeNotifier {
   }
 
   List<GirlFarmer> performGachaGirl({int pulls = 1}) {
-    final credits = _resourceRepository.getResourceByName('Credits');
+    final credits = _resourceRepository.getResourceByName('Girl Scroll');
     final cost = pulls * 10;
 
     if (credits != null && credits.amount >= cost) {
@@ -1498,69 +1578,115 @@ class GameProvider with ChangeNotifier {
     // return RaceAbilities.getStarterAbilities(race);
   }
 
-  bool upgradeGirl(String girlId) {
+  bool upgradeGirl(String girlId, {bool useSkillbook = false}) {
     final girl = _girlRepository.getGirlById(girlId);
     final minerals = _resourceRepository.getResourceByName('Minerals');
+    final skillbooks = _resourceRepository.getResourceByName('Skillbooks');
+    final awakeningShards = _resourceRepository
+        .getResourceByName('AwakeningShards'); // New resource
 
-    if (girl != null && minerals != null) {
-      final int maxLevel = 100;
-      if (girl.level >= maxLevel) {
-        print("${girl.name} has reached the maximum level of $maxLevel.");
-        return false;
-      }
+    // Check if all resources exist
+    if (girl == null ||
+        minerals == null ||
+        skillbooks == null ||
+        awakeningShards == null) {
+      print("Error: Girl or Resources not found.");
+      return false;
+    }
 
-      final upgradeCost = (150 + (girl.level - 1) * 150).toInt();
+    final int maxLevel = 100;
+    if (girl.level >= maxLevel) {
+      print("${girl.name} has reached the maximum level of $maxLevel.");
+      return false;
+    }
 
-      if (minerals.amount >= upgradeCost) {
-        // Deduct minerals
-        minerals.amount -= upgradeCost;
-        _resourceRepository.updateResource(minerals);
+    // Check if NEXT level is a milestone (10, 20, 30...100)
+    final bool isMilestoneLevel = (girl.level + 1) % 10 == 0;
 
-        // Upgrade Girl
-        girl.level++;
+    // Calculate costs
+    final mineralUpgradeCost = (150 + (girl.level - 1) * 150).toInt();
+    final skillbookUpgradeCost =
+        (30 + (girl.level - 1) * 30).toInt(); // Balanced scaling
+    final awakeningShardCost =
+        isMilestoneLevel ? (40 + (girl.level ~/ 10) * 40) : 0;
 
-        // Increase miningEfficiency based on rarity
-        switch (girl.rarity) {
-          case 'Common':
-            girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.01;
-            break;
-          case 'Rare':
-            girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.04;
-            break;
-          case 'Unique':
-            girl.miningEfficiency += (Random().nextDouble() * 0.02) + 0.08;
-            break;
-          default:
-            girl.miningEfficiency += 0.01;
-        }
+    // Check if player has enough resources
+    if (isMilestoneLevel && awakeningShards.amount < awakeningShardCost) {
+      print(
+          "Not enough Awakening Shards! Required: $awakeningShardCost (Have: ${awakeningShards.amount})");
+      return false;
+    }
 
-        // Increase stats
-        girl.attackPoints += 2;
-        girl.defensePoints += 2;
-        girl.agilityPoints += 1;
-        girl.maxHp += 20;
-        girl.hp = girl.maxHp;
-        girl.maxMp += 10;
-        girl.mp = girl.maxMp;
-        girl.maxSp += 5;
-        girl.sp = girl.maxSp;
-        girl.criticalPoint += 1;
-
-        // Unlock abilities based on level and race
-        _unlockAbilities(girl);
-
-        // Save the updated girl
-        _girlRepository.updateGirl(girl);
-        notifyListeners();
-        return true;
-      } else {
-        print("Not enough minerals!");
+    if (useSkillbook) {
+      if (skillbooks.amount < skillbookUpgradeCost) {
+        print(
+            "Not enough Skillbooks! Required: $skillbookUpgradeCost (Have: ${skillbooks.amount})");
         return false;
       }
     } else {
-      print("Error: Girl or Minerals not found.");
-      return false;
+      if (minerals.amount < mineralUpgradeCost) {
+        print(
+            "Not enough Minerals! Required: $mineralUpgradeCost (Have: ${minerals.amount})");
+        return false;
+      }
     }
+
+    // Deduct resources
+    if (isMilestoneLevel) {
+      awakeningShards.amount -= awakeningShardCost;
+      _resourceRepository.updateResource(awakeningShards);
+    }
+
+    if (useSkillbook) {
+      skillbooks.amount -= skillbookUpgradeCost;
+      _resourceRepository.updateResource(skillbooks);
+    } else {
+      minerals.amount -= mineralUpgradeCost;
+      _resourceRepository.updateResource(minerals);
+    }
+
+    // Upgrade Girl
+    girl.level++;
+
+    // Increase miningEfficiency based on rarity
+    switch (girl.rarity) {
+      case 'Common':
+        girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.01;
+        break;
+      case 'Rare':
+        girl.miningEfficiency += (Random().nextDouble() * 0.03) + 0.04;
+        break;
+      case 'Unique':
+        girl.miningEfficiency += (Random().nextDouble() * 0.02) + 0.08;
+        break;
+      default:
+        girl.miningEfficiency += 0.01;
+    }
+
+    // Increase stats
+    girl.attackPoints += 2;
+    girl.defensePoints += 2;
+    girl.agilityPoints += 1;
+    girl.maxHp += 20;
+    girl.hp = girl.maxHp; // Full heal on level-up
+    girl.maxMp += 10;
+    girl.mp = girl.maxMp;
+    girl.maxSp += 5;
+    girl.sp = girl.maxSp;
+    girl.criticalPoint += 1;
+
+    // Unlock abilities based on level and race
+    _unlockAbilities(girl);
+
+    // Save changes
+    _girlRepository.updateGirl(girl);
+    notifyListeners();
+
+    // Debug log
+    print("${girl.name} leveled up to ${girl.level}! "
+        "Cost: ${useSkillbook ? '$skillbookUpgradeCost Skillbooks' : '$mineralUpgradeCost Minerals'}"
+        "${isMilestoneLevel ? ' + $awakeningShardCost Awakening Shards' : ''}");
+    return true;
   }
 
   void _unlockAbilities(GirlFarmer girl) {
@@ -1987,7 +2113,7 @@ class GameProvider with ChangeNotifier {
         }
       }
 
-      final credits = _resourceRepository.getResourceByName('Credits');
+      final credits = _resourceRepository.getResourceByName('Gold');
       if (credits != null) {
         double sellPrice = 0;
         switch (girl.rarity) {
@@ -2339,4 +2465,18 @@ class GameProvider with ChangeNotifier {
     _resourceTimer?.cancel();
     super.dispose();
   }
+}
+
+class ResourceDisplay {
+  final String name;
+  final double amount;
+  final String imagePath;
+  final Color color;
+
+  ResourceDisplay({
+    required this.name,
+    required this.amount,
+    required this.imagePath,
+    required this.color,
+  });
 }

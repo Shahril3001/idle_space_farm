@@ -60,70 +60,70 @@ class TransactionExchangePage extends StatelessWidget {
       BuildContext context, GameProvider gameProvider) {
     List<Map<String, dynamic>> exchanges = [
       {
-        "label": "150 Golds ➝ 1000 Minerals",
-        "from": "Credits",
-        "to": "Minerals",
-        "fromAmount": 150.0, // Use double instead of int
-        "toAmount": 1000.0, // Use double instead of int
-        "fromIcon":
-            'assets/images/icons/resources-golds.png', // Updated to image asset
-        "toIcon":
-            'assets/images/icons/resources-minerals.png', // Updated to image asset
-      },
-      {
-        "label": "150 Golds ➝ 500 Runes",
-        "from": "Credits",
-        "to": "Energy",
-        "fromAmount": 150.0, // Use double instead of int
-        "toAmount": 500.0, // Use double instead of int
-        "fromIcon":
-            'assets/images/icons/resources-golds.png', // Updated to image asset
-        "toIcon":
-            'assets/images/icons/resources-runes.png', // Updated to image asset
-      },
-      {
-        "label": "1000 Minerals ➝ 150 Golds",
-        "from": "Minerals",
-        "to": "Credits",
-        "fromAmount": 1000.0, // Use double instead of int
-        "toAmount": 150.0, // Use double instead of int
-        "fromIcon":
-            'assets/images/icons/resources-minerals.png', // Updated to image asset
-        "toIcon":
-            'assets/images/icons/resources-golds.png', // Updated to image asset
-      },
-      {
-        "label": "500 Runes ➝ 150 Golds",
-        "from": "Energy",
-        "to": "Credits",
-        "fromAmount": 500.0, // Use double instead of int
-        "toAmount": 150.0, // Use double instead of int
-        "fromIcon":
-            'assets/images/icons/resources-runes.png', // Updated to image asset
-        "toIcon":
-            'assets/images/icons/resources-golds.png', // Updated to image asset
-      },
-      {
-        "label": "1000 Minerals ➝ 500 Runes",
-        "from": "Minerals",
-        "to": "Energy",
+        "label": "150 Golds ➝ 1000 Metals",
+        "from": "Gold",
+        "to": "Metal",
         "fromAmount": 1000.0, // Use double instead of int
         "toAmount": 500.0, // Use double instead of int
         "fromIcon":
-            'assets/images/icons/resources-minerals.png', // Updated to image asset
+            'assets/images/resources/resources-gold.png', // Updated to image asset
         "toIcon":
-            'assets/images/icons/resources-runes.png', // Updated to image asset
+            'assets/images/resources/resources-metal.png', // Updated to image asset
       },
       {
-        "label": "500 Runes ➝ 1000 Minerals",
-        "from": "Energy",
-        "to": "Minerals",
+        "label": "150 Golds ➝ 500 Gems",
+        "from": "Gold",
+        "to": "Gem",
+        "fromAmount": 1000.0, // Use double instead of int
+        "toAmount": 10.0, // Use double instead of int
+        "fromIcon":
+            'assets/images/resources/resources-gold.png', // Updated to image asset
+        "toIcon":
+            'assets/images/resources/resources-rune.png', // Updated to image asset
+      },
+      {
+        "label": "1000 Metals ➝ 150 Golds",
+        "from": "Metal",
+        "to": "Gold",
         "fromAmount": 500.0, // Use double instead of int
         "toAmount": 1000.0, // Use double instead of int
         "fromIcon":
-            'assets/images/icons/resources-runes.png', // Updated to image asset
+            'assets/images/resources/resources-metal.png', // Updated to image asset
         "toIcon":
-            'assets/images/icons/resources-minerals.png', // Updated to image asset
+            'assets/images/resources/resources-gold.png', // Updated to image asset
+      },
+      {
+        "label": "500 Gems ➝ 150 Golds",
+        "from": "Gem",
+        "to": "Gold",
+        "fromAmount": 10.0, // Use double instead of int
+        "toAmount": 1000.0, // Use double instead of int
+        "fromIcon":
+            'assets/images/resources/resources-rune.png', // Updated to image asset
+        "toIcon":
+            'assets/images/resources/resources-gold.png', // Updated to image asset
+      },
+      {
+        "label": "1000 Metals ➝ 500 Runes",
+        "from": "Metal",
+        "to": "Gem",
+        "fromAmount": 500.0, // Use double instead of int
+        "toAmount": 10.0, // Use double instead of int
+        "fromIcon":
+            'assets/images/resources/resources-metal.png', // Updated to image asset
+        "toIcon":
+            'assets/images/resources/resources-rune.png', // Updated to image asset
+      },
+      {
+        "label": "10 Gems ➝ 500 Metals",
+        "from": "Gem",
+        "to": "Metal",
+        "fromAmount": 10.0, // Use double instead of int
+        "toAmount": 500.0, // Use double instead of int
+        "fromIcon":
+            'assets/images/resources/resources-rune.png', // Updated to image asset
+        "toIcon":
+            'assets/images/resources/resources-metal.png', // Updated to image asset
       },
     ];
 
@@ -151,7 +151,7 @@ class TransactionExchangePage extends StatelessWidget {
                 Text(
                   exchange["fromAmount"].toString(),
                   style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),
@@ -167,7 +167,7 @@ class TransactionExchangePage extends StatelessWidget {
                 Text(
                   exchange["toAmount"].toString(),
                   style: TextStyle(
-                      fontSize: 14,
+                      fontSize: 13,
                       color: Colors.white,
                       fontWeight: FontWeight.bold),
                 ),

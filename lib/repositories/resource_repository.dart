@@ -27,17 +27,54 @@ class ResourceRepository {
   }
 
   Future<void> clearAllResources() async {
-    // Delete all resource keys
-    final resourceKeys =
-        _box.keys.where((key) => key.toString().startsWith('resource_'));
+    final resourceKeys = _box.keys
+        .where((key) => key.toString().startsWith('resource_'))
+        .toList();
     await _box.deleteAll(resourceKeys);
   }
 
-  // Add this method to support the save/load system
   Future<void> saveAllResources(List<Resource> resources) async {
-    await clearAllResources(); // Clear existing resources first
+    await clearAllResources();
     for (final resource in resources) {
       await addResource(resource);
+    }
+  }
+
+  // New helper methods
+  Future<void> initializeDefaultResources() async {
+    if ((await _box.keys
+        .where((k) => k.toString().startsWith('resource_'))
+        .isEmpty)) {
+      await _addDefaultResources();
+    }
+  }
+
+  Future<void> _addDefaultResources() async {
+    const defaultResources = {
+      'Default': 0.0,
+      'Gold': 10000000.0,
+      'Silver': 0.0,
+      'Metal': 10000000.0,
+      'Rune': 10000000.0,
+      'Skill Book': 10000000.0,
+      'Awakening Shard': 10000000.0,
+      'Enhancement Stone': 10000000.0,
+      'Forge Material': 10000000.0,
+      'Girl Scroll': 10000000.0,
+      'Equipment Chest': 10000000.0,
+      'Gem': 10000000.0,
+      'Diamond': 10000000.0,
+      'Stamina': 10000000.0,
+      'Dungeon Key': 100.0,
+      'Arena Ticket': 100.0,
+      'Raid Ticket': 100.0,
+    };
+
+    for (final entry in defaultResources.entries) {
+      await addResource(Resource(
+        name: entry.key,
+        amount: entry.value,
+      ));
     }
   }
 }

@@ -76,8 +76,10 @@ flutter:
     - assets/images/potions/
     - assets/images/abilities/
     - assets/images/locations/
+    - assets/images/resources/
     - assets/audios/mp3/
     - assets/audios/wav/
+    - assets/fonts/
     
   # The following line ensures that the Material Icons font is
   # included with your application, so that you can use the icons in
@@ -100,12 +102,10 @@ flutter:
   # "family" key with the font family name, and a "fonts" key with a
   # list giving the asset and other descriptors for the font. For
   # example:
-  # fonts:
-  #   - family: Schyler
-  #     fonts:
-  #       - asset: fonts/Schyler-Regular.ttf
-  #       - asset: fonts/Schyler-Italic.ttf
-  #         style: italic
+  fonts:
+    - family: 'B612Mono-Regular'
+      fonts:
+        - asset: 'assets/fonts/B612Mono-Regular.ttf'
   #   - family: Trajan Pro
   #     fonts:
   #       - asset: fonts/TrajanPro.ttf

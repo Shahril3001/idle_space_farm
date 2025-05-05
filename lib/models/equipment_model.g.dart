@@ -21,6 +21,7 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
       name: fields[1] as String,
       slot: fields[2] as EquipmentSlot,
       rarity: fields[8] as EquipmentRarity,
+      imageEquip: fields[19] as String?,
       weaponType: fields[16] as WeaponType?,
       armorType: fields[17] as ArmorType?,
       accessoryType: fields[18] as AccessoryType?,
@@ -42,7 +43,7 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
   @override
   void write(BinaryWriter writer, Equipment obj) {
     writer
-      ..writeByte(19)
+      ..writeByte(20)
       ..writeByte(0)
       ..write(obj.id)
       ..writeByte(1)
@@ -80,7 +81,9 @@ class EquipmentAdapter extends TypeAdapter<Equipment> {
       ..writeByte(17)
       ..write(obj.armorType)
       ..writeByte(18)
-      ..write(obj.accessoryType);
+      ..write(obj.accessoryType)
+      ..writeByte(19)
+      ..write(obj.imageEquip);
   }
 
   @override

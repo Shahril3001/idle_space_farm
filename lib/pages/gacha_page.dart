@@ -2,12 +2,16 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'dart:math';
 import '../main.dart';
+import '../providers/audio_manager.dart';
 import '../providers/game_provider.dart';
 import '../models/girl_farmer_model.dart';
 import '../models/equipment_model.dart';
 
 class GachaMainPage extends StatefulWidget {
+  const GachaMainPage({super.key});
+
   @override
+  // ignore: library_private_types_in_public_api
   _GachaMainPageState createState() => _GachaMainPageState();
 }
 
@@ -139,12 +143,13 @@ class GachaAnimation extends StatefulWidget {
   final VoidCallback onComplete;
 
   const GachaAnimation({
-    Key? key,
+    super.key,
     required this.isCharacterGacha,
     required this.onComplete,
-  }) : super(key: key);
+  });
 
   @override
+  // ignore: library_private_types_in_public_api
   _GachaAnimationState createState() => _GachaAnimationState();
 }
 
@@ -153,10 +158,13 @@ class _GachaAnimationState extends State<GachaAnimation>
   late AnimationController _controller;
   late Animation<double> _scaleAnimation;
   late Animation<double> _opacityAnimation;
+  late AudioManager _audioManager;
 
   @override
   void initState() {
     super.initState();
+    _audioManager = Provider.of<AudioManager>(context, listen: false);
+
     _controller = AnimationController(
       vsync: this,
       duration: Duration(milliseconds: 1500),
@@ -180,6 +188,25 @@ class _GachaAnimationState extends State<GachaAnimation>
     _controller.forward().then((_) {
       widget.onComplete();
     });
+
+    _playGachaSound();
+  }
+
+  Future<void> _playGachaSound() async {
+    try {
+      await _audioManager.playSFX('audios/wav/gacha_reveal1.wav');
+    } catch (e) {
+      debugPrint('Error playing gacha SFX: $e');
+    }
+  }
+
+  String _formatAmount(double amount) {
+    if (amount >= 1000000) {
+      return '${(amount / 1000000).toStringAsFixed(1)}M';
+    } else if (amount >= 1000) {
+      return '${(amount / 1000).toStringAsFixed(1)}K';
+    }
+    return amount.toStringAsFixed(0);
   }
 
   @override
@@ -347,17 +374,17 @@ class GachaGirlPage extends StatelessWidget {
       title: 'Summon Girl',
       image: Image.asset(
         "assets/images/ui/summon-girl.png",
-        width: 250,
-        height: 280,
+        width: 220,
+        height: 230,
         fit: BoxFit.cover,
       ),
-      subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
+      subtitle: 'Let the goddess hear your prayer.',
       button1: _buildGachaButton(
         context,
         gameProvider,
         '1x Pull',
         1,
-        "assets/images/icons/gacha_01scroll.png", // Image asset path instead of IconData
+        "assets/images/resources/resources-summongirlscroll.png", // Image asset path instead of IconData
         Colors.blueAccent,
         true,
       ),
@@ -366,10 +393,11 @@ class GachaGirlPage extends StatelessWidget {
         gameProvider,
         '10x Pulls',
         10,
-        "assets/images/icons/gacha_10scroll.png", // Image asset path
+        "assets/images/resources/resources-summongirlscroll.png", // Image asset path
         Colors.blueAccent,
         true,
       ),
+      isCharacterGacha: true,
     );
   }
 }
@@ -383,17 +411,17 @@ class GachaItemPage extends StatelessWidget {
       title: 'Summon Equipment',
       image: Image.asset(
         "assets/images/ui/summon-equipment.png",
-        width: 250,
-        height: 280,
+        width: 220,
+        height: 230,
         fit: BoxFit.cover,
       ),
-      subtitle: '💰 10 Credits (1x)\n💰 90 Credits (10x)',
+      subtitle: 'Weapons of yore await the worthy.',
       button1: _buildGachaButton(
         context,
         gameProvider,
         '1x Pull',
         1,
-        "assets/images/icons/gacha_01scroll.png", // Image asset path
+        "assets/images/resources/resources-summonequipmentchest.png", // Image asset path
         Colors.blueAccent,
         false,
       ),
@@ -402,10 +430,11 @@ class GachaItemPage extends StatelessWidget {
         gameProvider,
         '10x Pulls',
         10,
-        "assets/images/icons/gacha_10scroll.png", // Image asset path
+        "assets/images/resources/resources-summonequipmentchest.png", // Image asset path
         Colors.blueAccent,
         false,
       ),
+      isCharacterGacha: false,
     );
   }
 }
@@ -417,6 +446,7 @@ Widget _buildGachaSection({
   required String subtitle,
   required Widget button1,
   required Widget button2,
+  required bool isCharacterGacha,
 }) {
   return Center(
     child: _buildGlassCard(
@@ -425,6 +455,7 @@ Widget _buildGachaSection({
       content: subtitle,
       button1: button1,
       button2: button2,
+      isCharacterGacha: isCharacterGacha,
     ),
   );
 }
@@ -435,59 +466,204 @@ Widget _buildGlassCard({
   required String content,
   required Widget button1,
   required Widget button2,
+  required bool isCharacterGacha,
 }) {
-  return Container(
-    margin: EdgeInsets.all(20),
-    child: Card(
-      elevation: 10,
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(10),
-        side: BorderSide(
-          color: Colors.blueAccent, // Border color
-          width: 2.0, // Border thickness
+  return Consumer<GameProvider>(builder: (context, gameProvider, child) {
+    // Get the appropriate resource based on gacha type
+    final resourceCount = isCharacterGacha
+        ? gameProvider.getGirlScroll().toDouble()
+        : gameProvider.getEquipmentChest().toDouble();
+    final resourceName = isCharacterGacha ? 'Girl Scroll' : 'Equipment Chest';
+    final resourceIcon = isCharacterGacha
+        ? 'assets/images/resources/resources-summongirlscroll.png'
+        : 'assets/images/resources/resources-summonequipmentchest.png';
+    return Container(
+      margin: EdgeInsets.all(20),
+      child: Card(
+        elevation: 10,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(10),
+          side: BorderSide(
+            color: Colors.blueAccent, // Border color
+            width: 2.0, // Border thickness
+          ),
+        ),
+        color: Colors.black.withOpacity(0.8),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                title,
+                style: TextStyle(
+                  fontFamily: 'GameFont',
+                  fontSize: 22,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.blueAccent,
+                ),
+              ),
+              Divider(color: Colors.white54),
+              if (image != null) image,
+              SizedBox(height: 10),
+              Text(
+                content,
+                style: TextStyle(
+                  fontFamily: 'GameFont',
+                  fontSize: 14,
+                  color: Colors.white,
+                  fontStyle: FontStyle.italic,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              SizedBox(height: 15),
+              Container(
+                padding: EdgeInsets.symmetric(vertical: 6, horizontal: 12),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.5),
+                  borderRadius: BorderRadius.circular(5),
+                  border: Border.all(
+                    color: isCharacterGacha
+                        ? Colors.blueAccent
+                        : Colors.blueAccent,
+                    width: 1.5,
+                  ),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      'Currency Owned',
+                      style: TextStyle(
+                        fontFamily: 'GameFont',
+                        fontSize: 15,
+                        color: Colors.white,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    SizedBox(height: 10),
+                    // Equal width currency display
+                    IntrinsicHeight(
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          // Primary currency (50% width)
+                          Expanded(
+                            child: _buildResourceCount(
+                              context,
+                              resourceIcon,
+                              resourceCount,
+                              resourceName,
+                            ),
+                          ),
+                          SizedBox(width: 8),
+                          // Premium currency (50% width)
+                          Expanded(
+                            child: _buildResourceCount(
+                              context,
+                              'assets/images/resources/resources-gem.png',
+                              Provider.of<GameProvider>(context).getGem(),
+                              'Gem',
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(height: 10),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Expanded(child: button1),
+                  SizedBox(width: 10),
+                  Expanded(child: button2),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
-      color: Colors.black.withOpacity(0.8),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Text(
-              title,
-              style: TextStyle(
-                fontFamily: 'GameFont',
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.blueAccent,
-              ),
-            ),
-            Divider(color: Colors.white54),
-            if (image != null) image,
-            SizedBox(height: 18),
-            Text(
-              content,
-              style: TextStyle(
-                fontFamily: 'GameFont',
-                fontSize: 14,
-                color: Colors.white,
-              ),
-              textAlign: TextAlign.center,
-            ),
-            SizedBox(height: 20),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Expanded(child: button1),
-                SizedBox(width: 10),
-                Expanded(child: button2),
-              ],
-            ),
-          ],
-        ),
+    );
+  });
+}
+
+Widget _buildResourceCount(
+  BuildContext context,
+  String iconPath,
+  double count,
+  String resourceName,
+) {
+  return Container(
+    constraints: BoxConstraints(minHeight: 48), // Equal minimum height
+    padding: EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    decoration: BoxDecoration(
+      color: Colors.blue.withOpacity(0.2),
+      borderRadius: BorderRadius.circular(5),
+      border: Border.all(
+        color: Colors.blueAccent,
+        width: 1,
       ),
     ),
+    child: Row(
+      mainAxisAlignment: MainAxisAlignment.center,
+      children: [
+        // Icon with circular background
+        Container(
+          width: 24,
+          height: 24,
+          decoration: BoxDecoration(
+            color: Colors.white.withOpacity(0.9),
+            shape: BoxShape.circle,
+          ),
+          padding: EdgeInsets.all(4),
+          child: Image.asset(
+            iconPath,
+            width: 16,
+            height: 16,
+          ),
+        ),
+        SizedBox(width: 8),
+        Flexible(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text(
+                resourceName,
+                style: TextStyle(
+                  fontFamily: 'GameFont',
+                  fontSize: 10,
+                  color: Colors.white70,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+              Text(
+                _formatAmount(count),
+                style: TextStyle(
+                  fontFamily: 'GameFont',
+                  fontSize: 12,
+                  color: Colors.white,
+                  fontWeight: FontWeight.bold,
+                ),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
+          ),
+        ),
+      ],
+    ),
   );
+}
+
+String _formatAmount(double amount) {
+  if (amount >= 1000000) {
+    return '${(amount / 1000000).toStringAsFixed(1)}M';
+  } else if (amount >= 1000) {
+    return '${(amount / 1000).toStringAsFixed(1)}K';
+  }
+  return amount.toStringAsFixed(0);
 }
 
 Widget _buildGachaButton(
@@ -503,7 +679,7 @@ Widget _buildGachaButton(
       padding: EdgeInsets.symmetric(vertical: 5, horizontal: 15),
       backgroundColor: color,
       shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(15),
+        borderRadius: BorderRadius.circular(8),
       ),
       shadowColor: Colors.black.withOpacity(0.3),
       elevation: 8,
@@ -541,10 +717,27 @@ Widget _buildGachaButton(
         ),
       );
     },
-    icon: Image.asset(
-      iconAsset,
-      width: 30,
+    icon: Container(
+      width: 30, // Slightly larger to accommodate the padding
       height: 30,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(
+            18), // Half of width/height for perfect circle
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.2),
+            blurRadius: 3,
+            spreadRadius: 1,
+          ),
+        ],
+      ),
+      padding: EdgeInsets.all(4), // Adjust padding as needed
+      child: Image.asset(
+        iconAsset,
+        width: 20, // Slightly smaller than container
+        height: 20,
+      ),
     ),
     label: Text(
       label,

@@ -1,8 +1,6 @@
 import 'dart:async';
-import 'dart:typed_data';
 import 'dart:ui' as ui;
 import 'dart:math';
-import 'package:audioplayers/audioplayers.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -20,6 +18,7 @@ import 'models/ability_model.dart';
 import 'models/girl_farmer_model.dart';
 import 'models/equipment_model.dart';
 import 'models/shop_model.dart';
+import 'providers/audio_manager.dart';
 import 'providers/game_provider.dart';
 import 'providers/battle_provider.dart';
 import 'repositories/dailyreward_repository.dart';
@@ -32,8 +31,6 @@ import 'pages/navigationbar.dart';
 import 'pages/gacha_page.dart';
 import 'pages/girl_list_page.dart';
 import 'repositories/shop_repository.dart';
-
-final AudioPlayer backgroundAudioPlayer = AudioPlayer();
 
 class ImageCacheManager {
   static final Map<String, ImageProvider> _cache = {};
@@ -54,6 +51,7 @@ class ImageCacheManager {
       final byteData = await rootBundle.load(img);
       _memoryCache[img] = byteData.buffer.asUint8List();
       _cache[img] = MemoryImage(_memoryCache[img]!);
+      // ignore: use_build_context_synchronously
       precacheImage(_cache[img]!, context);
     }
   }
@@ -76,8 +74,6 @@ void main() async {
   // Initialize Flutter binding FIRST
   WidgetsFlutterBinding.ensureInitialized();
   // Now you can initialize the audio player
-  await backgroundAudioPlayer.setReleaseMode(ReleaseMode.loop);
-  await backgroundAudioPlayer.setPlayerMode(PlayerMode.mediaPlayer);
 
   debugPrintRebuildDirtyWidgets = false;
 
@@ -136,9 +132,11 @@ void main() async {
   }
   if (!Hive.isAdapterRegistered(27)) Hive.registerAdapter(DailyRewardAdapter());
 
-  // Open the main Hive box
   final box = await Hive.openBox('eldoria_chronicles');
-
+  // Create and initialize AudioManager
+  final audioManager = AudioManager();
+  await audioManager.initialize();
+  await audioManager.playBGM('audios/mp3/whispersofthesakura.mp3');
   // Initialize repositories
   final resourceRepository = ResourceRepository(box);
   final farmRepository = FarmRepository(box);
@@ -164,10 +162,10 @@ void main() async {
             dailyRewardRepository: dailyRewardRepository,
           )..loadGame(),
         ),
+        ChangeNotifierProvider<AudioManager>.value(value: audioManager),
         ChangeNotifierProvider(
           create: (_) => BattleProvider(),
         ),
-        Provider<AudioPlayer>.value(value: backgroundAudioPlayer),
       ],
       child: const MyApp(),
     ),
@@ -175,7 +173,7 @@ void main() async {
 }
 
 class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
+  const MyApp({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -183,6 +181,7 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Eldoria Chronicles Idle RPG',
       theme: ThemeData(
+        // fontFamily: 'B612Mono-Regular',
         primarySwatch: Colors.blue,
         scaffoldBackgroundColor: const Color(0xFF0A0A20),
       ),
@@ -196,9 +195,10 @@ class MyApp extends StatelessWidget {
 }
 
 class SplashScreen extends StatefulWidget {
-  const SplashScreen({Key? key}) : super(key: key);
+  const SplashScreen({super.key});
 
   @override
+  // ignore: library_private_types_in_public_api
   _SplashScreenState createState() => _SplashScreenState();
 }
 
@@ -447,7 +447,7 @@ class _SplashScreenState extends State<SplashScreen>
                 ),
                 const Text(
                   'v1.0.0',
-                  style: const TextStyle(
+                  style: TextStyle(
                     color: Colors.black87,
                     fontSize: 13,
                     fontWeight: FontWeight.w700,
