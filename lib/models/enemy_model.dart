@@ -111,7 +111,12 @@ class Enemy {
     this.skipNextTurn = false,
     this.mindControlled = false,
     this.mindController = null,
-  });
+  }) {
+    // Ensure HP doesn't exceed maxHP
+    hp = hp.clamp(0, maxHp);
+    mp = mp.clamp(0, maxMp);
+    sp = sp.clamp(0, maxSp);
+  }
 
   factory Enemy.freshCopy(Enemy other) {
     return Enemy(

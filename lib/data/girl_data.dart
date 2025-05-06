@@ -98,12 +98,12 @@ Map<String, int> _generateStats(String rarity, String type) {
   }
 
   return {
-    'hp': baseHp + rarityBonus,
-    'mp': baseMp + rarityBonus,
-    'sp': baseSp + rarityBonus,
-    'attackPoints': baseAtk + rarityBonus,
-    'defensePoints': baseDef + rarityBonus,
-    'agilityPoints': baseAgi + rarityBonus,
+    'hp': (baseHp + rarityBonus).clamp(1, 9999),
+    'mp': (baseMp + rarityBonus).clamp(1, 9999),
+    'sp': (baseSp + rarityBonus).clamp(1, 9999),
+    'attackPoints': (baseAtk + rarityBonus).clamp(1, 9999),
+    'defensePoints': (baseDef + rarityBonus).clamp(1, 9999),
+    'agilityPoints': (baseAgi + rarityBonus).clamp(1, 9999),
   };
 }
 

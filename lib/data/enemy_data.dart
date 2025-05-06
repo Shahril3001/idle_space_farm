@@ -529,7 +529,6 @@ List<Enemy> generateEnemies(
   final availableEnemies =
       regionalEnemies.isNotEmpty ? regionalEnemies : baseEnemies;
 
-  // Separate boss enemies from regular enemies
   final regularEnemies =
       availableEnemies.where((e) => e.rarity != "Boss").toList();
   final bossEnemies =
@@ -540,8 +539,13 @@ List<Enemy> generateEnemies(
   final difficultyMultiplier = _getDifficultyMultiplier(difficulty);
   final levelScale = 1 + (log(dungeonLevel) * 0.5);
 
+  // Helper function to safely convert and clamp values
+  int safeStat(num value) {
+    if (value.isInfinite || value.isNaN) return 10;
+    return value.round().clamp(1, 999999);
+  }
+
   for (int i = 0; i < _getEnemyCount(difficulty); i++) {
-    // 30% chance to spawn a boss if available, otherwise regular enemy
     final bool spawnBoss = bossEnemies.isNotEmpty && random.nextDouble() < 0.9;
     final Enemy baseEnemy = spawnBoss
         ? bossEnemies[random.nextInt(bossEnemies.length)]
@@ -550,27 +554,33 @@ List<Enemy> generateEnemies(
     enemies.add(Enemy(
       id: '${baseEnemy.id}-${DateTime.now().millisecondsSinceEpoch}-$i',
       name: "$difficulty ${baseEnemy.name}",
-      imageE: baseEnemy.imageE, //
+      imageE: baseEnemy.imageE,
       level: dungeonLevel,
       attackPoints:
-          (baseEnemy.attackPoints * difficultyMultiplier * levelScale).round(),
+          safeStat(baseEnemy.attackPoints * difficultyMultiplier * levelScale),
       defensePoints:
-          (baseEnemy.defensePoints * difficultyMultiplier * levelScale).round(),
+          safeStat(baseEnemy.defensePoints * difficultyMultiplier * levelScale),
       agilityPoints:
-          (baseEnemy.agilityPoints * difficultyMultiplier * levelScale).round(),
-      hp: (baseEnemy.maxHp * difficultyMultiplier * levelScale).round(),
-      maxHp: (baseEnemy.maxHp * difficultyMultiplier * levelScale).round(),
-      mp: (baseEnemy.maxMp * difficultyMultiplier).round(),
-      maxMp: (baseEnemy.maxMp * difficultyMultiplier).round(),
-      sp: baseEnemy.sp,
-      maxSp: baseEnemy.maxSp,
+          safeStat(baseEnemy.agilityPoints * difficultyMultiplier * levelScale),
+      hp: safeStat(baseEnemy.maxHp * difficultyMultiplier * levelScale),
+      maxHp: safeStat(baseEnemy.maxHp * difficultyMultiplier * levelScale),
+      mp: safeStat(baseEnemy.maxMp * difficultyMultiplier),
+      maxMp: safeStat(baseEnemy.maxMp * difficultyMultiplier),
+      sp: safeStat(baseEnemy.sp),
+      maxSp: safeStat(baseEnemy.maxSp),
+      criticalPoint: safeStat(baseEnemy.criticalPoint),
       abilities: baseEnemy.abilities.map((a) => a.freshCopy()).toList(),
       rarity: baseEnemy.rarity,
       type: baseEnemy.type,
       region: region,
       description: baseEnemy.description,
-      criticalPoint: baseEnemy.criticalPoint,
       currentCooldowns: {},
+      elementAffinities: List.from(baseEnemy.elementAffinities),
+      statusEffects: [],
+      forcedTarget: null,
+      skipNextTurn: false,
+      mindControlled: false,
+      mindController: null,
     ));
   }
 

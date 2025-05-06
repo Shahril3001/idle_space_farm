@@ -52,6 +52,8 @@ class StatusEffect {
     this.controlEffect,
   }) : remainingTurns = duration;
 
+  get type => null;
+
   StatusEffect freshCopy() {
     return StatusEffect(
       id: id,

@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import '../providers/audio_manager.dart';
+import 'battlemap_page_boss.dart';
+import 'battlemap_page_pvp.dart';
 import 'daily_reward_page.dart';
 import 'inventory_page.dart';
 import 'package:provider/provider.dart';
@@ -785,12 +787,14 @@ class _DashboardPageState extends State<DashboardPage> {
                     _buildAdventureButtonRow(
                       iconPath: 'assets/images/icons/battle-girl.png',
                       label: 'Champion Arena',
-                      onPressed: () => _navigateTo(context, MapScreen()),
+                      onPressed: () =>
+                          _navigateTo(context, PvPBattleMapScreen()),
                     ),
                     _buildAdventureButtonRow(
                       iconPath: 'assets/images/icons/battle-boss.png',
                       label: 'Boss Raid',
-                      onPressed: () => _navigateTo(context, MapScreen()),
+                      onPressed: () =>
+                          _navigateTo(context, BossBattleMapScreen()),
                     ),
                   ],
                 )

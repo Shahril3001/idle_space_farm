@@ -8,6 +8,8 @@ import '../models/girl_farmer_model.dart';
 
 enum BattleResult { ongoing, win, loss }
 
+enum BattleType { normal, boss, pvp }
+
 class BattleProvider with ChangeNotifier {
   // Battle state
   List<GirlFarmer>? _heroes;
@@ -30,18 +32,81 @@ class BattleProvider with ChangeNotifier {
   bool get hasBattleStarted => _hasBattleStarted;
   int get currentRound => _currentRound;
 
+  BattleType _battleType = BattleType.normal;
+  BattleType get battleType => _battleType;
+
+  Enemy _convertGirlToEnemy(GirlFarmer girl) {
+    // Convert all stats to int with proper validation
+    int safeLevel = girl.level.toInt();
+    int safeAttack = girl.attackPoints.toInt();
+    int safeDefense = girl.defensePoints.toInt();
+    int safeAgility = girl.agilityPoints.toInt();
+    int safeHp = girl.maxHp.toInt();
+    int safeMp = girl.maxMp.toInt();
+    int safeSp = girl.sp.toInt();
+    int safeCrit = girl.criticalPoint.toInt();
+
+    return Enemy(
+      id: girl.id,
+      name: "Rival ${girl.name}",
+      level: safeLevel,
+      attackPoints: safeAttack,
+      defensePoints: safeDefense,
+      agilityPoints: safeAgility,
+      hp: safeHp,
+      maxHp: safeHp,
+      mp: safeMp,
+      maxMp: safeMp,
+      sp: safeSp,
+      maxSp: safeSp,
+      criticalPoint: safeCrit,
+      rarity: girl.rarity,
+      type: girl.type,
+      region: girl.region,
+      description: girl.description,
+      imageE: girl.imageFace,
+      abilities: girl.abilities.map((a) => a.freshCopy()).toList(),
+      // Initialize all enemy-specific fields
+      currentCooldowns: {},
+      elementAffinities: [ElementType.none],
+      statusEffects: [],
+      forcedTarget: null,
+      skipNextTurn: false,
+      mindControlled: false,
+      mindController: null,
+    );
+  }
+
   void startBattle(
     List<GirlFarmer> heroes,
     int dungeonLevel,
     String difficulty, {
     List<Enemy>? predefinedEnemies,
     String region = 'DefaultRegion',
+    BattleType battleType = BattleType.normal,
+    List<GirlFarmer>? opponentGirls, // For PvP
   }) {
     _cleanupPreviousBattle();
 
-    _enemies = predefinedEnemies != null
-        ? predefinedEnemies.map((e) => Enemy.freshCopy(e)).toList()
-        : generateEnemies(dungeonLevel, difficulty, region: region);
+    _battleType = battleType;
+
+    switch (battleType) {
+      case BattleType.normal:
+        _enemies = predefinedEnemies ??
+            generateEnemies(dungeonLevel!, difficulty!, region: region);
+        break;
+
+      case BattleType.boss:
+        // Boss battles use predefined enemies (bosses)
+        _enemies = predefinedEnemies!.map((e) => Enemy.freshCopy(e)).toList();
+        break;
+
+      case BattleType.pvp:
+        // Convert opponent girls to "enemies" for battle system
+        _enemies =
+            opponentGirls!.map((girl) => _convertGirlToEnemy(girl)).toList();
+        break;
+    }
 
     _heroes = heroes.map((h) => h.copyWithFreshStats()).toList();
 
@@ -372,6 +437,20 @@ class BattleProvider with ChangeNotifier {
     } else {
       _executeBasicEnemyAttack(enemy, aliveHeroes);
     }
+
+    if (_battleType == BattleType.boss) {
+      // Bosses use stronger abilities more frequently
+      final useSpecialAbility = Random().nextDouble() > 0.7;
+      if (useSpecialAbility && enemy.abilities.isNotEmpty) {
+        final ability =
+            enemy.abilities[Random().nextInt(enemy.abilities.length)];
+        _executeEnemyAbility(
+            enemy, ability, _heroes!.where((h) => h.hp > 0).toList());
+        return;
+      }
+    }
+    // Default behavior
+    _executeBasicEnemyAttack(enemy, _heroes!.where((h) => h.hp > 0).toList());
   }
 
   AbilitiesModel? _selectBestEnemyAbility(
@@ -577,9 +656,18 @@ class BattleProvider with ChangeNotifier {
   }
 
   void _processRewards() {
-    if (_battleResult == "Victory") {
-      final credits = _enemies!.length * 50;
-      _battleLog.add("Earned $credits credits!");
+    if (_battleResult != "Victory") return;
+
+    switch (_battleType) {
+      case BattleType.boss:
+        _battleLog.add("★ Obtained Boss Chest Key! ★");
+        // Add special boss drops
+        break;
+      case BattleType.pvp:
+        _battleLog.add("★ Gained 100 PvP Honor Points! ★");
+        break;
+      default:
+        _battleLog.add("Earned ${_enemies!.length * 50} credits!");
     }
   }
 

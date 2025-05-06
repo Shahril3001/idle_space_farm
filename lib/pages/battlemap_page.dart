@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import '../main.dart';
-import 'battlepreparation_page.dart';
+import 'battlepreparation_page_invasion.dart';
 
 class MapScreen extends StatelessWidget {
   // Sample dungeon data
@@ -363,7 +363,7 @@ class MapScreen extends StatelessWidget {
           PageRouteBuilder(
             transitionDuration: Duration(milliseconds: 500),
             pageBuilder: (context, animation, secondaryAnimation) =>
-                PreparationScreen(
+                PreparationScreenNormal(
               difficulty: difficulty,
               dungeonLevel: level,
               region: region,
@@ -438,11 +438,6 @@ class MapScreen extends StatelessWidget {
         ),
         child: ElevatedButton(
           onPressed: () => Navigator.pop(context),
-          child: Text(
-            "Back",
-            style: TextStyle(
-                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
-          ),
           style: ElevatedButton.styleFrom(
             backgroundColor:
                 Colors.transparent, // Make button background transparent
@@ -451,6 +446,11 @@ class MapScreen extends StatelessWidget {
               borderRadius: BorderRadius.circular(15),
             ),
             padding: EdgeInsets.symmetric(vertical: 10),
+          ),
+          child: Text(
+            "Back",
+            style: TextStyle(
+                color: Colors.white, fontFamily: 'GameFont', fontSize: 16),
           ),
         ),
       ),

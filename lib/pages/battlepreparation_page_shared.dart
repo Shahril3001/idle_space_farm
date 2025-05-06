@@ -1,133 +1,119 @@
 import 'package:flutter/material.dart';
-import 'package:hive/hive.dart';
-import '../main.dart';
 import '../models/enemy_model.dart';
-import 'battle_screen.dart';
 import '../models/girl_farmer_model.dart';
-import '../data/enemy_data.dart';
-import '../repositories/girl_repository.dart';
 
-class PreparationScreen extends StatefulWidget {
-  final String difficulty;
-  final int dungeonLevel;
-  final String region;
-
-  const PreparationScreen({
-    required this.difficulty,
-    required this.dungeonLevel,
-    required this.region,
-  });
-
-  @override
-  _PreparationScreenState createState() => _PreparationScreenState();
-}
-
-class _PreparationScreenState extends State<PreparationScreen> {
-  late List<GirlFarmer> availableHeroes;
-  late List<Enemy> previewEnemies;
-  final List<GirlFarmer> selectedHeroes = [];
-
-  @override
-  void initState() {
-    super.initState();
-    availableHeroes =
-        GirlRepository(Hive.box('eldoria_chronicles')).getAllGirls();
-    previewEnemies = generateEnemies(
-      widget.dungeonLevel,
-      widget.difficulty,
-      region: widget.region,
-    );
-  }
-
-  List<Enemy> _prepareBattleEnemies() {
-    return previewEnemies.map((enemy) => Enemy.freshCopy(enemy)).toList();
-  }
-
-  List<GirlFarmer> _prepareBattleHeroes() {
-    return selectedHeroes.map((hero) => hero.copyWithFreshStats()).toList();
-  }
-
-  void toggleSelection(GirlFarmer hero) {
-    setState(() {
-      if (selectedHeroes.contains(hero)) {
-        selectedHeroes.remove(hero);
-      } else if (selectedHeroes.length < 5) {
-        selectedHeroes.add(hero);
-      }
-    });
-  }
-
-  void _showCharacterDetail(BuildContext context, dynamic character) {
-    showDialog(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: Text(character.name),
-        content: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              if (character is GirlFarmer)
-                Image.asset(character.imageFace, height: 60)
-              else
-                const Icon(Icons.dangerous, size: 60, color: Colors.red),
-              const SizedBox(height: 16),
-              Text('Level: ${character.level}'),
-              Text('HP: ${character.hp}/${character.maxHp}'),
-              Text('MP: ${character.mp}/${character.maxMp}'),
-              Text('ATK: ${character.attackPoints}'),
-              if (character is GirlFarmer) ...[
-                Text('DEF: ${character.defensePoints}'),
-                Text('AGI: ${character.agilityPoints}'),
-              ],
-            ],
+class PreparationShared {
+  static Widget buildEnemyPreview({
+    required BuildContext context,
+    required List<Enemy> previewEnemies,
+    required String title,
+  }) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.3,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: Text(
+              title,
+              style: const TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
           ),
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.pop(context),
-            child: const Text('Close'),
+          const SizedBox(height: 10),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 1.2,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              itemCount: previewEnemies.length,
+              itemBuilder: (context, index) {
+                final enemy = previewEnemies[index];
+                return EnemyCard(
+                  enemy: enemy,
+                  onDetail: () => _showCharacterDetail(context, enemy),
+                );
+              },
+            ),
           ),
         ],
       ),
     );
   }
 
-  @override
-  Widget build(BuildContext context) {
-    return SafeArea(
-      child: Scaffold(
-        appBar: CustomAppBar(
-          title: "Preparation",
-          height: 40,
-          padding: EdgeInsets.zero,
-          margin: EdgeInsets.zero,
-        ),
-        body: Container(
-          decoration: BoxDecoration(
-            image: DecorationImage(
-              image:
-                  ImageCacheManager.getImage('assets/images/ui/battle-bg.png'),
-              fit: BoxFit.cover,
+  static Widget buildOpponentPreview({
+    required BuildContext context,
+    required List<GirlFarmer> opponentTeam,
+  }) {
+    return Container(
+      height: MediaQuery.of(context).size.height * 0.3,
+      padding: const EdgeInsets.all(16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.all(8.0),
+            decoration: BoxDecoration(
+              color: Colors.black.withOpacity(0.8),
+              borderRadius: BorderRadius.circular(4),
+            ),
+            child: const Text(
+              "Opponent Team",
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
             ),
           ),
-          child: Column(
-            children: [
-              // Enemy Preview Section at the top
-              _buildEnemyPreview(),
-              const Divider(height: 20, thickness: 2),
-              // Hero Selection Section at the bottom
-              _buildHeroSelection(),
-              // Bottom action buttons
-              _buildActionButtons(),
-            ],
+          const SizedBox(height: 10),
+          Expanded(
+            child: GridView.builder(
+              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                crossAxisCount: 3,
+                childAspectRatio: 0.8,
+                mainAxisSpacing: 10,
+                crossAxisSpacing: 10,
+              ),
+              itemCount: opponentTeam.length,
+              itemBuilder: (context, index) {
+                final hero = opponentTeam[index];
+                return HeroCard(
+                  hero: hero,
+                  isSelected: false,
+                  onTap: () {},
+                  onDetail: () => _showCharacterDetail(context, hero),
+                );
+              },
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
 
-  Widget _buildHeroSelection() {
+  static Widget buildHeroSelection({
+    required BuildContext context,
+    required List<GirlFarmer> availableHeroes,
+    required List<GirlFarmer> selectedHeroes,
+    required Function(GirlFarmer) toggleSelection,
+  }) {
     return Expanded(
       child: Container(
         padding: const EdgeInsets.all(16.0),
@@ -157,7 +143,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
                       "${selectedHeroes.length}/5",
                       style: const TextStyle(fontSize: 12, color: Colors.white),
                     ),
-                    backgroundColor: const Color(0xFFCAA04D), // Gold color
+                    backgroundColor: const Color(0xFFCAA04D),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(8),
                     ),
@@ -192,57 +178,12 @@ class _PreparationScreenState extends State<PreparationScreen> {
     );
   }
 
-  Widget _buildEnemyPreview() {
-    return Container(
-      height: MediaQuery.of(context).size.height * 0.3,
-      padding: const EdgeInsets.all(16.0),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: double.infinity, // Makes container take full width of parent
-            padding: EdgeInsets.all(8.0), // Add some padding
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.8), // 70% opacity black
-              borderRadius:
-                  BorderRadius.circular(4), // Optional rounded corners
-            ),
-            child: const Text(
-              "Enemies You'll Face",
-              style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-              ),
-              textAlign:
-                  TextAlign.center, // Center the text within the container
-            ),
-          ),
-          const SizedBox(height: 10),
-          Expanded(
-            child: GridView.builder(
-              gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: 3,
-                childAspectRatio: 1.2,
-                mainAxisSpacing: 10,
-                crossAxisSpacing: 10,
-              ),
-              itemCount: previewEnemies.length,
-              itemBuilder: (context, index) {
-                final enemy = previewEnemies[index];
-                return EnemyCard(
-                  enemy: enemy,
-                  onDetail: () => _showCharacterDetail(context, enemy),
-                );
-              },
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildActionButtons() {
+  static Widget buildActionButtons({
+    required BuildContext context,
+    required List<GirlFarmer> selectedHeroes,
+    required VoidCallback onBack,
+    required VoidCallback onStart,
+  }) {
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Row(
@@ -259,7 +200,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 backgroundColor: Colors.redAccent,
               ),
-              onPressed: () => Navigator.pop(context),
+              onPressed: onBack,
             ),
           ),
           const SizedBox(width: 10),
@@ -277,9 +218,7 @@ class _PreparationScreenState extends State<PreparationScreen> {
                     ? Colors.green[500]
                     : Colors.grey,
               ),
-              onPressed: selectedHeroes.length == 5
-                  ? () => _startBattle(context)
-                  : null,
+              onPressed: selectedHeroes.length == 5 ? onStart : null,
             ),
           ),
         ],
@@ -287,16 +226,38 @@ class _PreparationScreenState extends State<PreparationScreen> {
     );
   }
 
-  void _startBattle(BuildContext context) {
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(
-        builder: (context) => BattleScreen(
-          heroes: _prepareBattleHeroes(),
-          enemies: _prepareBattleEnemies(),
-          difficulty: widget.difficulty,
-          region: widget.region,
+  static void _showCharacterDetail(BuildContext context, dynamic character) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(character.name),
+        content: SingleChildScrollView(
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (character is GirlFarmer)
+                Image.asset(character.imageFace, height: 60)
+              else
+                const Icon(Icons.dangerous, size: 60, color: Colors.red),
+              const SizedBox(height: 16),
+              Text('Level: ${character.level}'),
+              Text('HP: ${character.hp}/${character.maxHp}'),
+              Text('MP: ${character.mp}/${character.maxMp}'),
+              Text('ATK: ${character.attackPoints}'),
+              if (character is GirlFarmer) ...[
+                Text('DEF: ${character.defensePoints}'),
+                Text('AGI: ${character.agilityPoints}'),
+              ],
+            ],
+          ),
         ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Close'),
+          ),
+        ],
       ),
     );
   }
