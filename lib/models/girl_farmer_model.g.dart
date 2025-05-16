@@ -137,3 +137,141 @@ class GirlFarmerAdapter extends TypeAdapter<GirlFarmer> {
           runtimeType == other.runtimeType &&
           typeId == other.typeId;
 }
+
+class CharacterTypeAdapter extends TypeAdapter<CharacterType> {
+  @override
+  final int typeId = 28;
+
+  @override
+  CharacterType read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return CharacterType.warrior;
+      case 1:
+        return CharacterType.archmage;
+      case 2:
+        return CharacterType.assassin;
+      case 3:
+        return CharacterType.cleric;
+      case 4:
+        return CharacterType.paladin;
+      case 5:
+        return CharacterType.elementalist;
+      case 6:
+        return CharacterType.berserker;
+      case 7:
+        return CharacterType.archer;
+      case 8:
+        return CharacterType.unknown;
+      default:
+        return CharacterType.warrior;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, CharacterType obj) {
+    switch (obj) {
+      case CharacterType.warrior:
+        writer.writeByte(0);
+        break;
+      case CharacterType.archmage:
+        writer.writeByte(1);
+        break;
+      case CharacterType.assassin:
+        writer.writeByte(2);
+        break;
+      case CharacterType.cleric:
+        writer.writeByte(3);
+        break;
+      case CharacterType.paladin:
+        writer.writeByte(4);
+        break;
+      case CharacterType.elementalist:
+        writer.writeByte(5);
+        break;
+      case CharacterType.berserker:
+        writer.writeByte(6);
+        break;
+      case CharacterType.archer:
+        writer.writeByte(7);
+        break;
+      case CharacterType.unknown:
+        writer.writeByte(8);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CharacterTypeAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}
+
+class CharacterRaceAdapter extends TypeAdapter<CharacterRace> {
+  @override
+  final int typeId = 29;
+
+  @override
+  CharacterRace read(BinaryReader reader) {
+    switch (reader.readByte()) {
+      case 0:
+        return CharacterRace.human;
+      case 1:
+        return CharacterRace.elves;
+      case 2:
+        return CharacterRace.daemon;
+      case 3:
+        return CharacterRace.beastkin;
+      case 4:
+        return CharacterRace.dragonkin;
+      case 5:
+        return CharacterRace.celestial;
+      case 6:
+        return CharacterRace.unknown;
+      default:
+        return CharacterRace.human;
+    }
+  }
+
+  @override
+  void write(BinaryWriter writer, CharacterRace obj) {
+    switch (obj) {
+      case CharacterRace.human:
+        writer.writeByte(0);
+        break;
+      case CharacterRace.elves:
+        writer.writeByte(1);
+        break;
+      case CharacterRace.daemon:
+        writer.writeByte(2);
+        break;
+      case CharacterRace.beastkin:
+        writer.writeByte(3);
+        break;
+      case CharacterRace.dragonkin:
+        writer.writeByte(4);
+        break;
+      case CharacterRace.celestial:
+        writer.writeByte(5);
+        break;
+      case CharacterRace.unknown:
+        writer.writeByte(6);
+        break;
+    }
+  }
+
+  @override
+  int get hashCode => typeId.hashCode;
+
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      other is CharacterRaceAdapter &&
+          runtimeType == other.runtimeType &&
+          typeId == other.typeId;
+}

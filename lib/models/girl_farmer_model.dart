@@ -466,3 +466,43 @@ class GirlFarmer {
     };
   }
 }
+
+@HiveType(typeId: 28)
+enum CharacterType {
+  @HiveField(0)
+  warrior,
+  @HiveField(1)
+  archmage,
+  @HiveField(2)
+  assassin,
+  @HiveField(3)
+  cleric,
+  @HiveField(4)
+  paladin,
+  @HiveField(5)
+  elementalist,
+  @HiveField(6)
+  berserker,
+  @HiveField(7)
+  archer,
+  @HiveField(8)
+  unknown,
+}
+
+@HiveType(typeId: 29)
+enum CharacterRace {
+  @HiveField(0)
+  human,
+  @HiveField(1)
+  elves,
+  @HiveField(2)
+  daemon,
+  @HiveField(3)
+  beastkin,
+  @HiveField(4)
+  dragonkin,
+  @HiveField(5)
+  celestial,
+  @HiveField(6)
+  unknown,
+}

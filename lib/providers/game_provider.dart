@@ -1645,6 +1645,9 @@ class GameProvider with ChangeNotifier {
       _resourceRepository.updateResource(minerals);
     }
 
+    // Unlock abilities based on level and race
+    _unlockAbilities(girl);
+
     // Upgrade Girl
     girl.level++;
 
@@ -1675,9 +1678,6 @@ class GameProvider with ChangeNotifier {
     girl.sp = girl.maxSp;
     girl.criticalPoint += 1;
 
-    // Unlock abilities based on level and race
-    _unlockAbilities(girl);
-
     // Save changes
     _girlRepository.updateGirl(girl);
     notifyListeners();
@@ -1692,30 +1692,42 @@ class GameProvider with ChangeNotifier {
   void _unlockAbilities(GirlFarmer girl) {
     // First, handle race-specific ability unlocks
     switch (girl.race) {
-      case "Human":
+      // ignore: constant_pattern_never_matches_value_type
+      case CharacterRace.human:
         _unlockHumanAbilities(girl);
         break;
-      case "Eldren":
-        _unlockEldrenAbilities(girl);
+      // ignore: constant_pattern_never_matches_value_type
+      case CharacterRace.elves:
+        _unlockEldrenAbilities(girl); // Assuming Eldren = elf
         break;
-      case "Therian":
-        _unlockTherianAbilities(girl);
+      // ignore: constant_pattern_never_matches_value_type
+      case CharacterRace.beastkin:
+        _unlockTherianAbilities(girl); // Assuming Therian = beastkin
         break;
-      case "Dracovar":
-        _unlockDracovarAbilities(girl);
+      // ignore: constant_pattern_never_matches_value_type
+      case CharacterRace.dragonkin:
+        _unlockDracovarAbilities(girl); // Assuming Dracovar = dragonkin
         break;
-      case "Daemon":
-        _unlockDaemonAbilities(girl);
+      // ignore: constant_pattern_never_matches_value_type
+      case CharacterRace.daemon:
+        _unlockDaemonAbilities(girl); // Assuming Daemon = demon
+        break;
+      default:
+        // Handle unknown or other races
         break;
     }
 
     // Then handle class-specific ability unlocks
     switch (girl.type) {
-      case "Divine Cleric":
-        _unlockDivineClericAbilities(girl);
+      case CharacterType.cleric:
+        _unlockDivineClericAbilities(girl); // Assuming Divine Cleric = cleric
         break;
-      case "Phantom Reaver":
-        _unlockPhantomReaverAbilities(girl);
+      case CharacterType.assassin:
+        _unlockPhantomReaverAbilities(girl); // Assuming Phantom Reaver = rogue
+        break;
+      // Add other class cases as needed
+      default:
+        // Handle unknown or other types
         break;
     }
   }

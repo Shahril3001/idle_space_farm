@@ -158,7 +158,7 @@ class __BossBattleContentState extends State<_BossBattleContent> {
       decoration: BoxDecoration(
         color: Colors.black.withOpacity(0.7),
         borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.red, width: 2),
+        border: Border.all(color: Colors.red, width: 1),
       ),
       child: Column(
         children: [
@@ -182,7 +182,7 @@ class __BossBattleContentState extends State<_BossBattleContent> {
             value: hpPercent,
             backgroundColor: Colors.grey[800],
             color: _getBossHpColor(hpPercent),
-            minHeight: 20,
+            minHeight: 5,
           ),
           SizedBox(height: 8),
           Text(
@@ -257,50 +257,6 @@ class __BossBattleContentState extends State<_BossBattleContent> {
     );
   }
 
-  Widget _buildHeroList(List<GirlFarmer> heroes) {
-    return Expanded(
-      child: ListView.builder(
-        itemCount: heroes.length,
-        itemBuilder: (context, index) {
-          final hero = heroes[index];
-          final hpPercent = hero.hp / hero.maxHp;
-
-          return Card(
-            margin: EdgeInsets.only(bottom: 8),
-            color: Colors.black.withOpacity(0.5),
-            child: ListTile(
-              leading: Image.asset(hero.imageFace, height: 40),
-              title: Text(
-                hero.name,
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Colors.white,
-                ),
-              ),
-              subtitle: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(height: 4),
-                  LinearProgressIndicator(
-                    value: hpPercent,
-                    backgroundColor: Colors.grey[800],
-                    color: _getHpColor(hpPercent),
-                    minHeight: 6,
-                  ),
-                  SizedBox(height: 4),
-                  Text(
-                    "HP: ${hero.hp}/${hero.maxHp} | MP: ${hero.mp}/${hero.maxMp}",
-                    style: TextStyle(color: Colors.white70, fontSize: 12),
-                  ),
-                ],
-              ),
-            ),
-          );
-        },
-      ),
-    );
-  }
-
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<BattleProvider>(context);
@@ -330,11 +286,22 @@ class __BossBattleContentState extends State<_BossBattleContent> {
           ),
           Expanded(
             child: Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                _buildHeroList(provider.heroes ?? []),
-                SizedBox(width: 16),
+                // Hero list - 50% width
+                Expanded(
+                  flex: 5, // Slightly less than 50% to account for padding
+                  child: Padding(
+                    padding: const EdgeInsets.only(right: 8),
+                    child: _buildHeroList(provider.heroes ?? []),
+                  ),
+                ),
+                // Boss details - 50% width
                 if (provider.enemies != null && provider.enemies!.isNotEmpty)
-                  _buildBossDetails(provider.enemies!.first),
+                  Expanded(
+                    flex: 5,
+                    child: _buildBossDetails(provider.enemies!.first),
+                  ),
               ],
             ),
           ),
@@ -390,56 +357,215 @@ class __BossBattleContentState extends State<_BossBattleContent> {
     );
   }
 
+  Widget _buildHeroList(List<GirlFarmer> heroes) {
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        return ListView.builder(
+          physics: const ClampingScrollPhysics(),
+          itemCount: heroes.length,
+          itemBuilder: (context, index) {
+            final hero = heroes[index];
+            final hpPercent = hero.hp / hero.maxHp;
+            final mpPercent = hero.mp / hero.maxMp;
+
+            return ConstrainedBox(
+              constraints: BoxConstraints(
+                minHeight: 100,
+                maxHeight: 120,
+              ),
+              child: Card(
+                margin: const EdgeInsets.only(bottom: 8),
+                color: Colors.black.withOpacity(0.5),
+                child: Padding(
+                  padding: const EdgeInsets.all(8.0),
+                  child: IntrinsicHeight(
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        // Hero Avatar
+                        Container(
+                          width: 60,
+                          alignment: Alignment.center,
+                          child: Image.asset(
+                            hero.imageFace,
+                            height: 50,
+                            width: 50,
+                            fit: BoxFit.contain,
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+
+                        // Hero Stats
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              // Name
+                              Text(
+                                hero.name,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.white,
+                                  fontSize: 14,
+                                ),
+                                maxLines: 1,
+                                overflow: TextOverflow.ellipsis,
+                              ),
+
+                              // HP Bar
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("HP",
+                                      style: TextStyle(
+                                          color: Colors.white70, fontSize: 10)),
+                                  LinearProgressIndicator(
+                                    value: hpPercent,
+                                    backgroundColor: Colors.grey[800],
+                                    color: _getHpColor(hpPercent),
+                                    minHeight: 6,
+                                  ),
+                                  Text(
+                                    "${hero.hp}/${hero.maxHp}",
+                                    style: const TextStyle(
+                                        color: Colors.white70, fontSize: 10),
+                                  ),
+                                ],
+                              ),
+
+                              // MP Bar
+                              Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  const Text("MP",
+                                      style: TextStyle(
+                                          color: Colors.white70, fontSize: 10)),
+                                  LinearProgressIndicator(
+                                    value: mpPercent,
+                                    backgroundColor: Colors.grey[800],
+                                    color: Colors.blue,
+                                    minHeight: 6,
+                                  ),
+                                  Text(
+                                    "${hero.mp}/${hero.maxMp}",
+                                    style: const TextStyle(
+                                        color: Colors.white70, fontSize: 10),
+                                  ),
+                                ],
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
+              ),
+            );
+          },
+        );
+      },
+    );
+  }
+
   Widget _buildBossDetails(Enemy boss) {
-    return Container(
-      width: 150,
-      padding: EdgeInsets.all(8),
-      decoration: BoxDecoration(
-        color: Colors.black.withOpacity(0.5),
-        borderRadius: BorderRadius.circular(8),
-        border: Border.all(color: Colors.red),
-      ),
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.dangerous, size: 60, color: Colors.red),
-          SizedBox(height: 8),
-          Text(
-            boss.name,
-            style: TextStyle(
-              fontWeight: FontWeight.bold,
-              color: Colors.white,
-              fontSize: 16,
+    final hpPercent = boss.hp / boss.maxHp;
+
+    return Card(
+      color: Colors.black.withOpacity(0.5),
+      child: Padding(
+        padding: const EdgeInsets.all(12),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // First row - Icon and name
+            Row(
+              children: [
+                Icon(Icons.dangerous, size: 40, color: Colors.red),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Text(
+                    boss.name,
+                    style: const TextStyle(
+                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 16,
+                    ),
+                  ),
+                ),
+              ],
             ),
-            textAlign: TextAlign.center,
-          ),
-          SizedBox(height: 4),
-          Text(
-            "Lv. ${boss.level}",
-            style: TextStyle(color: Colors.white70),
-          ),
-          SizedBox(height: 8),
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Column(
-                children: [
-                  Icon(Icons.bolt, size: 16, color: Colors.orange),
-                  Text("${boss.attackPoints}",
-                      style: TextStyle(color: Colors.white)),
-                ],
-              ),
-              SizedBox(width: 8),
-              Column(
-                children: [
-                  Icon(Icons.shield, size: 16, color: Colors.blue),
-                  Text("${boss.defensePoints}",
-                      style: TextStyle(color: Colors.white)),
-                ],
-              ),
-            ],
-          ),
-        ],
+            const SizedBox(height: 12),
+
+            // HP Bar
+            LinearProgressIndicator(
+              value: hpPercent,
+              backgroundColor: Colors.grey[800],
+              color: _getBossHpColor(hpPercent),
+              minHeight: 8,
+            ),
+            const SizedBox(height: 8),
+
+            // HP Text and Level
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "HP: ${boss.hp}/${boss.maxHp}",
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  "Lv. ${boss.level}",
+                  style: const TextStyle(color: Colors.white70, fontSize: 12),
+                ),
+              ],
+            ),
+            const SizedBox(height: 12),
+
+            // Stats Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                Column(
+                  children: [
+                    const Icon(Icons.bolt, size: 16, color: Colors.orange),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${boss.attackPoints}",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    const Icon(Icons.shield, size: 16, color: Colors.blue),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${boss.defensePoints}",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+                Column(
+                  children: [
+                    const Icon(Icons.flash_on, size: 16, color: Colors.purple),
+                    const SizedBox(height: 4),
+                    Text(
+                      "${boss.attackPoints}",
+                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+          ],
+        ),
       ),
     );
   }

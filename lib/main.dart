@@ -131,6 +131,12 @@ void main() async {
     Hive.registerAdapter(ShopItemTypeAdapter());
   }
   if (!Hive.isAdapterRegistered(27)) Hive.registerAdapter(DailyRewardAdapter());
+  if (!Hive.isAdapterRegistered(28)) {
+    Hive.registerAdapter(CharacterTypeAdapter());
+  }
+  if (!Hive.isAdapterRegistered(29)) {
+    Hive.registerAdapter(CharacterRaceAdapter());
+  }
 
   final box = await Hive.openBox('eldoria_chronicles');
   // Create and initialize AudioManager
